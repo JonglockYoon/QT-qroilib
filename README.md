@@ -7,4 +7,4 @@ Gwenview 의 Multi view 기능과 메모리보다 큰 이미지를 로드 할 �
 Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 display하면서 vision ROI를 작성하여,
 내가 원하는 결과를 OpenCV를 통하여 쉽게 구현할수 있도록 한다.
 
-이 Program은 ARM계열 linux  와 X86계열 linux에서 test되었다.
+이 Program은 ARM계열 linux  와 X86계열 linux 및 windows 에서 test되었다.
