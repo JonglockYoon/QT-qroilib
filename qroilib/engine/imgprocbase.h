@@ -68,7 +68,6 @@ protected:
     void GetMidpoint(CvPoint p1, CvPoint p2, CvPoint *p3);
     cv::Point getValueX(std::vector<cv::Point> points, int pos); // x point 평균처리
     cv::Point getValueY(std::vector<cv::Point> points, int pos); // y point 평균처리
-    //외곽선 추적 : 검색된 외곽선 개수를 반환
 
 public:
     cv::Point2f CenterOfMoment(CvSeq* c);
