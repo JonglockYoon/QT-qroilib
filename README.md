@@ -24,11 +24,14 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 <pre>
 I will upload several applications using qroilib.
 
-qroiviewer : image viewer using qroilib
-qroicapture : single web camera capture program using qroilib
-qroimulticap : multi web camera capture program using qroilib
+qroiviewer : image viewer using qroilib.
+qroicapture : single web camera capture program using qroilib.
+qroimulticap : multi web camera capture program using qroilib.
 qroipicam : raspberry pi camera capture program using qroilib.
 qroieditor : ROI editor program using qroilib.
-qroialign : preparing...
-qroisimulator : preparing...
+qroialign : align program using qroilib.
+qroisimulator : simulation program using qroilib.
+   Threshold,Mopology,Edge,Blob,Contour,Arithmeticlogic
+   LineFit,Circle
+   CenterOfPlusMark,GeoMatch,SURF/SIFT/ORB Features2D,ColorDetect
 </pre>
