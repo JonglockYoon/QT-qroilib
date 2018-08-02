@@ -226,18 +226,18 @@ void MainWindow::setSaveImage()
         if (!pimg)
             return;
 
-        QApplication::setOverrideCursor(Qt::WaitCursor);
+        //QApplication::setOverrideCursor(Qt::WaitCursor);
         QString fileName = QFileDialog::getSaveFileName(this,
                 tr("Save Image"), "",
                 tr("Images (*.png *.bmp *.jpg *.tif *.ppm *.GIF);;All Files (*)"));
         if (fileName.isEmpty()) {
-            QApplication::restoreOverrideCursor();
+            //QApplication::restoreOverrideCursor();
             return;
         }
         //QApplication::setOverrideCursor(Qt::WaitCursor);
         QTimer::singleShot(1, [=] {
             pimg->save(fileName);
-            QApplication::restoreOverrideCursor();
+            //QApplication::restoreOverrideCursor();
         });
     }
 }
@@ -285,7 +285,7 @@ void MainWindow::setReadImage()
     v = currentView();
 
     QTimer::singleShot(1, [=] {
-        QApplication::setOverrideCursor(Qt::WaitCursor);
+        //QApplication::setOverrideCursor(Qt::WaitCursor);
         QImage img;
         cv::Mat m = cv::imread(fileName.toLocal8Bit().toStdString().c_str(), cv::IMREAD_COLOR);
         mat_to_qimage(m, img);
@@ -320,7 +320,7 @@ void MainWindow::setReadImage()
                 outWidget(title, &iplImg);
             }
         }
-        QApplication::restoreOverrideCursor();
+        //QApplication::restoreOverrideCursor();
     });
 
 }
