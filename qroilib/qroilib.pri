@@ -5,7 +5,8 @@ DEFINES += QEXTSERIALPORT_BUILD_SHARED
 include(./qtpropertybrowser/src/qtpropertybrowser.pri)
 
 win32 {
-INCLUDEPATH += "C:\opencv\buildQT\include"
+#INCLUDEPATH += "C:\opencv\buildQT\include"
+INCLUDEPATH += "..\winlib\include"
 }
 
 linux {
