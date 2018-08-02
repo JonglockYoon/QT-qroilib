@@ -21,19 +21,14 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 -----
 
+<pre>
 I will upload several applications using qroilib.
 
-qroiviewer - image viewer using qroilib
-
-qroicapture : preparing...
-
+qroiviewer : image viewer using qroilib
+qroicapture : web camera capture using qroilib
 qroimulticap : preparing...
-
 qroipicam : preparing...
-
 qroieditor : preparing...
-
 qroialign : preparing...
-
 qroisimulator : preparing...
-
+</pre>
