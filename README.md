@@ -35,4 +35,6 @@ qroisimulator : simulation program using qroilib.
    LineFit,Circle
    CenterOfPlusMark,GeoMatch,SURF/SIFT/ORB Features2D,ColorDetect
 qroistereo : OpenCV cv::StereoBM, cv::StereoSGBM test program using qroilib
+qgecam : Giga Ethernet Camera Control & Display Program
+         jiguiviou project를 qroilib 와 접목을 시도중이다.
 </pre>
