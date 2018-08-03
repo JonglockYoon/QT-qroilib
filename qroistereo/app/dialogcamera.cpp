@@ -26,7 +26,7 @@
 
 #include "dialogcamera.h"
 #include "ui_dialogcamera.h"
-#include "qextserialenumerator.h"
+//#include "qextserialenumerator.h"
 #include "mainwindow.h"
 
 DialogCamera::DialogCamera(QWidget *parent) :
