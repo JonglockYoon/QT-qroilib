@@ -34,4 +34,5 @@ qroisimulator : simulation program using qroilib.
    Threshold,Mopology,Edge,Blob,Contour,Arithmeticlogic
    LineFit,Circle
    CenterOfPlusMark,GeoMatch,SURF/SIFT/ORB Features2D,ColorDetect
+qroistereo : OpenCV cv::StereoBM, cv::StereoSGBM test program using qroilib
 </pre>
