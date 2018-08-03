@@ -1,0 +1,1215 @@
+<RegisterDescription>
+
+<Category NameSpace="Standard" Name="Root">
+<pFeature>GevVersionMajor</pFeature>
+<pFeature>GevVersionMinor</pFeature>
+<pFeature>GevDeviceModeIsBigEndian</pFeature>
+<pFeature>GevDeviceClass</pFeature>
+<pFeature>GevDeviceModeCharacterSet</pFeature>
+<pFeature>GevMACAddress</pFeature>
+<pFeature>GevSupportedIPConfigurationLLA</pFeature>
+<pFeature>GevSupportedIPConfigurationDHCP</pFeature>
+<pFeature>GevSupportedIPConfigurationPersistentIP</pFeature>
+<pFeature>GevCurrentIPConfigurationLLA</pFeature>
+<pFeature>GevCurrentIPConfigurationDHCP</pFeature>
+<pFeature>GevCurrentIPConfigurationPersistentIP</pFeature>
+<pFeature>GevCurrentIPAddress</pFeature>
+<pFeature>GevCurrentSubnetMask</pFeature>
+<pFeature>GevCurrentDefaultGateway</pFeature>
+<pFeature>DeviceManufacturerName</pFeature>
+<pFeature>DeviceModelName</pFeature>
+<pFeature>DeviceVersion</pFeature>
+<pFeature>DeviceManufacturerInfo</pFeature>
+<pFeature>DeviceSerialNumber</pFeature>
+<pFeature>DeviceUserDefinedName</pFeature>
+<pFeature>GevFirstURL</pFeature>
+<pFeature>GevSecondURL</pFeature>
+<pFeature>GevNumberOfInterfaces</pFeature>
+<pFeature>GevPersistentIPAddress</pFeature>
+<pFeature>GevPersistentSubnetMask</pFeature>
+<pFeature>GevPersistentDefaultGateway</pFeature>
+<pFeature>DeviceLinkSpeed</pFeature>
+<pFeature>NumberOfMessageChannels</pFeature>
+<pFeature>NumberOfStreamChannels</pFeature>
+<pFeature>SCSPxSupported</pFeature>
+<pFeature>GVCPCapability</pFeature>
+<pFeature>HeartbeatTimeout</pFeature>
+<pFeature>TimestampTickFrequency</pFeature>
+<pFeature>GVCPConfiguration</pFeature>
+<pFeature>GevGVCPPendingTimeout</pFeature>
+<!--<pFeature>ControlChannelPrivilege</pFeature>-->
+<pFeature>GevCCP</pFeature>
+<pFeature>GevPrimaryApplicationSocket</pFeature>
+<pFeature>GevPrimaryApplicationIPAddress</pFeature>
+<pFeature>GevMCPHostPort</pFeature>
+<pFeature>GevMCDA</pFeature>
+<pFeature>GevMCTT</pFeature>
+<pFeature>GevMCRC</pFeature>
+<pFeature>GevMCSP</pFeature>
+<pFeature>GevSCx</pFeature>
+</Category>
+
+<Integer NameSpace="Standard" Name="GevVersionMajor">
+<Description>Major version of the specification.</Description>
+<DisplayName>Version Major</DisplayName>
+<pValue>GevVersionMajorReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevVersionMajorReg">
+<Address>0x0000</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>15</LSB>
+<MSB>0</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevVersionMinor">
+<Description>Minor version of the specification.</Description>
+<DisplayName>Version Minor</DisplayName>
+<pValue>GevVersionMinorReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevVersionMinorReg">
+<Address>0x0000</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevDeviceModeIsBigEndian">
+<Description>Endianess of the device registers.</Description>
+<DisplayName>Device Mode Is Big Endian</DisplayName>
+<pValue>GevDeviceModeIsBigEndianReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevDeviceModeIsBigEndianReg">
+<Address>0x0004</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>0</Bit>
+</MaskedIntReg>
+
+<Enumeration NameSpace="Standard" Name="GevDeviceClass">
+<Description>Returns the class of the device.</Description>
+<DisplayName>Device Class</DisplayName>
+<EnumEntry NameSpace="Standard" Name="Transmitter">
+<Value>0</Value>
+</EnumEntry>
+<EnumEntry NameSpace="Standard" Name="Receiver">
+<Value>1</Value>
+</EnumEntry>
+<EnumEntry NameSpace="Standard" Name="Transceiver">
+<Value>2</Value>
+</EnumEntry>
+<EnumEntry NameSpace="Standard" Name="Peripheral">
+<Value>3</Value>
+</EnumEntry>
+<pValue>GevDeviceClassReg</pValue>
+</Enumeration>
+
+<MaskedIntReg Name="GevDeviceClassReg">
+<Address>0x0004</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>3</LSB>
+<MSB>1</MSB>
+</MaskedIntReg>
+
+<Enumeration NameSpace="Standard" Name="GevDeviceModeCharacterSet">
+<Description>Character set used by all the strings of the bootstrap registers.</Description>
+<DisplayName>Device Mode Character Set</DisplayName>
+<EnumEntry NameSpace="Standard" Name="UTF8">
+<Value>1</Value>
+</EnumEntry>
+<pValue>GevDeviceModeCharacterSetReg</pValue>
+</Enumeration>
+
+<MaskedIntReg Name="GevDeviceModeCharacterSetReg">
+<Address>0x0004</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>31</LSB>
+<MSB>24</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevMACAddress">
+<Description>MAC address of the network interface.</Description>
+<DisplayName>MAC Address</DisplayName>
+<pValue>GevMACAddressValExpr</pValue>
+</Integer>
+
+<IntSwissKnife Name="GevMACAddressValExpr">
+<pVariable Name="VAR_GEVMACADDRESSHIGH">GevMACAddressHighReg</pVariable>
+<pVariable Name="VAR_GEVMACADDRESSLOW">GevMACAddressLowReg</pVariable>
+<Formula>(VAR_GEVMACADDRESSHIGH &lt;&lt; 32) | VAR_GEVMACADDRESSLOW</Formula>
+</IntSwissKnife>
+
+<MaskedIntReg Name="GevMACAddressHighReg">
+<Address>0x0008</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<IntReg Name="GevMACAddressLowReg">
+<Address>0x000C</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Boolean NameSpace="Standard" Name="GevSupportedIPConfigurationLLA">
+<Visibility>Invisible</Visibility>
+<Description>It indicates if Link Local Address IP configuration scheme is supported by the given network interface.</Description>
+<DisplayName>Supported IP Configuration LLA</DisplayName>
+<pValue>GevSupportedIPConfigurationLLAReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSupportedIPConfigurationLLAReg">
+<Address>0x0010</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>29</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSupportedIPConfigurationDHCP">
+<Visibility>Invisible</Visibility>
+<Description>It indicates if DHCP IP configuration scheme is supported by the given network interface.</Description>
+<DisplayName>Supported IP Configuration DHCP</DisplayName>
+<pValue>GevSupportedIPConfigurationDHCPReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSupportedIPConfigurationDHCPReg">
+<Address>0x0010</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>30</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSupportedIPConfigurationPersistentIP">
+<Visibility>Invisible</Visibility>
+<Description>It indicates if PersistentIP configuration scheme is supported by the given network interface.</Description>
+<DisplayName>Supported IP Configuration Persistent IP</DisplayName>
+<pValue>GevSupportedIPConfigurationPersistentIPReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSupportedIPConfigurationPersistentIPReg">
+<Address>0x0010</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>31</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevCurrentIPConfigurationLLA">
+<Description>Controls whether the Link Local Address IP configuration scheme is activated on the given network interface.</Description>
+<DisplayName>Current IP Configuration LLA</DisplayName>
+<pValue>GevCurrentIPConfigurationLLAReg</pValue>
+<pIsImplemented>GevSupportedIPConfigurationLLA</pIsImplemented>
+</Boolean>
+
+<MaskedIntReg Name="GevCurrentIPConfigurationLLAReg">
+<Address>0x0014</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>29</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevCurrentIPConfigurationDHCP">
+<Description>Controls whether the DHCP IP configuration scheme is activated on the given network interface.</Description>
+<DisplayName>Current IP Configuration DHCP</DisplayName>
+<pValue>GevCurrentIPConfigurationDHCPReg</pValue>
+<pIsImplemented>GevSupportedIPConfigurationDHCP</pIsImplemented>
+</Boolean>
+
+<MaskedIntReg Name="GevCurrentIPConfigurationDHCPReg">
+<Address>0x0014</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>30</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevCurrentIPConfigurationPersistentIP">
+<Description>Controls whether the PersistentIP configuration scheme is activated on the given network interface.</Description>
+<DisplayName>Current IP Configuration Persistent IP</DisplayName>
+<pValue>GevCurrentIPConfigurationPersistentIPReg</pValue>
+<pIsImplemented>GevSupportedIPConfigurationPersistentIP</pIsImplemented>
+</Boolean>
+
+<MaskedIntReg Name="GevCurrentIPConfigurationPersistentIPReg">
+<Address>0x0014</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>31</Bit>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevCurrentIPAddress">
+<Description>Reports the IP address for the given network interface.</Description>
+<DisplayName>Current IP Address</DisplayName>
+<pValue>GevCurrentIPAddressReg</pValue>
+</Integer>
+
+<IntReg Name="GevCurrentIPAddressReg">
+<Address>0x0024</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevCurrentSubnetMask">
+<Description>Reports the subnet mask of the given interface.</Description>
+<DisplayName>Current Subnet Mask</DisplayName>
+<pValue>GevCurrentSubnetMaskReg</pValue>
+</Integer>
+
+<IntReg Name="GevCurrentSubnetMaskReg">
+<Address>0x0034</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevCurrentDefaultGateway">
+<Description>Reports the default gateway IP address to be used on the given network interface.</Description>
+<DisplayName>Current Default Gateway</DisplayName>
+<pValue>GevCurrentDefaultGatewayReg</pValue>
+<Inc>1</Inc>
+</Integer>
+
+<IntReg Name="GevCurrentDefaultGatewayReg">
+<Address>0x0044</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<StringReg NameSpace="Standard" Name="DeviceManufacturerName">
+<Description>Manufacturer information about the device.</Description>
+<DisplayName>Device Manufacturer Name</DisplayName>
+<Address>0x0048</Address>
+<Length>32</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="DeviceModelName">
+<Description>Model of the device.</Description>
+<DisplayName>Device Model Name</DisplayName>
+<Address>0x0068</Address>
+<Length>32</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="DeviceVersion">
+<Description>Version of the device.</Description>
+<DisplayName>Device Version</DisplayName>
+<Address>0x0088</Address>
+<Length>32</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="DeviceManufacturerInfo">
+<Description>Manufacturer information about the device.</Description>
+<DisplayName>Device Manufacturer Info</DisplayName>
+<Address>0x00A8</Address>
+<Length>48</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="DeviceSerialNumber">
+<Description>Serial number of the device.</Description>
+<DisplayName>Device Serial Number</DisplayName>
+<Address>0x00D8</Address>
+<Length>16</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="DeviceUserDefinedName">
+<Description>User-programmable Device Name.</Description>
+<DisplayName>Device User Name</DisplayName>
+<Address>0x00E8</Address>
+<Length>16</Length>
+<AccessMode>RW</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="GevFirstURL">
+<Description>Indicates the first URL to the XML device description file. The First URL is used as the first choice by the application to retrieve the XML device description file.</Description>
+<DisplayName>First URL</DisplayName>
+<Address>0x0200</Address>
+<Length>512</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<StringReg NameSpace="Standard" Name="GevSecondURL">
+<Description>Indicates the second URL to the XML device description file. This URL is an alternative if the application was unsuccessful to retrieve the device description file using the first URL.</Description>
+<DisplayName> Second URL</DisplayName>
+<Address>0x0400</Address>
+<Length>512</Length>
+<AccessMode>RO</AccessMode>
+</StringReg>
+
+<Integer NameSpace="Standard" Name="GevNumberOfInterfaces">
+<Description>Indicates the number of physical network interfaces supported by this device.</Description>
+<DisplayName> Number Of Interfaces</DisplayName>
+<pValue>GevNumberOfInterfacesReg</pValue>
+</Integer>
+
+<IntReg Name="GevNumberOfInterfacesReg">
+<Address>0x0600</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevPersistentIPAddress">
+<Description>Controls the Persistent IP address for this network interface. It is only used when the device boots with the Persistent IP configuration scheme.</Description>
+<DisplayName>Persistent IP Address</DisplayName>
+<pValue>GevPersistentIPAddressReg</pValue>
+</Integer>
+
+<IntReg Name="GevPersistentIPAddressReg">
+<Address>0x064C</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevPersistentSubnetMask">
+<Description>Controls the Persistent subnet mask associated with the Persistent IP address on this network interface. It is only used when the device boots with the Persistent IP configuration scheme.</Description>
+<DisplayName>Persistent Subnet Mask</DisplayName>
+<pValue>GevPersistentSubnetMaskReg</pValue>
+</Integer>
+
+<IntReg Name="GevPersistentSubnetMaskReg">
+<Address>0x065C</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevPersistentDefaultGateway">
+<Description>Controls the persistent default gateway for this network interface. It is only used when the device boots with the Persistent IP configuration scheme.</Description>
+<DisplayName>Persistent Default Gateway</DisplayName>
+<pValue>GevPersistentDefaultGatewayReg</pValue>
+</Integer>
+
+<IntReg Name="GevPersistentDefaultGatewayReg">
+<Address>0x066C</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="DeviceLinkSpeed">
+<Description>Indicates the speed of transmission negotiated by the given network interface.</Description>
+<DisplayName>Link Speed</DisplayName>
+<pValue>DeviceLinkSpeedReg</pValue>
+<pIsImplemented>GVCPCapabilityLS</pIsImplemented>
+</Integer>
+
+<IntReg Name="DeviceLinkSpeedReg">
+<Address>0x0670</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="NumberOfMessageChannels">
+<Description>Indicates the number of message channels supported by this device.</Description>
+<DisplayName>Message Channel Count</DisplayName>
+<pValue>NumberOfMessageChannelsReg</pValue>
+<Min>0</Min>
+<Max>1</Max>
+<Inc>1</Inc>
+</Integer>
+
+<IntReg Name="NumberOfMessageChannelsReg">
+<Address>0x0900</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="NumberOfStreamChannels">
+<Description>Indicates the number of stream channels supported by this device.</Description>
+<DisplayName>Stream Channel Count</DisplayName>
+<pValue>NumberOfStreamChannelsReg</pValue>
+<Min>0</Min>
+<Max>512</Max>
+<Inc>1</Inc>
+</Integer>
+
+<IntReg Name="NumberOfStreamChannelsReg">
+<Address>0x0904</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="NumberOfActionSignals">
+<Description>Indicates the number of action signals supported by this device.</Description>
+<DisplayName>Number of Action Signals</DisplayName>
+<pValue>NumberOfActionSignalsReg</pValue>
+</Integer>
+
+<IntReg Name="NumberOfActionSignalsReg">
+<Address>0x0908</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Boolean Name="SCSPxSupported">
+<Description>Indicates the SCSPx registers (stream channel source port) are available for all supported stream channels.</Description>
+<DisplayName>SCSPx</DisplayName>
+<pValue>SCSPxSupportedReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="SCSPxSupportedReg">
+<Address>0x092C</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>0</Bit>
+</MaskedIntReg>
+
+<Category NameSpace="Standard" Name="GVCPCapability">
+<DisplayName>GVCP Capability</DisplayName>
+<pFeature>GVCPCapabilityUN</pFeature>
+<pFeature>GVCPCapabilitySN</pFeature>
+<pFeature>GVCPCapabilityHD</pFeature>
+<pFeature>GVCPCapabilityLS</pFeature>
+<pFeature>GVCPCapabilityCAP</pFeature>
+<pFeature>GVCPCapabilityTD</pFeature>
+<pFeature>GVCPCapabilityDD</pFeature>
+<pFeature>GVCPCapabilityWD</pFeature>
+<pFeature>GVCPCapabilityES</pFeature>
+<pFeature>GVCPCapabilityPAS</pFeature>
+<pFeature>GVCPCapabilityA</pFeature>
+<pFeature>GVCPCapabilityP</pFeature>
+<pFeature>GVCPCapabilityED</pFeature>
+<pFeature>GVCPCapabilityE</pFeature>
+<pFeature>GVCPCapabilityPR</pFeature>
+<pFeature>GVCPCapabilityW</pFeature>
+<pFeature>GVCPCapabilityC</pFeature>
+</Category>
+
+<Boolean Name="GVCPCapabilityUN">
+<Description>Indicates if user-defined name is supported.</Description>
+<DisplayName>User Defined Name</DisplayName>
+<pValue>GVCPCapabilityUNReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityUNReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>0</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilitySN">
+<Description>Indicates if serial number is supported.</Description>
+<DisplayName>Serial Number</DisplayName>
+<pValue>GVCPCapabilitySNReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilitySNReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>1</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityHD">
+<Description>Indicates if heartbeat can be disabled.</Description>
+<DisplayName>Heartbeat can be disabled</DisplayName>
+<pValue>GVCPCapabilityHDReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityHDReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>2</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityLS">
+<Description>Indicates if link speed is supported.</Description>
+<DisplayName>Link Speed</DisplayName>
+<pValue>GVCPCapabilityLSReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityLSReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>3</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityCAP">
+<Description>Indicates if CCP Application Port and IP address registers are supported.</Description>
+<DisplayName>CCP Application Port/IP</DisplayName>
+<pValue>GVCPCapabilityCAPReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityCAPReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>4</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityMT">
+<Description>Indicates if manifest table is supported.</Description>
+<DisplayName>Manifest Table</DisplayName>
+<pValue>GVCPCapabilityMTReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityMTReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>5</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityTD">
+<Description>Indicates if Test Data is filled with data from the LSFR generator.</Description>
+<DisplayName>Test Data</DisplayName>
+<pValue>GVCPCapabilityTDReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityTDReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>6</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityDD">
+<Description>Indicates if Discovery Ack Delay is supported.</Description>
+<DisplayName>Discovery Ack Delay</DisplayName>
+<pValue>GVCPCapabilityDDReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityDDReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>7</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityWD">
+<Description>When Discovery Ack Delay is supported, indicates the application can write it.</Description>
+<DisplayName>Writable Discovery Ack Delay</DisplayName>
+<pValue>GVCPCapabilityWDReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityWDReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>8</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityES">
+<Description>Indicates if generation of extented status codes introduced in specification 1.1 are supported.</Description>
+<DisplayName>Extented Status Code for 1.1</DisplayName>
+<pValue>GVCPCapabilityESReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityESReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>9</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityPAS">
+<Description>Indicates if Primary Application switchover capability is supported.</Description>
+<DisplayName>Primary Application Support</DisplayName>
+<pValue>GVCPCapabilityPASReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityPASReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>10</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityA">
+<Description>Indicates if ACTION_CMD and ACTION_ACK are supported.</Description>
+<DisplayName>ACTION</DisplayName>
+<pValue>GVCPCapabilityAReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityAReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>25</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityP">
+<Description>Indicates if PENDING_ACK is supported.</Description>
+<DisplayName>PENDING</DisplayName>
+<pValue>GVCPCapabilityPReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityPReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>26</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityED">
+<Description>Indicates if EVENTDATA_CMD and EVENTDATA_ACK are supported.</Description>
+<DisplayName>EVENTDATA</DisplayName>
+<pValue>GVCPCapabilityEDReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityEDReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>27</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityE">
+<Description>Indicates if EVENT_CMD and EVENT_ACK are supported.</Description>
+<DisplayName>EVENT</DisplayName>
+<pValue>GVCPCapabilityEReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityEReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>28</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityPR">
+<Description>Indicates if PACKETRESEND_CMD is supported.</Description>
+<DisplayName>PACKETRESEND</DisplayName>
+<pValue>GVCPCapabilityPRReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityPRReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>29</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityW">
+<Description>Indicates if WRITEMEM_CMD and WRITEMEME_ACK are supported.</Description>
+<DisplayName>WRITEMEM</DisplayName>
+<pValue>GVCPCapabilityWReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityWReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>30</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPCapabilityC">
+<Description>Indicates if multiple operations in a single message are supported.</Description>
+<DisplayName>Concatenation</DisplayName>
+<pValue>GVCPCapabilityCReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GVCPCapabilityCReg">
+<Address>0x0934</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>31</Bit>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="HeartbeatTimeout">
+<Description>Controls the current heartbeat timeout in milliseconds.</Description>
+<DisplayName>Heartbeat Timeout</DisplayName>
+<pValue>GevHeartbeatTimeoutReg</pValue>
+<Min>500</Min>
+<Max>4294967295</Max>
+<Inc>1</Inc>
+</Integer>
+
+<IntReg Name="GevHeartbeatTimeoutReg">
+<Address>0x0938</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="TimestampTickFrequency">
+<Description>Indicates the number of timestamp ticks in 1 second (frequency in Hz).</Description>
+<DisplayName>GEV Timestamp Tick Frequency</DisplayName>
+<pValue>TimestampTickFrequencyValExpr</pValue>
+</Integer>
+
+<IntSwissKnife Name="TimestampTickFrequencyValExpr">
+<pVariable Name="VAR_TIMESTAMPTICKFREQUENCYHIGH">TimestampTickFrequencyHighReg</pVariable>
+<pVariable Name="VAR_TIMESTAMPTICKFREQUENCYLOW">TimestampTickFrequencyLowReg</pVariable>
+<Formula>(VAR_TIMESTAMPTICKFREQUENCYHIGH &lt;&lt; 32) | VAR_TIMESTAMPTICKFREQUENCYLOW</Formula>
+</IntSwissKnife>
+
+<Integer Name="TimestampTickFrequencyHigh">
+<Visibility>Invisible</Visibility>
+<pValue>TimestampTickFrequencyHighReg</pValue>
+</Integer>
+
+<IntReg Name="TimestampTickFrequencyHighReg">
+<Address>0x093C</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer Name="TimestampTickFrequencyLow">
+<Visibility>Invisible</Visibility>
+<pValue>GevTimestampTickFrequencyLowReg</pValue>
+</Integer>
+
+<IntReg Name="TimestampTickFrequencyLowReg">
+<Address>0x0940</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Category NameSpace="Standard" Name="GVCPConfiguration">
+<DisplayName>GVCP Configuration</DisplayName>
+<pFeature>GVCPConfigurationES</pFeature>
+<pFeature>GVCPConfigurationPE</pFeature>
+<pFeature>GVCPConfigurationHD</pFeature>
+</Category>
+
+<Boolean Name="GVCPConfigurationES">
+<Description>Enable generation of extented status codes introduced in specification 1.1.</Description>
+<DisplayName>Extented Status Code for 1.1</DisplayName>
+<pValue>GVCPConfigurationESReg</pValue>
+<pIsImplemented>GVCPCapabilityES</pIsImplemented>
+</Boolean>
+
+<MaskedIntReg Name="GVCPConfigurationESReg">
+<Address>0x0954</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>29</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPConfigurationPE">
+<Description>Enable generation of PENDING_ACK by the device.</Description>
+<DisplayName>PENDING_ACK</DisplayName>
+<pValue>GVCPConfigurationPEReg</pValue>
+<pIsImplemented>GVCPCapabilityP</pIsImplemented>
+</Boolean>
+
+<MaskedIntReg Name="GVCPConfigurationPEReg">
+<Address>0x0954</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>30</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GVCPConfigurationHD">
+<Description>Disable heartbeat.</Description>
+<DisplayName>Heartbeat Disable</DisplayName>
+<pValue>GVCPConfigurationHDReg</pValue>
+<pIsImplemented>GVCPCapabilityHD</pIsImplemented>
+</Boolean>
+
+<MaskedIntReg Name="GVCPConfigurationHDReg">
+<Address>0x0954</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>31</Bit>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevGVCPPendingTimeout">
+<Description>Indicates the longest GVCP command execution time before the device returns a PENDING_ACK.</Description>
+<DisplayName>GVCP pending timeout</DisplayName>
+<pValue>GevGVCPPendingTimeoutReg</pValue>
+<pIsImplemented>GVCPCapabilityP</pIsImplemented>
+</Integer>
+
+<MaskedIntReg Name="GevGVCPPendingTimeoutReg">
+<Address>0x0958</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Enumeration NameSpace="Standard" Name="GevCCP">
+<Description>Controls the device access privilege of an application.</Description>
+<DisplayName>GEV CCP</DisplayName>
+<EnumEntry NameSpace="Standard" Name="OpenAccess">
+<Value>0</Value>
+</EnumEntry>
+<EnumEntry NameSpace="Standard" Name="ExclusiveAccess">
+<Value>1</Value>
+</EnumEntry>
+<EnumEntry NameSpace="Standard" Name="ControlAccess">
+<Value>2</Value>
+</EnumEntry>
+<pValue>GevCCPReg</pValue>
+</Enumeration>
+
+<MaskedIntReg Name="GevCCPReg">
+<Address>0x0A00</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevPrimaryApplicationSocket">
+<Description>Returns the UDP source port of the primary application.</Description>
+<DisplayName>Primary Application Socket</DisplayName>
+<pValue>GevPrimaryApplicationSocketReg</pValue>
+<pIsImplemented>GVCPCapabilityPAS</pIsImplemented>
+</Integer>
+
+<MaskedIntReg Name="GevPrimaryApplicationSocketReg">
+<Address>0x0A04</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<pPort>Device</pPort>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevPrimaryApplicationIPAddress">
+<Description>Returns the address of the primary application.</Description>
+<DisplayName>Primary Application IP Address</DisplayName>
+<pValue>GevPrimaryApplicationIPAddressReg</pValue>
+<pIsImplemented>GVCPCapabilityPAS</pIsImplemented>
+</Integer>
+
+<IntReg Name="GevPrimaryApplicationIPAddressReg">
+<Address>0x0A14</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevMCPHostPort">
+<Description>Controls the port to which the device must send messages. Setting this value to 0 closes the message channel.</Description>
+<DisplayName>MCP Host Port</DisplayName>
+<!--<pIsImplemented>GevMCPHostPortImplExpr</pIsImplemented>-->
+<pValue>GevMCPHostPortReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevMCPHostPortReg">
+<Address>0x0B00</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevMCDA">
+<Description>Controls the destination IP address for the message channel.</Description>
+<DisplayName>MCDA</DisplayName>
+<pValue>GevMCDAReg</pValue>
+</Integer>
+
+<IntReg Name="GevMCDAReg">
+<Address>0x0B10</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevMCTT">
+<Description>Provides the transmission timeout value in milliseconds.</Description>
+<DisplayName>MCTT</DisplayName>
+<pValue>GevMCTTReg</pValue>
+</Integer>
+
+<IntReg Name="GevMCTTReg">
+<Address>0x0B14</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevMCRC">
+<Description>Controls the number of retransmissions allowed when a message channel message times out.</Description>
+<DisplayName>MCRC</DisplayName>
+<pValue>GevMCRCReg</pValue>
+</Integer>
+
+<IntReg Name="GevMCRCReg">
+<Address>0x0B18</Address>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevMCSP">
+<Description>This feature indicates the source port for the message channel.</Description>
+<DisplayName>GEV MCSP</DisplayName>
+<pValue>GevMCSPReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevMCSPReg">
+<Address>0x0B1C</Address>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Category NameSpace="Standard" Name="GevSCx">
+<DisplayName>Stream Channel</DisplayName>
+<pFeature>GevStreamChannelSelector</pFeature>
+<pFeature>GevSCPDirection</pFeature>
+<pFeature>GevSCPNetworkInterfaceIndex</pFeature>
+<pFeature>GevSCPHostPort</pFeature>
+<pFeature>GevSCPSFireTestPacket</pFeature>
+<pFeature>GevSCPSDoNotFragment</pFeature>
+<pFeature>GevSCPSBigEndian</pFeature>
+<pFeature>GevSCPSPacketSize</pFeature>
+<pFeature>GevSCPD</pFeature>
+<pFeature>GevSCDA</pFeature>
+<pFeature>GevSCSP</pFeature>
+<pFeature>GevSCCBigAndLittleEndian</pFeature>
+<pFeature>GevSCCIPReassembly</pFeature>
+<pFeature>GevSCCUnconditionalStreaming</pFeature>
+<pFeature>GevSCCExtendedChunkData</pFeature>
+<pFeature>GevSCCFGUnconditionalStreaming</pFeature>
+<pFeature>GevSCCFGExtendedChunkData</pFeature>
+</Category>
+
+<Integer NameSpace="Standard" Name="GevStreamChannelSelector">
+<Description>Selects the stream channel to control.</Description>
+<DisplayName>Stream Channel Selector</DisplayName>
+<Value>0</Value>
+<Min>0</Min>
+<Max>5</Max>
+<Inc>1</Inc>
+</Integer>
+
+<Enumeration NameSpace="Standard" Name="GevSCPDirection">
+<Description>Reports the direction of the stream channel.</Description>
+<DisplayName>SCP Direction</DisplayName>
+<EnumEntry NameSpace="Standard" Name="Transmitter">
+<Value>0</Value>
+</EnumEntry>
+<EnumEntry NameSpace="Standard" Name="Receiver">
+<Value>1</Value>
+</EnumEntry>
+<pValue>GevSCPDirectionReg</pValue>
+</Enumeration>
+
+<MaskedIntReg Name="GevSCPDirectionReg">
+<Address>0x0D00</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>0</Bit>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevSCPNetworkInterfaceIndex">
+<Description>Index of network interface to use.</Description>
+<DisplayName>SCP network interface index</DisplayName>
+<pValue>GevSCPNetworkInterfaceIndexReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevSCPNetworkInterfaceIndexReg">
+<Address>0x0D00</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>R0</AccessMode>
+<LSB>15</LSB>
+<MSB>12</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevSCPHostPort">
+<Description>Controls the port of the selected channel to which a GVSP transmitter must send data stream or the port from which a GVSP receiver may receive data stream. Setting this value to 0 closes the stream channel.</Description>
+<DisplayName>SCP Host Port</DisplayName>
+<pValue>GevSCPHostPortReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevSCPHostPortReg">
+<Address>0x0D00</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSCPSFireTestPacket">
+<Description>Sends a test packet. When this feature is set, the device will fire one test packet.</Description>
+<DisplayName>SCPS Fire Test Packet</DisplayName>
+<pValue>GevSCPSFireTestPacketReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCPSFireTestPacketReg">
+<Address>0x0D04</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>0</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSCPSDoNotFragment">
+<Description>The state of this feature is copied into the "do not fragment" bit of IP header of each stream packet. It can be used by the application to prevent IP fragmentation of packets on the stream channel.</Description>
+<DisplayName>SCPS Do Not Fragment</DisplayName>
+<pValue>GevSCPSDoNotFragmentReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCPSDoNotFragmentReg">
+<Address>0x0D04</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>1</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSCPSBigEndian">
+<Description>Endianess of multi-byte pixel data for this stream.</Description>
+<DisplayName>SCPS Big Endian</DisplayName>
+<pValue>GevSCPSBigEndianReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCPSBigEndianReg">
+<Address>0x0D04</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>2</Bit>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevSCPSPacketSize">
+<Description>Specifies the stream packet size, in bytes, to send on the selected channel for a GVSP transmitter or specifies the maximum packet size supported by a GVSP receiver.</Description>
+<DisplayName>SCPS Packet Size</DisplayName>
+<pValue>GevSCPSPacketSizeReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevSCPSPacketSizeReg">
+<Address>0x0D04</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Integer NameSpace="Standard" Name="GevSCPD">
+<Description>Controls the delay (in timestamp counter unit) to insert between each packet for this streamchannel.</Description>
+<DisplayName>SCPD</DisplayName>
+<pValue>GevSCPDReg</pValue>
+</Integer>
+
+<IntReg Name="GevSCPDReg">
+<Address>0x0D08</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevSCDA">
+<Description>Controls the destination IP address of the selected stream channel to which a GVSP transmitter must send data stream or the destination IP address from which a GVSP receiver may receive data stream.</Description>
+<DisplayName>SCDA</DisplayName>
+<pValue>GevSCDAReg</pValue>
+</Integer>
+
+<IntReg Name="GevSCDAReg">
+<Address>0x0D18</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+</IntReg>
+
+<Integer NameSpace="Standard" Name="GevSCSP">
+<Description>Indicates the source port of the stream channel.</Description>
+<DisplayName>SCSP</DisplayName>
+<pValue>GevSCSPReg</pValue>
+</Integer>
+
+<MaskedIntReg Name="GevSCSPReg">
+<Address>0x0D1C</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<LSB>31</LSB>
+<MSB>16</MSB>
+</MaskedIntReg>
+
+<Boolean Name="GevSCCBigAndLittleEndian">
+<Description>Indicates this stream channel supports both big and little endian.</Description>
+<DisplayName>SCC Big and Little Endian supported</DisplayName>
+<pValue>GevSCCBigAndLittleEndianReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCCBigAndLittleEndianReg">
+<Address>0x0D20</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>0</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GevSCCIPReassembly">
+<Description>For GVSP receivers, indicates this stream channel supports the reassembly of fragmented IP packets.</Description>
+<DisplayName>SCC IP reassembly supported</DisplayName>
+<pValue>GevSCCIPReassemblyReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCCIPReassemblyReg">
+<Address>0x0D20</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>1</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GevSCCUnconditionalStreaming">
+<Description>For GVSP transmitters, indicates that the stream channel supports unconditionnal streaming capabilities.</Description>
+<DisplayName>SCC unconditional streaming supported</DisplayName>
+<pValue>GevSCCUnconditionalStreamingReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCCUnconditionalStreamingReg">
+<Address>0x0D20</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>30</Bit>
+</MaskedIntReg>
+
+<Boolean Name="GevSCCExtendedChunkData">
+<Description>Indicates that the stream channelsupports the extented chunk data apyload type.</Description>
+<DisplayName>SCC extented chunk data supported</DisplayName>
+<pValue>GevSCCExtendedChunkDataReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCCExtendedChunkDataReg">
+<Address>0x0D20</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RO</AccessMode>
+<Bit>31</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSCCFGUnconditionalStreaming">
+<Description>Enables GVSP transmitters to continue to stream, for this stream channel, if its control channel is closed or regardless of the reception of any ICMP messages (such as destination unreachable messages).</Description>
+<DisplayName>SCCFG unconditional streaming</DisplayName>
+<pValue>GevSCCFGUnconditionalStreamingReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCCFGUnconditionalStreamingReg">
+<Address>0x0D24</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>30</Bit>
+</MaskedIntReg>
+
+<Boolean NameSpace="Standard" Name="GevSCCFGExtendedChunkData">
+<Description>Enables cameras to use the extended chunk data payload type for this stream channel.</Description>
+<DisplayName>SCCFG extended chunk data</DisplayName>
+<pValue>GevSCCFGExtendedChunkDataReg</pValue>
+</Boolean>
+
+<MaskedIntReg Name="GevSCCFGExtendedChunkDataReg">
+<Address>0x0D24</Address>
+<pAddress>GevSCPAddrCalc</pAddress>
+<Length>4</Length>
+<AccessMode>RW</AccessMode>
+<Bit>31</Bit>
+</MaskedIntReg>
+
+<IntSwissKnife Name="GevSCPAddrCalc">
+<pVariable Name="SEL">GevStreamChannelSelector</pVariable>
+<Formula>SEL * 0x40</Formula>
+</IntSwissKnife>
+
+</RegisterDescription>
