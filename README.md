@@ -1,5 +1,5 @@
 # qroilib
-QT Vision ROI Library
+QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.1)
 
 -----
 
