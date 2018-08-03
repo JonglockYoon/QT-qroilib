@@ -15,26 +15,32 @@ win32 {
 
 DEFINES += Q_OS_WIN
 LIBS += -L"..\winlib"
+#LIBS += -L"c:\opencv340\build\x64\vc15\lib"
 
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core320d -lopencv_imgproc320d -lopencv_highgui320d -lopencv_videoio320d -lopencv_imgcodecs320d
+#LIBS += -lopencv_core320d -lopencv_imgproc320d -lopencv_highgui320d -lopencv_videoio320d -lopencv_imgcodecs320d -lopencv_shape320d
+LIBS += -lopencv_world340d
 LIBS += "..\winlib\Debug\qroilib.lib"
 LIBS += "..\winlib\Debug\jpeg.lib"
 LIBS += "..\winlib\Debug\png.lib"
 LIBS += "..\winlib\Debug\zlib.lib"
 LIBS += "..\winlib\Debug\lcms2.lib"
+LIBS += "..\winlib\Debug\QZXing2.lib"
 }
 CONFIG(release, debug|release) {
-LIBS += -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320
+#LIBS += -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320 -lopencv_shape320
+LIBS += -lopencv_world340
 LIBS += "..\winlib\Release\qroilib.lib"
 LIBS += "..\winlib\Release\jpeg.lib"
 LIBS += "..\winlib\Release\png.lib"
 LIBS += "..\winlib\Release\zlib.lib"
 LIBS += "..\winlib\Release\lcms2.lib"
+LIBS += "..\winlib\Release\QZXing2.lib"
 }
 LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
+#INCLUDEPATH += "c:\opencv340\build\include"
 }
 
 linux {
