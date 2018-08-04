@@ -108,7 +108,6 @@ MainWindow::MainWindow()
     d->setupActions();
     d->mViewMainPage->loadConfig();
 
-    qApp->installEventFilter(this);
 
     Qroilib::DocumentView* v = currentView();
     if (v)

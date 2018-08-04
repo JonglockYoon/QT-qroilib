@@ -65,4 +65,4 @@ public:
 };
 
 
-
+extern CRecipeData * g_cRecipeData;

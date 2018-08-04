@@ -6,6 +6,7 @@
 //
 
 // Qt
+#include <QApplication>
 #include <QDebug>
 #include <QMenu>
 #include <QStatusBar>
@@ -145,6 +146,8 @@ ViewMainPage::ViewMainPage(QWidget* parent)
     urls.append(ch1);
     openUrls(urls, ch1);
 
+    qApp->installEventFilter(this);
+
 }
 
 ViewMainPage::~ViewMainPage()
@@ -219,7 +222,7 @@ void ViewMainPage::showContextMenu()
 
 QSize ViewMainPage::sizeHint() const
 {
-    return QSize(MAX_CAMERA_WIDTH, MAX_CAMERA_HEIGHT);
+    return QSize(640, 480);
 }
 
 QUrl ViewMainPage::url() const
