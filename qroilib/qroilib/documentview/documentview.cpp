@@ -327,7 +327,7 @@ void DocumentView::InitRoi(const QUrl url)
 {
     if (mRoi)
         delete mRoi;
-    mRoi = new RoiMap(RoiMap::Orthogonal, MAX_CAMERA_WIDTH, MAX_CAMERA_HEIGHT, 1, 1);
+    mRoi = new RoiMap(RoiMap::Orthogonal, 640, 480, 1, 1);
     mRoi->setLayerDataFormat(RoiMap::CSV);
     mRoi->setRenderOrder(RoiMap::RightDown);
 

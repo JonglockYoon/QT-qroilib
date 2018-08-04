@@ -113,7 +113,7 @@ AbstractImageView::AbstractImageView(QGraphicsItem* parent)
 {
     d->q = this;
     d->mControlKeyIsDown = false;
-    d->mEnlargeSmallerImages = false;
+    d->mEnlargeSmallerImages = true;
     d->mZoom = 1;
     d->mZoomToFit = true;
 

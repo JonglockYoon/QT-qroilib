@@ -17,6 +17,11 @@
 
 #include <qroilib/documentview/documentview.h>
 
+#define MAX_CAMERA_WIDTH 640 //1280//640 // 1600 //640
+#define MAX_CAMERA_HEIGHT 480 //1024//480 //1200 //480
+//#define MAX_CAMERA_WIDTH 2592
+//#define MAX_CAMERA_HEIGHT 1944
+
 class CamCapture : public QThread
 {
     Q_OBJECT

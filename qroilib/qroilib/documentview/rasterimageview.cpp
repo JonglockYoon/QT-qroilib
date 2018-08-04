@@ -201,7 +201,7 @@ RasterImageView::RasterImageView(QGraphicsItem* parent, int seq)
 
     d->mAlphaBackgroundMode = AlphaBackgroundCheckBoard;
     d->mAlphaBackgroundColor = Qt::black;
-    d->mEnlargeSmallerImages = false;
+    d->mEnlargeSmallerImages = true;
 
     d->mBufferIsEmpty = true;
     d->mScaler = new ImageScaler(this);
@@ -249,7 +249,7 @@ void RasterImageView::loadFromDocument()
         return;
     }
 
-    document()->setSize(QSize(MAX_CAMERA_WIDTH,MAX_CAMERA_HEIGHT));
+    document()->setSize(QSize(640,480));
     finishSetDocument();
 }
 
