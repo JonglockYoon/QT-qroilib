@@ -1,0 +1,38 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/camera.png</file>
+        <file>resources/notes.png</file>
+        <file>resources/pencil.png</file>
+        <file>resources/file.png</file>
+        <file>resources/circle-roi.png</file>
+        <file>resources/polygon-roi.png</file>
+        <file>resources/line-roi.png</file>
+        <file>resources/curve-roi.png</file>
+        <file>resources/rect-roi.png</file>
+        <file>resources/text.png</file>
+        <file>resources/select.png</file>
+        <file>resources/move.png</file>
+        <file>resources/ok.png</file>
+        <file>resources/remove.png</file>
+        <file>resources/arrow-left.png</file>
+        <file>resources/arrow-right.png</file>
+        <file>resources/arrow-down.png</file>
+        <file>resources/arrow-up.png</file>
+        <file>resources/flag.png</file>
+        <file>resources/settings.png</file>
+        <file>resources/exit.png</file>
+        <file>resources/insert-ellipse.png</file>
+        <file>resources/insert-image.png</file>
+        <file>resources/insert-object.png</file>
+        <file>resources/insert-polygon.png</file>
+        <file>resources/insert-polyline.png</file>
+        <file>resources/insert-rectangle.png</file>
+        <file>resources/insert-text.png</file>
+        <file>resources/camimg.png</file>
+        <file>resources/logdata.png</file>
+        <file>resources/pattern-roi.png</file>
+        <file>resources/model.png</file>
+        <file>resources/point-roi.png</file>
+        <file>resources/search.png</file>
+    </qresource>
+</RCC>

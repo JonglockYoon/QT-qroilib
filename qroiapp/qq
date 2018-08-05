@@ -1,0 +1,1 @@
+gnome-terminal -e "bash -c /home/yoon-jonglock/Projects/qroilib/qroilib0409/build-qroiapp-Desktop-Release/qroiapp"

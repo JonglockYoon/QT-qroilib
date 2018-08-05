@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>349</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>600</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionCreate_Rectangle">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-95-vector-path-square.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-95-vector-path-square.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Rectangle</string>
+   </property>
+  </action>
+  <action name="actionCreate_Circle">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-96-vector-path-circle.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-96-vector-path-circle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Circle</string>
+   </property>
+  </action>
+  <action name="actionCreate_Polygon">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-97-vector-path-polygon.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-97-vector-path-polygon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Polygon</string>
+   </property>
+  </action>
+  <action name="actionCreate_Polyline">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-98-vector-path-line.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-98-vector-path-line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Polyline</string>
+   </property>
+  </action>
+  <action name="actionSelection">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-100-vector-path-all.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-100-vector-path-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Selection</string>
+   </property>
+  </action>
+  <action name="actionMove">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-151-edit.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-151-edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Polygon</string>
+   </property>
+  </action>
+  <action name="actionMove_2">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-187-move.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-187-move.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move</string>
+   </property>
+  </action>
+  <action name="actionText">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-108-text.png</normaloff>../../../../glyphicons_free/glyphicons/png/glyphicons-108-text.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

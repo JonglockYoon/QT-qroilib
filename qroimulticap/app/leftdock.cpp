@@ -214,10 +214,10 @@ int LeftDock::getExposureValue()
 
 void LeftDock::on_buttonOpenCamera_clicked()
 {
-    int ncam1 = ui->comboBoxCam1Port->currentIndex();
-    int ncam2 = ui->comboBoxCam2Port->currentIndex();
-    int ncam3 = ui->comboBoxCam3Port->currentIndex();
-    int ncam4 = ui->comboBoxCam4Port->currentIndex();
+//    int ncam1 = ui->comboBoxCam1Port->currentIndex();
+//    int ncam2 = ui->comboBoxCam2Port->currentIndex();
+//    int ncam3 = ui->comboBoxCam3Port->currentIndex();
+//    int ncam4 = ui->comboBoxCam4Port->currentIndex();
 
     ViewMainPage* pView = theMainWindow->viewMainPage();
     QString str;
@@ -227,6 +227,7 @@ void LeftDock::on_buttonOpenCamera_clicked()
         m_sCamera[0] = "";
     else {
         m_sCamera[0] = str;
+        int ncam1 = m_sCamera[0].mid(0,2).toInt();
         pView->OpenCam(0, ncam1-1);
     }
     pView->CloseCam(1);
@@ -235,6 +236,7 @@ void LeftDock::on_buttonOpenCamera_clicked()
         m_sCamera[1] = "";
     else {
         m_sCamera[1] = str;
+        int ncam2 = m_sCamera[1].mid(0,2).toInt();
         pView->OpenCam(1, ncam2-1);
     }
     pView->CloseCam(2);
@@ -243,6 +245,7 @@ void LeftDock::on_buttonOpenCamera_clicked()
         m_sCamera[2] = "";
     else {
         m_sCamera[2] = str;
+        int ncam3 = m_sCamera[2].mid(0,2).toInt();
         pView->OpenCam(2, ncam3-1);
     }
     pView->CloseCam(3);
@@ -251,6 +254,7 @@ void LeftDock::on_buttonOpenCamera_clicked()
         m_sCamera[3] = "";
     else {
         m_sCamera[3] = str;
+        int ncam4 = m_sCamera[3].mid(0,2).toInt();
         pView->OpenCam(3, ncam4-1);
     }
 

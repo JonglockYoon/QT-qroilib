@@ -200,7 +200,7 @@ int LeftDock::getExposureValue()
 
 void LeftDock::on_buttonOpenCamera_clicked()
 {
-    int ncam1 = ui->comboBoxCam1Port->currentIndex();
+    //int ncam1 = ui->comboBoxCam1Port->currentIndex();
 
     ViewMainPage* pView = theMainWindow->viewMainPage();
     QString str;
@@ -211,6 +211,7 @@ void LeftDock::on_buttonOpenCamera_clicked()
     else {
         //theMainWindow->nCamExposure = getExposureValue();
         m_sCamera1 = str;
+        int ncam1 = m_sCamera1.mid(0,2).toInt();
         pView->OpenCam(0, ncam1-1);
     }
 
