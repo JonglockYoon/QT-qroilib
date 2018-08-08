@@ -41,6 +41,7 @@
 using namespace Qroilib;
 using namespace std;
 
+
 LeftDock::LeftDock(QString name, QWidget *parent)
     : QDockWidget(name, parent)
      ,ui(new Ui::LeftDock)
@@ -54,23 +55,28 @@ LeftDock::LeftDock(QString name, QWidget *parent)
 
     model2 = new QStringListModel(this);
 
-    //theMainWindow->nCamExposure = getExposureValue();
     m_sCamera1 = "";
     thresholdLow = 0;
     thresholdHigh = 0;
     setThresholdLowValue(thresholdLow);
     setThresholdHighValue(thresholdHigh);
 
+    ui->sliderFPS->setRange(0, 50);
+    ui->sliderFPS->setSingleStep(1);
+    ui->sliderFPS->setValue(theMainWindow->nCamFPS);
+
 #ifdef Q_OS_WIN
-    ui->sliderExposure->setRange(0, 9);
-#else
-    ui->sliderExposure->setRange(0, 15000);
-#endif
+    ui->sliderExposure->setRange(0, 20);
     ui->sliderExposure->setSingleStep(1);
+#else
+    ui->sliderExposure->setRange(0, 1500);
+    ui->sliderExposure->setSingleStep(10);
+#endif
     ui->sliderExposure->setValue(theMainWindow->nCamExposure);
     setExposureValue(theMainWindow->nCamExposure);
 
     connect(ui->sliderExposure, SIGNAL(valueChanged(int)), this, SLOT(setExposureValue(int)));
+    connect(ui->sliderFPS, SIGNAL(valueChanged(int)), this, SLOT(setFPSValue(int)));
 
     ui->sliderThresholdLow->setRange(0, 255);
     ui->sliderThresholdHigh->setRange(0, 255);
@@ -107,8 +113,42 @@ LeftDock::LeftDock(QString name, QWidget *parent)
     ui->comboBoxCam1Port->setModel(model2);
     ui->comboBoxCam1Port->setCurrentIndex(-1);
 
+    updateValue();
 }
 
+void LeftDock::updateValue()
+{
+    QString str;
+
+    str = QString("%1").arg(theMainWindow->nCamFPS);
+    ui->lineEditFPS->setText(str);
+
+
+#ifdef Q_OS_WIN
+    str = QString("%1").arg(theMainWindow->nCamExposure-10);
+    ui->lineEditExposure->setText(str);
+#else
+    str = QString("%1").arg(theMainWindow->nCamExposure);
+    ui->lineEditExposure->setText(str);
+#endif
+}
+
+void LeftDock::setFPSValue(int val)
+{
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+    if (!pView->myCamCapture)
+        return;
+
+    theMainWindow->nCamFPS = val;
+
+    pView->myCamCapture->mutex.lock();
+    pView->myCamCapture->capture.set(CV_CAP_PROP_FPS, val);
+    pView->myCamCapture->mutex.unlock();
+
+    theMainWindow->nCamExposure = getExposureValue();
+
+    updateValue();
+}
 
 void LeftDock::setExposureValue(int val)
 {
@@ -116,10 +156,11 @@ void LeftDock::setExposureValue(int val)
     if (!pView->myCamCapture)
         return;
 
+    pView->myCamCapture->mutex.lock();
+
 #ifdef Q_OS_WIN
     theMainWindow->nCamExposure = val;
-    if (pView->myCamCapture)
-        pView->myCamCapture->capture.set(CV_CAP_PROP_EXPOSURE, val-10);
+    pView->myCamCapture->capture.set(CV_CAP_PROP_EXPOSURE, val-10);
 #else
     int ncam1 = ui->comboBoxCam1Port->currentIndex();
     char video[64];
@@ -128,6 +169,7 @@ void LeftDock::setExposureValue(int val)
     int fd = ::v4l2_open(video,O_RDWR);
     if (fd == -1) {
         perror("opening video device");
+        pView->myCamCapture->mutex.unlock();
         return;
     }
 
@@ -137,8 +179,8 @@ void LeftDock::setExposureValue(int val)
 
         if (-1 == v4l2_ioctl(fd,VIDIOC_S_CTRL,&ctrl)) {
             perror("setting exposure manual");
-            ::v4l2_close(fd);
-            return;
+            //::v4l2_close(fd);
+            //return;
         }
 
 
@@ -146,8 +188,8 @@ void LeftDock::setExposureValue(int val)
         ctrl.value = val;
         if (-1 == v4l2_ioctl(fd,VIDIOC_S_CTRL,&ctrl)) {
             perror("setting exposure absolute");
-            ::v4l2_close(fd);
-            return;
+            //::v4l2_close(fd);
+            //return;
         }
         qDebug() << "setExposureValue ok" << val;
     } catch (cv::Exception &e) {
@@ -159,9 +201,23 @@ void LeftDock::setExposureValue(int val)
     ::v4l2_close(fd);
 
     theMainWindow->nCamExposure = val;
-
 #endif
 
+    pView->myCamCapture->mutex.unlock();
+
+    theMainWindow->nCamFPS = getFPSValue();
+    updateValue();
+}
+
+int LeftDock::getFPSValue()
+{
+    int val = 0;
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+    if (!pView->myCamCapture)
+        return -1;
+
+    val = pView->myCamCapture->capture.get(CV_CAP_PROP_FPS);
+    return val;
 }
 
 int LeftDock::getExposureValue()
@@ -172,7 +228,7 @@ int LeftDock::getExposureValue()
         return -1;
 
 #ifdef Q_OS_WIN
-    val = pView->myCamCapture->capture.get(CV_CAP_PROP_EXPOSURE) + 13;
+    val = pView->myCamCapture->capture.get(CV_CAP_PROP_EXPOSURE) + 10;
 #else
     int ncam1 = ui->comboBoxCam1Port->currentIndex();
     char video[64];
@@ -215,7 +271,10 @@ void LeftDock::on_buttonOpenCamera_clicked()
         pView->OpenCam(0, ncam1-1);
     }
 
-    //ui->sliderExposure->setValue(theMainWindow->nCamExposure);
+    theMainWindow->nCamFPS = getFPSValue();
+    theMainWindow->nCamExposure = getExposureValue();
+    updateValue();
+
 }
 
 void LeftDock::setThresholdLowValue(int val)
