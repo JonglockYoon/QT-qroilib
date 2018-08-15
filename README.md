@@ -19,6 +19,8 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 이 Program은 ARM계열 linux  와 X86계열 linux 및 windows 에서 test되었다.
 
+블로그 : https://blog.naver.com/jerry1455/221331480081
+
 -----
 
 <pre>
