@@ -53,6 +53,7 @@ private:
 
 public  Q_SLOTS:
     void finishNewRoiObject();
+    void setReadImage();
 
 public:
     int InspectOneItem(IplImage* img, Qroilib::RoiObject *pData);
