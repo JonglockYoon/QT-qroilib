@@ -500,6 +500,10 @@ void DialogThreshold::ExecThreshold(IplImage* iplImg)
     if (!tmp)
         tmp = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
 
+    if (ui->chkBoxGaussian) {
+       cvSmooth(iplImg, iplImg, CV_GAUSSIAN,7,7);
+    }
+
     switch(method)
     {
         case 0:

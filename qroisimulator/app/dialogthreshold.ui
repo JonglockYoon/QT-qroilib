@@ -373,7 +373,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>270</y>
+     <y>300</y>
      <width>271</width>
      <height>71</height>
     </rect>
@@ -428,6 +428,19 @@
     </property>
    </widget>
   </widget>
+  <widget class="QCheckBox" name="chkBoxGaussian">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>270</y>
+     <width>111</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>With Gaussian</string>
+   </property>
+  </widget>
   <zorder>AdaptiveGroup</zorder>
   <zorder>label_3</zorder>
   <zorder>comboBoxThresholdMethod</zorder>
@@ -445,6 +458,7 @@
   <zorder>comboBoxSource</zorder>
   <zorder>chkBoxNot</zorder>
   <zorder>ThresholdGroup_2</zorder>
+  <zorder>chkBoxGaussian</zorder>
  </widget>
  <resources/>
  <connections/>
