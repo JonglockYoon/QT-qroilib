@@ -46,6 +46,7 @@ struct MainWindow::Private
     QMenu *fileMenu;
     QMenu *viewMenu;
 
+    QAction *readImage;
     QAction *exitAct;
 
     void setupWidgets()
@@ -71,12 +72,16 @@ struct MainWindow::Private
 
     void setupActions()
     {
+        readImage = new QAction(QIcon(), tr("&Read Image ..."), q);
+        connect(readImage, SIGNAL(triggered(bool)), q, SLOT(setReadImage()));
+
         exitAct = new QAction(QIcon(), tr("E&xit"), q);
         exitAct->setShortcuts(QKeySequence::Quit);
         connect(exitAct, SIGNAL(triggered()), q, SLOT(close()));
 
         fileMenu = new QMenu(tr("&File"), q);
 
+        fileMenu->addAction(readImage);
         fileMenu->addAction(exitAct);
         viewMenu = new QMenu(tr("&View"), q);
 
@@ -101,8 +106,6 @@ MainWindow::MainWindow()
     d->setupWidgets();
     d->setupActions();
     d->mViewMainPage->loadConfig();
-
-    qApp->installEventFilter(this);
 
     extern Qroilib::ParamTable ROIDSHARED_EXPORT paramTable[];
     DocumentView* v = currentView();
@@ -311,3 +314,44 @@ void MainWindow::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
         cvLine(iplImage, pt1, pt2, CV_RGB(192, 192, 192), 2, 8, 0);
     }
 }
+
+
+void MainWindow::setReadImage()
+{
+    ViewMainPage* pView = viewMainPage();
+    if (!pView)
+        return;
+
+    DocumentView* v = currentView();
+    if (!v)
+        return;
+
+
+    QString fileName = QFileDialog::getOpenFileName(this,
+            tr("Open Image"), QDir::currentPath(),
+            tr("Images (*.png *.bmp *.jpg *.tif *.ppm *.GIF);;All Files (*)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    //QApplication::setOverrideCursor(Qt::WaitCursor);
+    QTimer::singleShot(1, [=] {
+        QImage img;
+        cv::Mat m = cv::imread(fileName.toLocal8Bit().toStdString().c_str(), cv::IMREAD_COLOR);
+        mat_to_qimage(m, img);
+        if (v) {
+            v->mRoi->setWidth(img.width());
+            v->mRoi->setHeight(img.height());
+
+            v->document()->setImageInternal(img);
+            v->imageView()->updateBuffer();
+
+            v->updateLayout();
+            pView->updateLayout();
+
+        }
+        //QApplication::restoreOverrideCursor();
+    });
+
+}
+

@@ -259,7 +259,7 @@ int CImgAlign::MeasureAlignImage(IplImage* src)
             double dDistX = fabs(pData1->bounds().top() - pData->bounds().top()) * dResX;
             double dDistY = (pos[0][0].dEdge - pos[0][1].dEdge);
             dRetAngle = (atan2(dDistY, dDistX) * 180.0 / PI); // degree
-            dRetAngle = -dRetAngle;
+            //dRetAngle = -dRetAngle;
 
             // 가로 Measure ROI의 중심점이 dRetAngle 많큼 회전했을때 이동 위치를 산출해서 Rotate 회전 중심을 바꾸어준다.
             // 회전후 Shift된 위치를 계산해서 이동시키기위함.
@@ -313,6 +313,7 @@ int CImgAlign::MeasureAlignImage(IplImage* src)
             nErrorType = 2;
             return nErrorType;
         }
+
         qDebug() << "RotateImage: " << dRetAngle << center.x << center.y;
         RotateImage(src, dRetAngle, center); // degree 입력
 

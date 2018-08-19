@@ -84,6 +84,8 @@ public:
     void OpenCam(int nv, int nCam);
     void CloseCam(int seq);
 
+     IplImage* getIplgray();
+
 Q_SIGNALS:
 
     /**

@@ -32,7 +32,7 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Roi_Align_TowPoint, CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다
     _Inspect_Roi_Align_TowPoint, CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다.
     _Inspect_Roi_Align_TowPoint, CParam(_ProcessValue1, ("Corner"), _ComboValue, ("0"), ("UpperLeft, UpperRight, BottomLeft, BottomRight")),
-    //_Inspect_Roi_Align_TowPoint, CParam(_LightValue, ("Light"), _IntValue, ("200")),
+    _Inspect_Roi_Align_TowPoint, CParam(_ProcessValue1, ("Method"), _ComboValue, ("0"), ("Corner, CornerByLine")),
 
     //_Inspect_Roi_Align_Measure, CParam(_ProcessValue1, ("Measurement type"), _ComboValue, ("0"), ("SubpixelEdge,SubpixelEdgeWithThreshold,PeakEdge")),
     _Inspect_Roi_Align_Measure, CParam(_ProcessValue1, ("Direction"), _ComboValue, ("0"), ("Left2Right,Right2Left,Top2Bottom,Bottom2Top,CenterPoint")),

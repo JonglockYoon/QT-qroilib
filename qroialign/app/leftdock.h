@@ -43,11 +43,11 @@ private slots:
 
     void on_pushButton_WriteROI_clicked();
 
-    void on_pushButton_Tow_Point_Align_clicked();
-
     void on_pushButton_Measure_Align_clicked();
 
     void on_pushButton_Preview_clicked();
+
+    void on_pushButton_TowPointAlign_clicked();
 
 private:
     int m_nCamExposure;

@@ -194,7 +194,7 @@ int LeftDock::getExposureValue()
 
 void LeftDock::on_buttonOpenCamera_clicked()
 {
-    //int ncam1 = ui->comboBoxCam1Port->currentIndex();
+    int ncam1 = ui->comboBoxCam1Port->currentIndex();
 
     ViewMainPage* pView = theMainWindow->viewMainPage();
     QString str;
@@ -204,7 +204,6 @@ void LeftDock::on_buttonOpenCamera_clicked()
         m_sCamera1 = "";
     else {
         m_sCamera1 = str;
-        int ncam1 = m_sCamera1.mid(0,2).toInt();
         pView->OpenCam(0, ncam1-1);
     }
 
@@ -280,19 +279,20 @@ void LeftDock::on_pushButton_WriteROI_clicked()
 int LeftDock::PrepareImage()
 {
     ViewMainPage* pMainView = theMainWindow->viewMainPage();
-    DocumentView* pdocview = pMainView->currentView();
-    const QImage *camimg = pdocview->image();
-    if (camimg->isNull())
-        return -1;
-
-    cv::Mat frame;
-    qimage_to_mat(camimg, frame);
-
-    IplImage riplImg;
+//    DocumentView* v = pMainView->currentView();
+//    const QImage *camimg = v->image();
     IplImage *iplImg;
-    riplImg = frame;
-    iplImg = &riplImg;
+//    if (!camimg->isNull())
+//    {
+//        cv::Mat frame;
+//        qimage_to_mat(camimg, frame);
 
+//        IplImage riplImg;
+//        riplImg = frame;
+//        iplImg = &riplImg;
+//    } else {
+        iplImg = pMainView->getIplgray();
+//    }
 
     CvSize searchSize = cvSize(iplImg->width, iplImg->height);
     graySearchImg = cvCreateImage(searchSize, IPL_DEPTH_8U, 1);
@@ -309,17 +309,18 @@ int LeftDock::PrepareImage()
     return 0;
 }
 
+
 //
 // _Inspect_Roi_Align_TowPoint ROI 2개가 있어야한다.
 //
-void LeftDock::on_pushButton_Tow_Point_Align_clicked()
+void LeftDock::on_pushButton_TowPointAlign_clicked()
 {
     if (PrepareImage() != 0)
         return;
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     ViewMainPage* pMainView = theMainWindow->viewMainPage();
-    DocumentView* pdocview = pMainView->currentView();
+    DocumentView* v = pMainView->currentView();
     pMainView->bPreview = false;
 
     theMainWindow->align.TowPointAlignImage(graySearchImg);
@@ -329,9 +330,9 @@ void LeftDock::on_pushButton_Tow_Point_Align_clicked()
     QImage img;
     mat_to_qimage(mat, img);
 
-    if (pdocview->document()) {
-        pdocview->document()->setImageInternal(img);
-        pdocview->imageView()->updateBuffer();
+    if (v->document()) {
+        v->document()->setImageInternal(img);
+        v->imageView()->updateBuffer();
     }
 
     cvReleaseImage(&graySearchImg);
@@ -349,7 +350,7 @@ void LeftDock::on_pushButton_Measure_Align_clicked()
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     ViewMainPage* pMainView = theMainWindow->viewMainPage();
-    DocumentView* pdocview = pMainView->currentView();
+    DocumentView* v = pMainView->currentView();
     pMainView->bPreview = false;
 
     theMainWindow->align.MeasureAlignImage(graySearchImg);
@@ -359,9 +360,9 @@ void LeftDock::on_pushButton_Measure_Align_clicked()
     QImage img;
     mat_to_qimage(mat, img);
 
-    if (pdocview->document()) {
-        pdocview->document()->setImageInternal(img);
-        pdocview->imageView()->updateBuffer();
+    if (v->document()) {
+        v->document()->setImageInternal(img);
+        v->imageView()->updateBuffer();
     }
 
     cvReleaseImage(&graySearchImg);

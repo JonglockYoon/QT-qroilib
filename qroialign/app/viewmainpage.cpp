@@ -149,6 +149,8 @@ ViewMainPage::ViewMainPage(QWidget* parent)
     urls.append(ch1);
     openUrls(urls, ch1);
 
+    qApp->installEventFilter(this);
+
 }
 
 ViewMainPage::~ViewMainPage()
@@ -443,4 +445,40 @@ void ViewMainPage::editRoiProperty()
     roipropertyeditor->show();
     roipropertyeditor->raise();
 
+}
+
+
+IplImage* ViewMainPage::getIplgray()
+{
+    Qroilib::DocumentView *v = currentView();
+    const QImage *pimg = v->image();
+    if (!pimg)
+        return nullptr;
+    if (pimg->isNull())
+        return nullptr;
+
+    cv::Mat frame;
+    qimage_to_mat(pimg, frame);
+
+    IplImage riplImg;
+    IplImage *iplImg;
+    static IplImage *grayImg = nullptr;
+
+    riplImg = frame;
+    iplImg = &riplImg;
+
+    CvSize isize = cvSize(iplImg->width, iplImg->height);
+    if (grayImg == nullptr)
+        grayImg = cvCreateImage(isize, IPL_DEPTH_8U, 1);
+    if (iplImg->nChannels == 3)
+        cvCvtColor(iplImg, grayImg, CV_RGB2GRAY);
+    else if (iplImg->nChannels == 4) {
+        if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
+            cvCvtColor(iplImg, grayImg, CV_BGRA2GRAY);
+        else
+            cvCvtColor(iplImg, grayImg, CV_RGBA2GRAY);
+    } else
+        cvCopy(iplImg, grayImg);
+
+    return grayImg;
 }
