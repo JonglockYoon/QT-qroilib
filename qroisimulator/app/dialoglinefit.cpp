@@ -183,12 +183,34 @@ void DialogLinefit::ExecRansacLinefit(IplImage* iplImg)
 
     if (!tmp)
         tmp = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
-    cvZero(tmp);
+    //cvZero(tmp);
 
+    cvInRangeS(iplImg, cv::Scalar(100), cv::Scalar(255), iplImg);
+
+//     IplConvKernel *element = nullptr;
+//     int filterSize = 3;  // 필터의 크기를 3으로 설정 (Noise out area)
+//     element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
+//     cvMorphologyEx(iplImg, iplImg, nullptr, element, CV_MOP_OPEN, 7);
+//     cvReleaseStructuringElement(&element);
+
+//     element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
+//     cvMorphologyEx(iplImg, iplImg, nullptr, element, CV_MOP_GRADIENT, 3);
+//     cvReleaseStructuringElement(&element);
+
+//     element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
+//     cvMorphologyEx(iplImg, iplImg, nullptr, element, CV_MOP_ERODE, 2);
+//     cvReleaseStructuringElement(&element);
+
+
+    cvSmooth(iplImg, iplImg, CV_GAUSSIAN,3,3);
+    cvCopy(iplImg, tmp);
 
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* contours = 0;
     cvFindContours(iplImg, storage, &contours, sizeof(CvContour), CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+
+
 
     float line[4];
     while(contours)
@@ -201,19 +223,25 @@ void DialogLinefit::ExecRansacLinefit(IplImage* iplImg)
         // CV_DIST_L2 : 거리 유형
         // 0 : L2 거리 사용하지 않음
         // 0.01 : 정확도
-        cvFitLine(contours, CV_DIST_L2, 0, 0.01, 0.01, line);
+        cvFitLine(contours, CV_DIST_HUBER, 0, 0.001, 0.001, line);
         CvRect boundbox = cvBoundingRect(contours);
         int xlen = boundbox.width / 2;
         int ylen = boundbox.height / 2;
 
+
+        double d = sqrt(line[0] * line[0] + line[1] * line[1]);
+        line[0] /= d;
+        line[1] /= d;
+        double t = boundbox.width + boundbox.height;
+
         // 올바른 선을 계산하는지 확인하기 위해 영상에 예상 선을 그림
         int x0= line[2]; // 선에 놓은 한 점
         int y0= line[3];
-        int x1= x0 - xlen*line[0]; // 기울기에 길이를 갖는 벡터 추가
-        int y1= y0 - ylen*line[1];
-        int x2= x0 + xlen*line[0];
-        int y2= y0 + ylen*line[1];
-        cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(255,255,255), 1, 8 );
+        int x1= x0 - t*line[0]; // 기울기에 길이를 갖는 벡터 추가
+        int y1= y0 - t*line[1];
+        int x2= x0 + t*line[0];
+        int y2= y0 + t*line[1];
+        cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
 
         contours = contours->h_next;
     }
