@@ -442,13 +442,18 @@ void DialogApplication::ExecRansacLinefit(IplImage* iplImg)
         int xlen = boundbox.width / 2;
         int ylen = boundbox.height / 2;
 
+        double d = sqrt(line[0] * line[0] + line[1] * line[1]);
+        line[0] /= d;
+        line[1] /= d;
+        double t = boundbox.width + boundbox.height;
+
         // 올바른 선을 계산하는지 확인하기 위해 영상에 예상 선을 그림
         int x0= line[2]; // 선에 놓은 한 점
         int y0= line[3];
-        int x1= x0 - xlen*line[0]; // 기울기에 길이를 갖는 벡터 추가
-        int y1= y0 - ylen*line[1];
-        int x2= x0 + xlen*line[0];
-        int y2= y0 + ylen*line[1];
+        int x1= x0 - t*line[0]; // 기울기에 길이를 갖는 벡터 추가
+        int y1= y0 - t*line[1];
+        int x2= x0 + t*line[0];
+        int y2= y0 + t*line[1];
         cvLine( img2, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(255,255,255), 1, 8 );
 
         contours = contours->h_next;
