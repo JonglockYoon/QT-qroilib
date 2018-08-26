@@ -259,6 +259,8 @@ void MainWindow::setReadImage()
         return;
     }
 
+     v->selectTool(v->actCreateRectangle);
+
     // 기존 ROI들 clear
     int seq = 0;
     QList<const Qroilib::RoiObject*> selectedObjects;

@@ -348,6 +348,32 @@
      <string>ColorDetect</string>
     </property>
    </widget>
+   <widget class="QRadioButton" name="radioButtonCodeScanner_2">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>120</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CodeScanner</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonCenterOfPlusMark_2">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>120</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CenterOfPlusMark</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QLabel" name="label_7">
    <property name="geometry">

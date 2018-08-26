@@ -221,6 +221,21 @@ void ViewMainPage::ClearU()
     if (!v)
         return;
 
+    QList<const Qroilib::RoiObject*> selectedObjects;
+
+    for (const Layer *layer : v->mRoi->objectGroups()) {
+        const ObjectGroup &objectGroup = *static_cast<const ObjectGroup*>(layer);
+        for (const Qroilib::RoiObject *roiObject : objectGroup) {
+            selectedObjects.append(roiObject);
+        }
+    }
+    if (selectedObjects.size() > 0) {
+        v->setSelectedObjects((const QList<Qroilib::RoiObject *> &)selectedObjects);
+        v->delete_();
+    }
+    selectedObjects.clear();
+
+
     v->mRoi->setWidth(0);
     v->mRoi->setHeight(0);
 
