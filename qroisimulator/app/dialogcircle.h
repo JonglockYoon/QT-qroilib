@@ -34,6 +34,8 @@ private slots:
     void on_pushButtonClose_clicked();
     void on_pushButtonExec_clicked();
     void updatePlayerUI(const QImage* img);
+    void setValuep1(int val);
+    void setEditValuep1(const QString &val);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -53,6 +55,7 @@ private:
     bool bRealtime = false;
 
     IplImage* tmp = nullptr;
+    float bestCirclePercentage;
 };
 
 #endif // DIALOGcircle_H

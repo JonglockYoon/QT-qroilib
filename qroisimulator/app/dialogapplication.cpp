@@ -505,6 +505,10 @@ void DialogApplication::codeScanner(IplImage* iplImg)
 
 void DialogApplication::ExecGeoMatch(IplImage* iplImg, IplImage* iplImg2)
 {
+    if (iplImg == nullptr)
+        return;
+    if (iplImg2 == nullptr)
+        return;
     int w = max(iplImg->width, iplImg2->width);
     int h = max(iplImg->height, iplImg2->height);
 

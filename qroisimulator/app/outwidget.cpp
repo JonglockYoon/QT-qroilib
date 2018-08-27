@@ -32,5 +32,5 @@ void OutWidget::closeEvent(QCloseEvent *event)
         }
     }
 
-    delete mViewOutPage;
+    //delete mViewOutPage;
 }

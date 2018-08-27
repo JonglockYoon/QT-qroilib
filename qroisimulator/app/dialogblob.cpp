@@ -391,6 +391,7 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     cvCopy(iplImg, tmp);
     NoiseOut(tmp);
     FilterArea(tmp);
+    //cvShowImage("FilterArea", tmp);
     FilterDiameter(tmp);
     if (bThinner)
         Thinner(tmp);

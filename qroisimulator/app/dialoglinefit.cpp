@@ -223,7 +223,7 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
 
     CvPoint* points = (CvPoint*)malloc(blobCount * sizeof(CvPoint));
 
-    for (int i = 0; i < blobCount; i++)
+    for (int i = 0; i < blobCount; i++) // 각 점들의 중심점을 구합니다.
     {
         CBlob *currentBlob = blobs.GetBlob(i);
         double m00 = currentBlob->Moment(0,0);
@@ -235,9 +235,8 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
         points[i].y = p.y;
     }
 
+    //cvFitLine으로 최적의 직선을을 찾습니다.
     CvMat pointMat = cvMat(1, blobCount, CV_32SC2, points);
-
-    //최적의 직선찾기
     float line[4];
     cvFitLine(&pointMat, CV_DIST_L1, 1, 0.001, 0.001, line);
 
@@ -248,7 +247,7 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
     line[1] /= d;
     t = tmp->width + tmp->height;
 
-    // 올바른 선을 계산하는지 확인하기 위해 영상에 예상 선을 그림
+    // 영상에 선을 그립니다.
     int x0= line[2]; // 선에 놓은 한 점
     int y0= line[3];
     int x1= x0 - t*line[0]; // 기울기에 길이를 갖는 벡터 추가
@@ -286,7 +285,7 @@ void DialogLinefit::ExecRansacLinefitBlob(IplImage* iplImg)
         line[1] /= d;
         double t = boundbox.width + boundbox.height;
 
-        // 올바른 선을 계산하는지 확인하기 위해 영상에 예상 선을 그림
+        // 영상에 선을 그립니다.
         int x0= line[2]; // 선에 놓은 한 점
         int y0= line[3];
         int x1= x0 - t*line[0]; // 기울기에 길이를 갖는 벡터 추가

@@ -170,6 +170,8 @@ void DialogContour::on_pushButtonExec_clicked()
             iplImg2 = pView1->getIplgray();
         }
     }
+    if(iplImg2 == nullptr)
+        return;
 
     IplImage* iplImg = nullptr;
     if (source0 == 0)

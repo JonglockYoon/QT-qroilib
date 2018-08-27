@@ -27,6 +27,18 @@ DialogCircle::DialogCircle(QWidget *parent) :
 
     connect(ui->comboBoxSource, SIGNAL(activated(int)), this, SLOT(activatedComboBoxSource(int)));
     QObject::connect(ui->chkBoxRealtime, SIGNAL(clicked(bool)), this, SLOT(changeRealtime(bool)));
+
+    ui->sliderp1->setMinimum(1);
+    ui->sliderp1->setMaximum(100);
+    ui->sliderp1->setSingleStep(1);
+    ui->sliderp1->setPageStep(10);
+
+    bestCirclePercentage = 0.5;
+    QObject::connect(ui->editp1, SIGNAL(textChanged(const QString &)), this, SLOT(setEditValuep1(const QString &)));
+    QObject::connect(ui->sliderp1, SIGNAL(valueChanged(int)), this, SLOT(setValuep1(int)));
+
+    str = QString("%1").arg(bestCirclePercentage * 100.0);
+    ui->editp1->setText(str);
 }
 
 DialogCircle::~DialogCircle()
@@ -42,11 +54,11 @@ void DialogCircle::closeEvent(QCloseEvent *event)
             QObject::disconnect(pView, SIGNAL(processedImage(const QImage*)), this, SLOT(updatePlayerUI(const QImage*)));
         }
     } else {
-        OutWidget* pWidget = theMainWindow->vecOutWidget[source-1];
-        ViewOutPage* pView = pWidget->mViewOutPage;
-        if (pView) {
-            QObject::disconnect(pView, SIGNAL(processedImage(const QImage*)), this, SLOT(updatePlayerUI(const QImage*)));
-        }
+//        OutWidget* pWidget = theMainWindow->vecOutWidget[source-1];
+//        ViewOutPage* pView = pWidget->mViewOutPage;
+//        if (pView) {
+//            QObject::disconnect(pView, SIGNAL(processedImage(const QImage*)), this, SLOT(updatePlayerUI(const QImage*)));
+//        }
     }
 
     if (tmp)
@@ -82,6 +94,17 @@ void DialogCircle::changeRealtime(bool checked)
 void DialogCircle::activatedComboBoxSource(int act)
 {
     source = act;
+}
+void DialogCircle::setValuep1(int val)
+{
+    bestCirclePercentage = (float)val / 100.0;
+    QString str = QString("%1").arg(val);
+    ui->editp1->setText(str);
+}
+void DialogCircle::setEditValuep1(const QString &val)
+{
+    bestCirclePercentage = (float)val.toInt() / 100.0;
+    ui->sliderp1->setValue(val.toInt());
 }
 
 void DialogCircle::on_pushButtonClose_clicked()
@@ -165,7 +188,7 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
 {
     //QString str;
     IplImage* grayImg = cvCreateImage(cvGetSize(grayImgIn), IPL_DEPTH_8U, 1);
-    CBlobResult blobs = CBlobResult(grayImgIn, nullptr, 0);	// Use a black background color.
+    CBlobResult blobs = CBlobResult(grayImgIn, nullptr, 0);
     int nBlobs = blobs.GetNumBlobs();
     for (int i = 0; i < nBlobs; i++)	// 여러개의 Blob이 있을때 한개씩 뽑아서 RANSAC을 돌린다.
     {
@@ -235,7 +258,9 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
             }
         }
         if (rbest.center.x > 0) {
-            vecRansicCircle.push_back(rbest);
+            if (rbest.cPerc > bestCirclePercentage) {
+                vecRansicCircle.push_back(rbest);
+            }
         }
     }
     cvReleaseImage(&grayImg);
