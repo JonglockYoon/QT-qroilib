@@ -359,11 +359,11 @@ void DialogEdge::ExecEdge(IplImage* iplImg)
             cvCanny(iplImg, tmp, val1, val2, 3);
             break;
         case 1:
-            if (sobelX == 0 && sobelX == 0)
+            if (sobelX == 0 && sobelY == 0)
                 break;
             sobel_tmp = cvCreateImage(cvSize(iplImg->width, iplImg->height), IPL_DEPTH_16S, 1);
-            cvSobel(iplImg, sobel_tmp, sobelX, sobelX);
-            SobelNormalize(sobel_tmp, tmp, sobelX, sobelX);
+            cvSobel(iplImg, sobel_tmp, sobelX, sobelY);
+            SobelNormalize(sobel_tmp, tmp, sobelX, sobelY);
             cvReleaseImage(&sobel_tmp);
             break;
         case 2:
