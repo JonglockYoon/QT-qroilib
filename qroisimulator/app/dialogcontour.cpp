@@ -170,8 +170,6 @@ void DialogContour::on_pushButtonExec_clicked()
             iplImg2 = pView1->getIplgray();
         }
     }
-    if(iplImg2 == nullptr)
-        return;
 
     IplImage* iplImg = nullptr;
     if (source0 == 0)
@@ -215,15 +213,18 @@ void DialogContour::on_pushButtonExec_clicked()
                 cvCopy(iplImg, croppedImage);
                 cvResetImageROI(iplImg);
 
-                cvSetImageROI(iplImg2, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
-                croppedImage2 = cvCreateImage(cvSize(rect.width(), rect.height()), iplImg2->depth, iplImg2->nChannels);
-                cvCopy(iplImg2, croppedImage2);
-                cvResetImageROI(iplImg2);
-
+                if (iplImg2 != nullptr)
+                {
+                    cvSetImageROI(iplImg2, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
+                    croppedImage2 = cvCreateImage(cvSize(rect.width(), rect.height()), iplImg2->depth, iplImg2->nChannels);
+                    cvCopy(iplImg2, croppedImage2);
+                    cvResetImageROI(iplImg2);
+                }
                 ExecContour(croppedImage, croppedImage2);
 
                 cvReleaseImage(&croppedImage);
-                cvReleaseImage(&croppedImage2);
+                if (iplImg2 != nullptr)
+                    cvReleaseImage(&croppedImage2);
             }
             else
                 ExecContour(iplImg, iplImg2);
@@ -284,9 +285,13 @@ void DialogContour::ExecContour(IplImage* iplImg, IplImage* iplImg2)
         DrawContour(iplImg);
         break;
     case 1: // MatchShapes
+        if(iplImg2 == nullptr)
+            return;
         TestMatchShapes(iplImg, iplImg2);
         break;
     case 2: // MatchShapes
+        if(iplImg2 == nullptr)
+            return;
         TestShapeContextDistanceExtractor(iplImg, iplImg2);
         break;
     }
@@ -323,14 +328,22 @@ void DialogContour::DrawContour(IplImage* iplImg)
         while(contours)
         {
             double area = cvContourArea(contours);
+            CvRect r = cvBoundingRect(contours);
+            if ((r.width+10) >= iplImg->width || (r.height+10) >= iplImg->height) {
+                contours = contours->h_next;
+                continue;
+            }
+
             if (area > dMinArea)
             {
                 cv::Point2f center = base.CenterOfMoment(contours);
                 DrawResultCrossMark(outImg, center);
 
-                cvRectangle(outImg, CvPoint(0,0), CvPoint(outImg->width/2,20), cvScalar(0, 0, 0), CV_FILLED);
-                sprintf(text, "Area:%.1f", area);
-                cvPutText(outImg, text, cvPoint(10, 16), &font, cvScalar(255, 255, 255));
+                if (contours->total == 1) {
+                    cvRectangle(outImg, CvPoint(0,0), CvPoint(outImg->width/2,20), cvScalar(0, 0, 0), CV_FILLED);
+                    sprintf(text, "Area:%.1f", area);
+                    cvPutText(outImg, text, cvPoint(10, 16), &font, cvScalar(255, 255, 255));
+                }
             }
             contours = contours->h_next;
         }
