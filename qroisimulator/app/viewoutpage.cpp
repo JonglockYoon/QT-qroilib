@@ -330,7 +330,6 @@ IplImage* ViewOutPage::getIplgray()
 
     IplImage riplImg;
     IplImage *iplImg;
-    static IplImage *grayImg = nullptr;
 
     riplImg = frame;
     iplImg = &riplImg;

@@ -74,6 +74,7 @@ public:
 
     IplImage* getIplgray();
     IplImage* getIplcolor();
+    IplImage *grayImg = nullptr;
 
 Q_SIGNALS:
 
