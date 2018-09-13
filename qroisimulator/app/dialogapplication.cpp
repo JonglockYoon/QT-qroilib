@@ -319,8 +319,8 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
 
     if (!outImg)
         outImg = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
-    //cvCopy(iplImg, outImg);
-    cvZero(outImg);
+    cvCopy(iplImg, outImg);
+    //cvZero(outImg);
 
     CImgProcBase base;
 
@@ -373,7 +373,7 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
     //...
 
     cvSetImageROI(outImg, r);
-    cvCopy(croppedImage, outImg);
+    cvXor(croppedImage, outImg, outImg);
     cvResetImageROI(outImg);
 
 
@@ -406,7 +406,7 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
     //...
 
     cvSetImageROI(outImg, r);
-    cvOr(croppedImage, outImg, outImg);
+    cvXor(croppedImage, outImg, outImg);
     cvResetImageROI(outImg);
 
     if (img2) cvReleaseImage(&img2);
@@ -430,8 +430,8 @@ void DialogApplication::ExecRansacLinefit(IplImage* iplImg)
     {
         if (contours->total < 10)
         {
-            contours = contours->h_next;
-            continue;
+            //contours = contours->h_next;
+            //continue;
         }
 
         // CV_DIST_L2 : 거리 유형
@@ -454,7 +454,7 @@ void DialogApplication::ExecRansacLinefit(IplImage* iplImg)
         int y1= y0 - t*line[1];
         int x2= x0 + t*line[0];
         int y2= y0 + t*line[1];
-        cvLine( img2, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(255,255,255), 1, 8 );
+        cvLine( img2, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
 
         contours = contours->h_next;
     }
