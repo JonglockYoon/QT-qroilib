@@ -85,7 +85,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 public:
     void ExecApplication(IplImage* iplImg, IplImage* iplImg2);
-    void ExecRansacLinefit(IplImage* iplImg);
+    void ExecRansacLinefit(IplImage* iplImg, int offset);
 
 public:
     void centerOfPlusmaek(IplImage* iplImg);
@@ -113,6 +113,8 @@ private:
     bool bRealtime = false;
 
     IplImage* outImg = nullptr;
+
+    CvPoint plusmarkpt[4];
 };
 
 #endif // DIALOGapp_H

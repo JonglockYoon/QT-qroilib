@@ -338,8 +338,8 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
     int cx = r.width;
     int cy = r.height;
     int imgStep;
-    int tcy = (cy * 0.6) * 255;
-    int tcx = (cx * 0.6) * 255;
+    int tcy = (cy * 0.5) * 255;
+    int tcx = (cx * 0.5) * 255;
 
     IplImage* croppedImage = cvCreateImage(cvSize(r.width, r.height), img2->depth, img2->nChannels);
 
@@ -347,7 +347,7 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
     // 좌우 Trim
     imageData = (uchar*)croppedImage->imageData;
     imgStep = croppedImage->widthStep;
-    for (int i = 0; i < croppedImage->width; i++) {	// 60% 이상 black이면 검정색으로채움
+    for (int i = 0; i < croppedImage->width; i++) {	// 50% 이상 black이면 검정색으로채움
         unsigned long sum = 0;
         for (int j = 0; j < croppedImage->height; j++)
             sum += imageData[imgStep * j + i];
@@ -368,8 +368,8 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
         else break;
     }
 
-
-    ExecRansacLinefit(croppedImage);
+    cvShowImage("Vertical", croppedImage);
+    ExecRansacLinefit(croppedImage, 0); // 세로선
     //...
 
     cvSetImageROI(outImg, r);
@@ -381,7 +381,7 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
     imgStep = croppedImage->widthStep;
     imageData = (uchar*)croppedImage->imageData;
     // 상하 Trim
-    for (int i = 0; i < croppedImage->height; i++) {	// 60% 이상 black이면 검정색으로채움
+    for (int i = 0; i < croppedImage->height; i++) {	// 50% 이상 black이면 검정색으로채움
         unsigned long sum = 0;
         for (int j = 0; j < croppedImage->width; j++)
             sum += imageData[imgStep * i + j];
@@ -402,12 +402,30 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
         else break;
     }
 
-    ExecRansacLinefit(croppedImage);
+    cvShowImage("Horizontal", croppedImage);
+    ExecRansacLinefit(croppedImage, 2); // 가로선
     //...
 
     cvSetImageROI(outImg, r);
     cvXor(croppedImage, outImg, outImg);
     cvResetImageROI(outImg);
+
+    Point intPnt;
+    CImgProcBase img;
+    img.getIntersectionPoint(plusmarkpt[0],plusmarkpt[1],plusmarkpt[2],plusmarkpt[3], intPnt);
+
+    intPnt.x += p->MinX();
+    intPnt.y += p->MinY();
+
+    char text[128];
+    sprintf(text, "%d,%d",  intPnt.x, intPnt.y);
+    CvFont font;
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.3, 0.3, 0, 1, CV_AA);
+
+    cvRectangle(outImg, CvPoint(0,0), CvPoint(outImg->width,10), cvScalar(255, 255, 255), CV_FILLED);
+    cvPutText(outImg, text, cvPoint(10, 10), &font, cvScalar(128, 128, 128));
+
+
 
     if (img2) cvReleaseImage(&img2);
     if (croppedImage) cvReleaseImage(&croppedImage);
@@ -416,7 +434,7 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
 
 
 
-void DialogApplication::ExecRansacLinefit(IplImage* iplImg)
+void DialogApplication::ExecRansacLinefit(IplImage* iplImg, int offset)
 {
     IplImage* img2 = cvCloneImage(iplImg);
     cvZero(img2);
@@ -439,8 +457,8 @@ void DialogApplication::ExecRansacLinefit(IplImage* iplImg)
         // 0.01 : 정확도
         cvFitLine(contours, CV_DIST_L2, 0, 0.01, 0.01, line);
         CvRect boundbox = cvBoundingRect(contours);
-        int xlen = boundbox.width / 2;
-        int ylen = boundbox.height / 2;
+        //int xlen = boundbox.width / 2;
+        //int ylen = boundbox.height / 2;
 
         double d = sqrt(line[0] * line[0] + line[1] * line[1]);
         line[0] /= d;
@@ -450,11 +468,14 @@ void DialogApplication::ExecRansacLinefit(IplImage* iplImg)
         // 올바른 선을 계산하는지 확인하기 위해 영상에 예상 선을 그림
         int x0= line[2]; // 선에 놓은 한 점
         int y0= line[3];
-        int x1= x0 - t*line[0]; // 기울기에 길이를 갖는 벡터 추가
-        int y1= y0 - t*line[1];
-        int x2= x0 + t*line[0];
-        int y2= y0 + t*line[1];
+        int x1= x0 - t * floor(line[0]+0.5); // 기울기에 길이를 갖는 벡터 추가
+        int y1= y0 - t * floor(line[1]+0.5);
+        int x2= x0 + t * floor(line[0]+0.5);
+        int y2= y0 + t * floor(line[1]+0.5);
         cvLine( img2, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
+
+        plusmarkpt[offset+0] = CvPoint(x1,y1);
+        plusmarkpt[offset+1] = CvPoint(x2,y2);
 
         contours = contours->h_next;
     }
