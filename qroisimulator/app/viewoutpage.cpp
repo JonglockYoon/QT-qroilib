@@ -335,8 +335,9 @@ IplImage* ViewOutPage::getIplgray()
     iplImg = &riplImg;
 
     CvSize isize = cvSize(iplImg->width, iplImg->height);
-    if (grayImg == nullptr)
-        grayImg = cvCreateImage(isize, IPL_DEPTH_8U, 1);
+    if (grayImg != nullptr)
+        cvReleaseImage(&grayImg);
+    grayImg = cvCreateImage(isize, IPL_DEPTH_8U, 1);
     if (iplImg->nChannels == 3)
         cvCvtColor(iplImg, grayImg, CV_RGB2GRAY);
     else if (iplImg->nChannels == 4) {
@@ -370,8 +371,9 @@ IplImage* ViewOutPage::getIplcolor()
     iplImg = &riplImg;
 
     CvSize isize = cvSize(iplImg->width, iplImg->height);
-    if (colorImg == nullptr)
-       colorImg = cvCreateImage(isize, IPL_DEPTH_8U, 3);
+    if (colorImg != nullptr)
+        cvReleaseImage(&colorImg);
+    colorImg = cvCreateImage(isize, IPL_DEPTH_8U, 3);
     if (iplImg->nChannels == 1)
         cvCvtColor(iplImg, colorImg, CV_GRAY2RGB);
     else if (iplImg->nChannels == 3)
