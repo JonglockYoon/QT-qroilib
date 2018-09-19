@@ -38,6 +38,8 @@ private slots:
 
     void on_radioButtonShapeContextDistanceExtractor_clicked();
 
+    void on_radioButtonDrawContourRect_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:
@@ -45,6 +47,7 @@ public:
     void ExecContour(IplImage* iplImg, IplImage* iplImg2);
 private:
     int method = 0;
+    int bContourRect = 0;
     Ui::DialogContour *ui;
     QString mName;
     int source0 = 0;

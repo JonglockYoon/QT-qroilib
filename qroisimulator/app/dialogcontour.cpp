@@ -266,16 +266,20 @@ void DialogContour::DrawResultCrossMark(IplImage *iplImage, cv::Point2f center)
 void DialogContour::on_radioButtonDrawContour_clicked()
 {
     method = 0;
+    bContourRect = 0;
 }
-
 void DialogContour::on_radioButtonMatchShapes_clicked()
 {
     method = 1;
 }
-
 void DialogContour::on_radioButtonShapeContextDistanceExtractor_clicked()
 {
     method = 2;
+}
+void DialogContour::on_radioButtonDrawContourRect_clicked()
+{
+    method = 0;
+    bContourRect = 1;
 }
 
 void DialogContour::ExecContour(IplImage* iplImg, IplImage* iplImg2)
@@ -323,12 +327,17 @@ void DialogContour::DrawContour(IplImage* iplImg)
 
     cvZero(outImg);
     if (!bApproxPoly) {
-        cvDrawContours(outImg, contours, CV_RGB(255, 255, 255), CV_RGB(255, 255, 255), 2, 1, 8, cvPoint(0, 0));
+        if (bContourRect == 0)
+            cvDrawContours(outImg, contours, CV_RGB(255, 255, 255), CV_RGB(255, 255, 255), 2, 1, 8, cvPoint(0, 0));
 
         while(contours)
         {
             double area = cvContourArea(contours);
             CvRect r = cvBoundingRect(contours);
+
+            if (bContourRect == 1)
+                cvDrawRect(outImg, CvPoint(r.x, r.y),CvPoint(r.x+r.width, r.y+r.height), CvScalar(255,255,255), 1, 8);
+
             if ((r.width+10) >= iplImg->width || (r.height+10) >= iplImg->height) {
                 contours = contours->h_next;
                 continue;
@@ -544,6 +553,4 @@ void DialogContour::TestShapeContextDistanceExtractor(IplImage* iplImg, IplImage
 
 // https://m.blog.naver.com/PostView.nhn?blogId=cyber3208&logNo=60163282137&proxyReferer=https%3A%2F%2Fwww.google.com%2F
 //example_14-04.cpp
-
-
 

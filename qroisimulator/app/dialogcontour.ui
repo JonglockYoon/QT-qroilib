@@ -214,6 +214,19 @@
     <string>ShapeContextDistanceExtractor</string>
    </property>
   </widget>
+  <widget class="QRadioButton" name="radioButtonDrawContourRect">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>120</y>
+     <width>161</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>DrawContour Rectangle</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
