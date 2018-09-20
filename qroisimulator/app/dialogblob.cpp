@@ -396,5 +396,34 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     if (bThinner)
         Thinner(tmp);
 
+
+    CBlobResult blobs;
+    blobs = CBlobResult(tmp, NULL, 0);
+    int nBlobs = blobs.GetNumBlobs();
+
+    double width,length;
+    for (int i = 0; i < nBlobs; i++)
+    {
+        CBlob *blob = blobs.GetBlob(i);
+
+        double widthC,lengthC;
+        double tmp;
+
+        tmp = blob->Perimeter()*blob->Perimeter() - 16*blob->Area();
+        if( tmp > 0.0 )
+            widthC = (double) (blob->Perimeter()+sqrt(tmp))/4;
+        else
+            widthC = (double) (blob->Perimeter())/4;
+
+        if(widthC<=0.0)
+            length = width = 0;
+        else {
+            lengthC=(double) blob->Area()/widthC;
+            length=MAX( lengthC , widthC );
+            width=MIN( lengthC , widthC );
+        }
+        qDebug() << i << ":" << width << length;
+    }
+
     theMainWindow->outWidget(mName, tmp);
 }
