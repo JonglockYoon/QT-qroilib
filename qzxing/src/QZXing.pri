@@ -265,7 +265,7 @@ SOURCES += $$PWD/CameraImageWrapper.cpp \
 qzxing_multimedia {
     QT += multimedia
 
-    CONFIG += qzxing_qml
+#    CONFIG += qzxing_qml
 
     DEFINES += QZXING_MULTIMEDIA
 
@@ -278,9 +278,9 @@ qzxing_multimedia {
 
 qzxing_qml {
     greaterThan(QT_VERSION, 4.7): lessThan(QT_VERSION, 5.0): QT += declarative
-    greaterThan(QT_MAJOR_VERSION, 4): QT += quick
+#    greaterThan(QT_MAJOR_VERSION, 4): QT += quick
 
-    DEFINES += QZXING_QML
+#    DEFINES += QZXING_QML
 
     HEADERS +=  \
         $$PWD/QZXingImageProvider.h

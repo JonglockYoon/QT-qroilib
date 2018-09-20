@@ -20,7 +20,7 @@
 #if QT_VERSION >= 0x040700 && QT_VERSION < 0x050000
 #include <QtDeclarative>
 #elif QT_VERSION >= 0x050000
-#include <QtQml/qqml.h>
+//#include <QtQml/qqml.h>
 #endif
 
 #ifdef QZXING_MULTIMEDIA
