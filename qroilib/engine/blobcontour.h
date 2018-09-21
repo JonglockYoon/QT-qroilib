@@ -1,6 +1,7 @@
 #ifndef BLOBCONTOUR_H_INCLUDED
 #define BLOBCONTOUR_H_INCLUDED
 
+#include <roilib_export.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "list"
@@ -18,7 +19,7 @@ typedef CvSeq* t_PointList;
 
 
 //! Blob contour class (in crack code)
-class CBlobContour
+class ROIDSHARED_EXPORT CBlobContour
 {
 	friend class CBlob;
 	
