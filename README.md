@@ -1,6 +1,7 @@
 # qroilib
-QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.1)
-
+QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.2)
+-----
+0.0.2 : blobcontour.h update
 -----
 
 This program has been tested on ARM linux and x86 linux and windows.
