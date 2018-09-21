@@ -134,6 +134,9 @@ public:
     CamCapture* myCamCapture = nullptr;
     RoiPropertyEditor *roipropertyeditor;
     bool bPreview = true;
+    IplImage *grayImg = nullptr;
+    IplImage *colorImg = nullptr;
+
 };
 
 #endif /* VIEWMAINPAGE_H */

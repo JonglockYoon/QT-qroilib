@@ -376,6 +376,16 @@ void DialogBlob::on_pushButtonExec_clicked()
     }
 }
 
+void DialogBlob::DrawRotatedRect( IplImage * iplSrc,CvBox2D rect,CvScalar color, int thickness, int line_type, int shift )
+{
+    CvPoint2D32f boxPoints[4];
+    cvBoxPoints(rect, boxPoints);
+    cvLine(iplSrc,cvPoint((int)boxPoints[0].x, (int)boxPoints[0].y),cvPoint((int)boxPoints[1].x, (int)boxPoints[1].y),color,thickness,line_type,shift);
+    cvLine(iplSrc,cvPoint((int)boxPoints[1].x, (int)boxPoints[1].y),cvPoint((int)boxPoints[2].x, (int)boxPoints[2].y),color,thickness,line_type,shift);
+    cvLine(iplSrc,cvPoint((int)boxPoints[2].x, (int)boxPoints[2].y),cvPoint((int)boxPoints[3].x, (int)boxPoints[3].y),color,thickness,line_type,shift);
+    cvLine(iplSrc,cvPoint((int)boxPoints[3].x, (int)boxPoints[3].y),cvPoint((int)boxPoints[0].x, (int)boxPoints[0].y),color,thickness,line_type,shift);
+}
+
 void DialogBlob::ExecBlob(IplImage* iplImg)
 {
     if (tmp) {
@@ -388,10 +398,11 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     if (!tmp)
         tmp = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
 
+    cvShowImage("iplImg", iplImg);
+
     cvCopy(iplImg, tmp);
     NoiseOut(tmp);
     FilterArea(tmp);
-    //cvShowImage("FilterArea", tmp);
     FilterDiameter(tmp);
     if (bThinner)
         Thinner(tmp);
@@ -407,11 +418,11 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
         CBlob *blob = blobs.GetBlob(i);
 
         double widthC,lengthC;
-        double tmp;
+        double tmpVal;
 
-        tmp = blob->Perimeter()*blob->Perimeter() - 16*blob->Area();
-        if( tmp > 0.0 )
-            widthC = (double) (blob->Perimeter()+sqrt(tmp))/4;
+        tmpVal = blob->Perimeter()*blob->Perimeter() - 16*blob->Area();
+        if( tmpVal > 0.0 )
+            widthC = (double) (blob->Perimeter()+sqrt(tmpVal))/4;
         else
             widthC = (double) (blob->Perimeter())/4;
 
@@ -422,7 +433,29 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
             length=MAX( lengthC , widthC );
             width=MIN( lengthC , widthC );
         }
-        qDebug() << i << ":" << width << length;
+        qDebug() << i << "(width,length):" << width << length;
+        qDebug() << "    (area):" << blob->Area();
+        qDebug() << "    (perimeter):" << blob->Perimeter();
+        qDebug() << "    (convex):" << blob->GetConvexHull();
+        qDebug() << "    (stddev):" << blob->StdDev(iplImg);
+
+        CvRect rect = blob->GetBoundingBox();
+        //CvBox2D box2d = blob->GetEllipse();
+        t_PointList convexseq = blob->GetConvexHull();
+
+        cvDrawContours(tmp, convexseq, CVX_WHITE, CVX_WHITE, 1, 1, 8);
+        cvDrawRect(tmp, CvPoint(rect.x, rect.y),CvPoint(rect.x+rect.width, rect.y+rect.height), CvScalar(255,255,255), 1, 8);
+        //DrawRotatedRect(tmp,box2d,CVX_WHITE,1,8,0);
+
+
+        CBlobContour *bcontour = blob->GetExternalContour();
+        t_chainCodeList externseq = bcontour->GetContourPoints();
+        CvBox2D box2d1 = cvMinAreaRect2 (externseq,0);
+        //DrawRotatedRect(tmp,box2d1,CVX_WHITE,1,8,0);
+
+        //CvBox2D box2d2 = cvMinAreaRect2 (convexseq,0);
+        //cvEllipseBox(tmp,box2d2,cvScalarAll(255),1,8,0);
+        //DrawRotatedRect(tmp,box2d2,CVX_WHITE,1,8,0);
     }
 
     theMainWindow->outWidget(mName, tmp);

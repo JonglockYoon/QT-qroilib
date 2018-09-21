@@ -245,6 +245,14 @@ void ViewMainPage::ClearU()
     //v->updateLayout();
     //updateLayout();
 
+    if (grayImg) {
+        cvReleaseImage(&grayImg);
+        grayImg = nullptr;
+    }
+    if (colorImg) {
+        cvReleaseImage(&colorImg);
+        colorImg = nullptr;
+    }
 }
 void ViewMainPage::showContextMenu()
 {
@@ -446,7 +454,6 @@ IplImage* ViewMainPage::getIplgray()
 
     IplImage riplImg;
     IplImage *iplImg;
-    static IplImage *grayImg = nullptr;
 
     riplImg = frame;
     iplImg = &riplImg;
@@ -481,7 +488,6 @@ IplImage* ViewMainPage::getIplcolor()
 
     IplImage riplImg;
     IplImage *iplImg;
-    static IplImage *colorImg = nullptr;
 
     riplImg = frame;
     iplImg = &riplImg;

@@ -48,6 +48,7 @@ public:
     void FilterArea(IplImage* grayImg);
     void FilterDiameter(IplImage* grayImg);
     void Thinner(IplImage* grayImg);
+    void DrawRotatedRect( IplImage * iplSrc,CvBox2D rect,CvScalar color, int thickness, int line_type, int shift );
 
 public:
     int NoiseOut(IplImage* grayImg);
