@@ -1,8 +1,10 @@
 # qroilib
 QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.3)
 -----
+<pre>
 0.0.2 : blobcontour.h update
 0.0.3 : update CBlob::JoinBlob()
+</pre>
 -----
 
 This program has been tested on ARM linux and x86 linux and windows.
