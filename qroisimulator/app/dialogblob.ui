@@ -412,6 +412,19 @@
     <string>Thinner</string>
    </property>
   </widget>
+  <widget class="QCheckBox" name="chkBoxJoin">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>300</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Join</string>
+   </property>
+  </widget>
   <zorder>groupBox</zorder>
   <zorder>groupBox_2</zorder>
   <zorder>pushButtonClose</zorder>
@@ -435,6 +448,7 @@
   <zorder>editx2</zorder>
   <zorder>label_11</zorder>
   <zorder>chkBoxThinner</zorder>
+  <zorder>chkBoxJoin</zorder>
  </widget>
  <resources/>
  <connections/>

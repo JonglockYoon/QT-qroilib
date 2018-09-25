@@ -28,6 +28,7 @@ DialogBlob::DialogBlob(QWidget *parent) :
     connect(ui->comboBoxSource, SIGNAL(activated(int)), this, SLOT(activatedComboBoxSource(int)));
     QObject::connect(ui->chkBoxRealtime, SIGNAL(clicked(bool)), this, SLOT(changeRealtime(bool)));
     QObject::connect(ui->chkBoxThinner, SIGNAL(clicked(bool)), this, SLOT(changeThinner(bool)));
+    QObject::connect(ui->chkBoxJoin, SIGNAL(clicked(bool)), this, SLOT(changeJoin(bool)));
 
 
     Noiseout1 = 0;
@@ -102,6 +103,10 @@ void DialogBlob::closeEvent(QCloseEvent *event)
 void DialogBlob::changeThinner(bool checked)
 {
     bThinner = checked;
+}
+void DialogBlob::changeJoin(bool checked)
+{
+    bJoin = checked;
 }
 
 void DialogBlob::changeRealtime(bool checked)
@@ -388,6 +393,7 @@ void DialogBlob::DrawRotatedRect( IplImage * iplSrc,CvBox2D rect,CvScalar color,
 
 void DialogBlob::ExecBlob(IplImage* iplImg)
 {
+    QString str;
     if (tmp) {
         if (tmp->width != iplImg->width || tmp->height != iplImg->height) {
             cvReleaseImage(&tmp);
@@ -398,12 +404,14 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     if (!tmp)
         tmp = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
 
-    cvShowImage("iplImg", iplImg);
+    //cvShowImage("iplImg", iplImg);
 
     cvCopy(iplImg, tmp);
     NoiseOut(tmp);
-    FilterArea(tmp);
-    FilterDiameter(tmp);
+    if (MaxArea > 0 || MinArea > 0)
+        FilterArea(tmp);
+    if (MinX > 0 || MinY > 0 || MaxX > 0 || MaxY > 0)
+        FilterDiameter(tmp);
     if (bThinner)
         Thinner(tmp);
 
@@ -411,7 +419,7 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     CBlobResult blobs;
     blobs = CBlobResult(tmp, NULL, 0);
     int nBlobs = blobs.GetNumBlobs();
-
+#if 0
     double width,length;
     for (int i = 0; i < nBlobs; i++)
     {
@@ -456,6 +464,33 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
         //CvBox2D box2d2 = cvMinAreaRect2 (convexseq,0);
         //cvEllipseBox(tmp,box2d2,cvScalarAll(255),1,8,0);
         //DrawRotatedRect(tmp,box2d2,CVX_WHITE,1,8,0);
+
+    }
+#endif
+
+    if (bJoin) { // All Blob Join
+        blobs = CBlobResult(tmp, NULL, 0);
+        int nBlobs = blobs.GetNumBlobs();
+        if (nBlobs > 1)
+        {
+            CBlob *blob1 = blobs.GetBlob(0);
+            for (int i = 1; i < nBlobs; i++)
+            {
+                CBlob *blob = blobs.GetBlob(i);
+                cvShowImage(str.toLatin1(), tmp1);
+                blob1->JoinBlob(blob);
+
+//                CBlobContour *bcontour = blob->GetExternalContour();
+//                t_chainCodeList externseq = bcontour->GetContourPoints();
+//                cvDrawContours(tmp, externseq, CvScalar(128,128,128), CvScalar(128,128,128), 1, 1, 8);
+            }
+
+            //cvZero(tmp);
+            //blob1->FillBlob(tmp, CVX_WHITE);
+
+            CvRect rect = blob1->GetBoundingBox();
+            cvDrawRect(tmp, CvPoint(rect.x, rect.y),CvPoint(rect.x+rect.width, rect.y+rect.height), CvScalar(128,128,128), 1, 8);
+        }
     }
 
     theMainWindow->outWidget(mName, tmp);

@@ -25,6 +25,7 @@ public:
 private slots:
     void changeRealtime(bool);
     void changeThinner(bool);
+    void changeJoin(bool);
     void activatedComboBoxSource(int act);
     void on_pushButtonClose_clicked();
     void on_pushButtonExec_clicked();
@@ -41,6 +42,7 @@ private slots:
     void setEditValuex2(const QString &);
     void setEditValuey1(const QString &);
     void setEditValuey2(const QString &);
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:
@@ -72,6 +74,7 @@ private:
     int MinY = 0;
     int MaxY = 0;
     bool bThinner = false;
+    bool bJoin = false;
 };
 
 #endif // DIALOGBLOB_H
