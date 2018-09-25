@@ -685,21 +685,36 @@ t_PointList CBlob::GetConvexHull()
 - AUTHOR: Ricard Borr?
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
+  2018.9.25 Jonglock-Yoon
+     GetChainCode -> GetContourPoints
+     Blob?? ????? ???? ??? ?? ??? ???? Join??? ??.
 */
 void CBlob::JoinBlob( CBlob *blob )
 {
-	CvSeqWriter writer;
-	CvSeqReader reader;
-	t_chainCode chainCode;
+    //  2018.9.25 jlyoon add.
+    CvSeq *seq = m_externalContour.GetContourPoints();
+    CvSeq *contour1 = blob->GetExternalContour()->GetContourPoints();
 
-	cvStartAppendToSeq( m_externalContour.GetChainCode(), &writer );
-	cvStartReadSeq( blob->GetExternalContour()->GetChainCode(), &reader );
+    for(int i=0;i<contour1->total;i++)
+    {
+        CvPoint* p;
+        p = (CvPoint*)cvGetSeqElem (contour1, i );
+        cvSeqPush(seq,p);
+    }
 
-	for (int i = 0; i < blob->GetExternalContour()->GetChainCode()->total; i++ )
-	{
-		CV_READ_SEQ_ELEM( chainCode, reader );
-		CV_WRITE_SEQ_ELEM( chainCode, writer );
-	}	
-	cvEndWriteSeq( &writer );
+    //  2018.9.25 jlyoon delete.
+//	CvSeqWriter writer;
+//	CvSeqReader reader;
+//	t_chainCode chainCode;
+
+//	cvStartAppendToSeq( m_externalContour.GetChainCode(), &writer );
+//	cvStartReadSeq( blob->GetExternalContour()->GetChainCode(), &reader );
+
+//	for (int i = 0; i < blob->GetExternalContour()->GetChainCode()->total; i++ )
+//	{
+//		CV_READ_SEQ_ELEM( chainCode, reader );
+//		CV_WRITE_SEQ_ELEM( chainCode, writer );
+//	}
+//	cvEndWriteSeq( &writer );
 
 }
