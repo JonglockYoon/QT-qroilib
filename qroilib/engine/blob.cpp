@@ -553,6 +553,13 @@ CvRect CBlob::GetBoundingBox()
 */
 CvBox2D CBlob::GetEllipse()
 {
+// 2018.9.25 jlyoon - replace opencv api
+    m_ellipse = cvMinAreaRect2 (GetExternalContour()->GetContourPoints(),0);
+    return m_ellipse;
+
+/*
+ * 2018.9.25 jlyoon - replace opencv api
+ *
 	// it is calculated?
 	if( m_ellipse.size.width != -1 )
 		return m_ellipse;
@@ -628,7 +635,7 @@ CvBox2D CBlob::GetEllipse()
 	}
         
 	return m_ellipse;
-
+*/
 }
 
 /**
