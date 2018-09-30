@@ -477,7 +477,7 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
             for (int i = 1; i < nBlobs; i++)
             {
                 CBlob *blob = blobs.GetBlob(i);
-                cvShowImage(str.toLatin1(), tmp1);
+                //cvShowImage(str.toLatin1(), tmp1);
                 blob1->JoinBlob(blob);
 
 //                CBlobContour *bcontour = blob->GetExternalContour();

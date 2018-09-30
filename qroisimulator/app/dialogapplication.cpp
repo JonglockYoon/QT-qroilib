@@ -73,6 +73,8 @@ DialogApplication::DialogApplication(QWidget *parent) :
 
 DialogApplication::~DialogApplication()
 {
+    if (backImg)
+        cvReleaseImage(&backImg);
 }
 
 void DialogApplication::closeEvent(QCloseEvent *event)
@@ -227,7 +229,7 @@ void DialogApplication::on_pushButtonExec_clicked()
                 QRectF rect = pData->bounds();	// Area로 등록된 ROI.
                 rect.normalized();
 
-                if (rect.left() < 0)	rect.setLeft(0);
+                if (rect.left() < 0) rect.setLeft(0);
                 if (rect.top() < 0)	rect.setTop(0);
                 if (rect.right() >= iplImg->width) rect.setRight(iplImg->width);
                 if (rect.bottom() >= iplImg->height) rect.setBottom(iplImg->height);
@@ -262,25 +264,119 @@ void DialogApplication::on_pushButtonExec_clicked()
     }
 }
 
+void DialogApplication::restoreLoadedImage()
+{
+    if (backImg != nullptr)
+    {
+        ViewMainPage *pView = (ViewMainPage *)theMainWindow->viewMainPage();
+        QImage img;
+        cv::Mat m = cvarrToMat(backImg);
+        mat_to_qimage(m, img);
+        Qroilib::DocumentView* v = pView->currentView();
+        v->document()->setImageInternal(img);
+        v->imageView()->updateBuffer();
+    }
+}
+
 void DialogApplication::on_radioButtonCenterOfPlusMark_clicked()
 {
+    restoreLoadedImage();
     method = 0;
 }
 void DialogApplication::on_radioButtonCodeScanner_clicked()
 {
+    restoreLoadedImage();
     method = 1;
 }
 void DialogApplication::on_radioButtonGeoMatch_clicked()
 {
+    restoreLoadedImage();
     method = 2;
 }
 void DialogApplication::on_radioButtonXFeatures2D_clicked()
 {
+    restoreLoadedImage();
     method = 3;
 }
 void DialogApplication::on_radioButtonColorDetect_clicked()
 {
+    restoreLoadedImage();
     method = 4;
+}
+void DialogApplication::on_radioButtonFFT_clicked()
+{
+    ViewMainPage *pView = (ViewMainPage *)theMainWindow->viewMainPage();
+    IplImage* iplImg = pView->getIplcolor();
+    if (iplImg == nullptr)
+        return;
+    if (backImg == nullptr)
+        backImg = cvCloneImage(iplImg);
+
+    QImage img;
+    cv::Mat m = convertFFTMag();
+    mat_to_qimage(m, img);
+
+    Qroilib::DocumentView* v = pView->currentView();
+    v->document()->setImageInternal(img);
+    v->imageView()->updateBuffer();
+
+    method = 5;
+}
+
+cv::Mat DialogApplication::convertFFTMag()
+{
+    ViewMainPage *pView = (ViewMainPage *)theMainWindow->viewMainPage();
+    IplImage* iplImg = pView->getIplgray();
+    cv::Mat inputImage = cvarrToMat(iplImg);
+
+    // Go float
+    cv::Mat fImage;
+    inputImage.convertTo(fImage, CV_32F);
+
+    fImage = fImage(cv::Rect(0, 0, fImage.cols & -2, fImage.rows & -2));
+
+    cv::Mat padded; //expand input image to optimal size
+    int m = cv::getOptimalDFTSize( fImage.rows );
+    int n = cv::getOptimalDFTSize( fImage.cols ); // on the border add zero values
+    cv::copyMakeBorder(fImage, padded, 0, m - fImage.rows, 0, n - fImage.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    cv::Mat planes[] = {cv::Mat_<float>(padded), cv::Mat::zeros(padded.size(), CV_32F)};
+
+    // FFT
+    cv::Mat fourierTransform;
+    cv::dft(fImage, fourierTransform, cv::DFT_SCALE|cv::DFT_COMPLEX_OUTPUT);
+
+    fourierTransform.copyTo(ftI);
+    ftI = ftI(cv::Rect(0, 0, ftI.cols & -2, ftI.rows & -2));
+    int cx = ftI.cols/2;
+    int cy = ftI.rows/2;
+    cv::Mat f0(ftI, cv::Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+    cv::Mat f1(ftI, cv::Rect(cx, 0, cx, cy));  // Top-Right
+    cv::Mat f2(ftI, cv::Rect(0, cy, cx, cy));  // Bottom-Left
+    cv::Mat f3(ftI, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
+    cv::Mat tmp;                       // swap quadrants (Top-Left with Bottom-Right)
+    f0.copyTo(tmp);
+    f3.copyTo(f0);
+    tmp.copyTo(f3);
+    f1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+    f2.copyTo(f1);
+    tmp.copyTo(f2);
+
+    cv::split(ftI, planes);       // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
+    magnitude(planes[0], planes[1], planes[0]);// planes[0] = magnitude
+    cv::Mat magI;
+    magI = planes[0];
+
+    magI += cv::Scalar::all(1);         // switch to logarithmic scale
+    log(magI, magI);
+
+    normalize(magI, magI, 0, 255, cv::NORM_MINMAX); // Transform the matrix with float values into a
+                                            // viewable image form (float between values 0 and 1).
+
+    //cv::imshow("fourierTransform", magI);
+
+    magI.convertTo(displayImage, CV_8U);
+
+    return displayImage;
 }
 
 void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
@@ -302,7 +398,9 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
     case 4:
         ColorDetect(iplImg, iplImg2);
         break;
-
+    case 5:
+        FFTTest();
+        break;
     }
     theMainWindow->outWidget(mName, outImg);
 }
@@ -946,4 +1044,116 @@ void DialogApplication::ColorDetect(IplImage* iplImg, IplImage* iplImg2)
 
 
     return;
+}
+
+
+void DialogApplication::FFTTest()
+{
+    cv::Mat fourierTransform;
+
+/*
+    // Go float
+    cv::Mat fImage;
+    cv::Mat inputImage = cvarrToMat(backImg);
+    cvtColor(inputImage, inputImage, cv::COLOR_BGR2GRAY);
+
+    inputImage.convertTo(fImage, CV_32F);
+    //cv::imshow("backImage", inputImage);
+
+    cv::dft(fImage, fourierTransform, cv::DFT_SCALE|cv::DFT_COMPLEX_OUTPUT);
+    //ftI = fourierTransform;
+
+    fourierTransform = fourierTransform(cv::Rect(0, 0, ftI.cols & -2, ftI.rows & -2));
+    int cx = fourierTransform.cols/2;
+    int cy = fourierTransform.rows/2;
+    cv::Mat f0(fourierTransform, cv::Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+    cv::Mat f1(fourierTransform, cv::Rect(cx, 0, cx, cy));  // Top-Right
+    cv::Mat f2(fourierTransform, cv::Rect(0, cy, cx, cy));  // Bottom-Left
+    cv::Mat f3(fourierTransform, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
+    cv::Mat tmp;                       // swap quadrants (Top-Left with Bottom-Right)
+    f0.copyTo(tmp);
+    f3.copyTo(f0);
+    tmp.copyTo(f3);
+    f1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+    f2.copyTo(f1);
+    tmp.copyTo(f2);
+*/
+
+    ftI.copyTo(fourierTransform);
+
+    int cols2 = fourierTransform.cols;
+    int rows2 = fourierTransform.rows;
+    float *pdata = (float *)fourierTransform.data;
+
+    ViewMainPage *viewMain = (ViewMainPage *)theMainWindow->viewMainPage();
+    Qroilib::DocumentView* v = viewMain->currentView();
+    if (v != nullptr) {
+        RoiObject *pData = nullptr;
+        for (const Layer *layer : v->mRoi->objectGroups()) {
+            const ObjectGroup &objectGroup = *static_cast<const ObjectGroup*>(layer);
+            for (const Qroilib::RoiObject *roiObject : objectGroup) {
+                pData = (RoiObject *)roiObject;
+
+                QRectF rect = pData->bounds();	// Area로 등록된 ROI.
+                const int szx = rect.width();
+                const int szy = rect.height();
+                cv::Mat roizero = Mat::zeros(szx,szy,CV_32F);
+                cv::Mat roi(fourierTransform, cv::Rect(rect.x(),rect.y(),szx,szy));
+                roizero.copyTo(roi);
+
+//                for (int y = rect.y(); y < rect.y()+szy; y++) {
+//                    for (int x = rect.x(); x < rect.x()+szx; x++) {
+//                        pdata[x + (cols2*y)] = 0;
+//                    }
+//                }
+            }
+        }
+    }
+    cv::Mat roizero = Mat::zeros(cols2,rows2, CV_32F);// 전부 0으로 초기화
+    cv::Mat roi = fourierTransform(cv::Rect(0,0,cols2,rows2));
+    roizero.copyTo(roi);
+
+
+
+
+    //fourierTransform = fourierTransform(cv::Rect(0, 0, fourierTransform.cols & -2, fourierTransform.rows & -2));
+    int cx2 = fourierTransform.cols/2;
+    int cy2 = fourierTransform.rows/2;
+    cv::Mat x0(fourierTransform, cv::Rect(0, 0, cx2, cy2));   // Top-Left - Create a ROI per quadrant
+    cv::Mat x1(fourierTransform, cv::Rect(cx2, 0, cx2, cy2));  // Top-Right
+    cv::Mat x2(fourierTransform, cv::Rect(0, cy2, cx2, cy2));  // Bottom-Left
+    cv::Mat x3(fourierTransform, cv::Rect(cx2, cy2, cx2, cy2)); // Bottom-Right
+    cv::Mat tmp2;                       // swap quadrants (Top-Left with Bottom-Right)
+    x0.copyTo(tmp2);
+    x3.copyTo(x0);
+    tmp2.copyTo(x3);
+    x1.copyTo(tmp2);                    // swap quadrant (Top-Right with Bottom-Left)
+    x2.copyTo(x1);
+    tmp2.copyTo(x2);
+
+
+    // IFFT
+    //std::cout << "Inverse transform...\n";
+    cv::Mat inverseTransform;
+    cv::dft(fourierTransform, inverseTransform, cv::DFT_INVERSE|cv::DFT_REAL_OUTPUT);
+
+    // Back to 8-bits
+    cv::Mat finalImage;
+    inverseTransform.convertTo(finalImage, CV_8U);
+    //cv::imshow("inverseTransform", finalImage);
+
+
+    if (outImg) {
+        if (outImg->width != finalImage.cols || outImg->height != finalImage.rows) {
+            cvReleaseImage(&outImg);
+            outImg = nullptr;
+        }
+    }
+
+    if (!outImg)
+        outImg = cvCreateImage(cvSize(finalImage.cols, finalImage.rows), IPL_DEPTH_8U, 1);
+
+
+    IplImage ipl = finalImage;
+    cvCopy(&ipl, outImg);
 }

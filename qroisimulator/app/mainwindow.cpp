@@ -290,6 +290,7 @@ void MainWindow::setReadImage()
         //QApplication::setOverrideCursor(Qt::WaitCursor);
         QImage img;
         cv::Mat m = cv::imread(fileName.toLocal8Bit().toStdString().c_str(), cv::IMREAD_COLOR);
+        //cv::imshow("m", m);
         mat_to_qimage(m, img);
         if (v) {
             QImage *pimg = (QImage *)v->image();

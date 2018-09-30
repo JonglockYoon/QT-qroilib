@@ -81,11 +81,20 @@ private slots:
 
     void on_radioButtonColorDetect_clicked();
 
+    void on_radioButtonFFT_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:
     void ExecApplication(IplImage* iplImg, IplImage* iplImg2);
     void ExecRansacLinefit(IplImage* iplImg, int offset);
+
+    IplImage* backImg = nullptr;
+    void restoreLoadedImage();
+    cv::Mat convertFFTMag();
+    cv::Mat ftI;
+    cv::Mat displayImage;
+    void FFTTest();
 
 public:
     void centerOfPlusmaek(IplImage* iplImg);

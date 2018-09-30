@@ -13,11 +13,11 @@
   <property name="mouseTracking">
    <bool>false</bool>
   </property>
-  <property name="tabletTracking">
-   <bool>true</bool>
-  </property>
   <property name="windowTitle">
    <string>Application</string>
+  </property>
+  <property name="tabletTracking" stdset="0">
+   <bool>true</bool>
   </property>
   <widget class="QPushButton" name="pushButtonClose">
    <property name="geometry">
@@ -338,7 +338,7 @@
    <widget class="QRadioButton" name="radioButtonColorDetect">
     <property name="geometry">
      <rect>
-      <x>23</x>
+      <x>20</x>
       <y>200</y>
       <width>111</width>
       <height>16</height>
@@ -359,6 +359,19 @@
     </property>
     <property name="text">
      <string>CodeScanner</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonFFT">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>300</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>FFT</string>
     </property>
    </widget>
   </widget>
