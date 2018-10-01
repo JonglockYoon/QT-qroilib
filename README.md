@@ -23,7 +23,21 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 이 Program은 ARM계열 linux  와 X86계열 linux 및 windows 에서 test되었다.
 
-블로그 : https://blog.naver.com/jerry1455/221331480081
+다음 블로그에 각 Program의 설명들이 있습니다.
+https://blog.naver.com/jerry1455/221360187807 - qroilib Simulator (OpenCV code scanner, color detect)
+https://blog.naver.com/jerry1455/221359626135 - qroilib Simulator (OpenCV feature detect, matching)
+https://blog.naver.com/jerry1455/221355750336 - qroilib Simulator (OpenCV contour extract)
+https://blog.naver.com/jerry1455/221351163442 - qroilib Simulator (OpenCV edge detector)
+https://blog.naver.com/jerry1455/221347932308 - qroilib Simulator (OpenCV circle fit)
+https://blog.naver.com/jerry1455/221347271028 - qroilib Simulator (OpenCV blob)
+https://blog.naver.com/jerry1455/221346560824 - qroilib Simulator (OpenCV line fit)
+https://blog.naver.com/jerry1455/221341913377 - qroilib Align(OpenCV Align Image)
+https://blog.naver.com/jerry1455/221339548001 - qroilib Editor(OpenCV ROI Editor)
+https://blog.naver.com/jerry1455/221337051707 - PiCam Capture(OpenCV PiCam Capture)
+https://blog.naver.com/jerry1455/221335173223 - Multi Capture Image (OpenCV Multi Capture)
+https://blog.naver.com/jerry1455/221332990270 - Capture Image (OpenCV Capture Image)
+https://blog.naver.com/jerry1455/221332701399 - qroilib image viewer(OpenCV Image viewer)
+https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Library)?
 
 -----
 
