@@ -14,7 +14,7 @@ This program was created to enable the ROI of 'Machine Vision Program' to be imp
 I used Gwenview's image viewer function and Tiled's object drawing function, and implemented various functions using OpenCV.
 
 -----
-
+<pre>
 이 Program은 Machine Vision Program을 QT 환경에서 쉽게 구현할수 있게 하기 위해 작성되었다.
 
 Gwenview 의 Multi view 기능과 메모리보다 큰 이미지를 로드 할 수 있도록 작성된 이미지 viewer기능을 이용하고,
@@ -38,7 +38,7 @@ https://blog.naver.com/jerry1455/221335173223 - Multi Capture Image (OpenCV Mult
 https://blog.naver.com/jerry1455/221332990270 - Capture Image (OpenCV Capture Image)
 https://blog.naver.com/jerry1455/221332701399 - qroilib image viewer(OpenCV Image viewer)
 https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Library)?
-
+</pre>
 -----
 
 <pre>
