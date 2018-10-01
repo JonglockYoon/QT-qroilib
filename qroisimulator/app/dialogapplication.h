@@ -92,6 +92,7 @@ public:
     IplImage* backImg = nullptr;
     void restoreLoadedImage();
     cv::Mat convertFFTMag();
+    cv::Mat fImage;
     cv::Mat ftI;
     cv::Mat displayImage;
     void FFTTest();

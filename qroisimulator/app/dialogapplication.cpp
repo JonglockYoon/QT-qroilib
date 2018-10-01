@@ -330,7 +330,6 @@ cv::Mat DialogApplication::convertFFTMag()
     cv::Mat inputImage = cvarrToMat(iplImg);
 
     // Go float
-    cv::Mat fImage;
     inputImage.convertTo(fImage, CV_32F);
 
     fImage = fImage(cv::Rect(0, 0, fImage.cols & -2, fImage.rows & -2));
@@ -368,12 +367,10 @@ cv::Mat DialogApplication::convertFFTMag()
 
     magI += cv::Scalar::all(1);         // switch to logarithmic scale
     log(magI, magI);
-
-    normalize(magI, magI, 0, 255, cv::NORM_MINMAX); // Transform the matrix with float values into a
-                                            // viewable image form (float between values 0 and 1).
+    normalize(magI, magI, 0, 2048, cv::NORM_MINMAX); // Transform the matrix with float values into a
+                         // viewable image form (float between values 0 and 1024).
 
     //cv::imshow("fourierTransform", magI);
-
     magI.convertTo(displayImage, CV_8U);
 
     return displayImage;
@@ -1053,7 +1050,6 @@ void DialogApplication::FFTTest()
 
 /*
     // Go float
-    cv::Mat fImage;
     cv::Mat inputImage = cvarrToMat(backImg);
     cvtColor(inputImage, inputImage, cv::COLOR_BGR2GRAY);
 
@@ -1079,11 +1075,18 @@ void DialogApplication::FFTTest()
     tmp.copyTo(f2);
 */
 
+    int cols2 = ftI.cols;
+    int rows2 = ftI.rows;
     ftI.copyTo(fourierTransform);
 
-    int cols2 = fourierTransform.cols;
-    int rows2 = fourierTransform.rows;
-    float *pdata = (float *)fourierTransform.data;
+    cv::Mat padded; //expand input image to optimal size
+    int m = cv::getOptimalDFTSize( fImage.rows );
+    int n = cv::getOptimalDFTSize( fImage.cols ); // on the border add zero values
+    cv::copyMakeBorder(fImage, padded, 0, m - fImage.rows, 0, n - fImage.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    cv::Mat planes[] = {cv::Mat_<float>(padded), cv::Mat::zeros(padded.size(), CV_32F)};
+    cv::split(fourierTransform, planes);       // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
+    float *pdata1 = (float *)planes[0].data;
+    float *pdata2 = (float *)planes[1].data;
 
     ViewMainPage *viewMain = (ViewMainPage *)theMainWindow->viewMainPage();
     Qroilib::DocumentView* v = viewMain->currentView();
@@ -1097,24 +1100,17 @@ void DialogApplication::FFTTest()
                 QRectF rect = pData->bounds();	// Area로 등록된 ROI.
                 const int szx = rect.width();
                 const int szy = rect.height();
-                cv::Mat roizero = Mat::zeros(szx,szy,CV_32F);
-                cv::Mat roi(fourierTransform, cv::Rect(rect.x(),rect.y(),szx,szy));
-                roizero.copyTo(roi);
-
-//                for (int y = rect.y(); y < rect.y()+szy; y++) {
-//                    for (int x = rect.x(); x < rect.x()+szx; x++) {
-//                        pdata[x + (cols2*y)] = 0;
-//                    }
-//                }
+                for (int y = rect.y(); y < rect.y()+szy; y++) {
+                    for (int x = rect.x(); x < rect.x()+szx; x++) {
+                        pdata1[x + (cols2*y)] = 0;
+                        pdata2[x + (cols2*y)] = 0;
+                    }
+                }
             }
         }
     }
-    cv::Mat roizero = Mat::zeros(cols2,rows2, CV_32F);// 전부 0으로 초기화
-    cv::Mat roi = fourierTransform(cv::Rect(0,0,cols2,rows2));
-    roizero.copyTo(roi);
 
-
-
+    cv::merge(planes, 2, fourierTransform);
 
     //fourierTransform = fourierTransform(cv::Rect(0, 0, fourierTransform.cols & -2, fourierTransform.rows & -2));
     int cx2 = fourierTransform.cols/2;
