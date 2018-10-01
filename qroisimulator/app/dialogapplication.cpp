@@ -331,16 +331,15 @@ cv::Mat DialogApplication::convertFFTMag()
 
     // Go float
     inputImage.convertTo(fImage, CV_32F);
-
     fImage = fImage(cv::Rect(0, 0, fImage.cols & -2, fImage.rows & -2));
 
     cv::Mat padded; //expand input image to optimal size
     int m = cv::getOptimalDFTSize( fImage.rows );
     int n = cv::getOptimalDFTSize( fImage.cols ); // on the border add zero values
     cv::copyMakeBorder(fImage, padded, 0, m - fImage.rows, 0, n - fImage.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
-    cv::Mat planes[] = {cv::Mat_<float>(padded), cv::Mat::zeros(padded.size(), CV_32F)};
 
     // FFT
+    cv::Mat planes[] = {cv::Mat_<float>(padded), cv::Mat::zeros(padded.size(), CV_32F)};
     cv::Mat fourierTransform;
     cv::dft(fImage, fourierTransform, cv::DFT_SCALE|cv::DFT_COMPLEX_OUTPUT);
 
@@ -1048,33 +1047,6 @@ void DialogApplication::FFTTest()
 {
     cv::Mat fourierTransform;
 
-/*
-    // Go float
-    cv::Mat inputImage = cvarrToMat(backImg);
-    cvtColor(inputImage, inputImage, cv::COLOR_BGR2GRAY);
-
-    inputImage.convertTo(fImage, CV_32F);
-    //cv::imshow("backImage", inputImage);
-
-    cv::dft(fImage, fourierTransform, cv::DFT_SCALE|cv::DFT_COMPLEX_OUTPUT);
-    //ftI = fourierTransform;
-
-    fourierTransform = fourierTransform(cv::Rect(0, 0, ftI.cols & -2, ftI.rows & -2));
-    int cx = fourierTransform.cols/2;
-    int cy = fourierTransform.rows/2;
-    cv::Mat f0(fourierTransform, cv::Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
-    cv::Mat f1(fourierTransform, cv::Rect(cx, 0, cx, cy));  // Top-Right
-    cv::Mat f2(fourierTransform, cv::Rect(0, cy, cx, cy));  // Bottom-Left
-    cv::Mat f3(fourierTransform, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
-    cv::Mat tmp;                       // swap quadrants (Top-Left with Bottom-Right)
-    f0.copyTo(tmp);
-    f3.copyTo(f0);
-    tmp.copyTo(f3);
-    f1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
-    f2.copyTo(f1);
-    tmp.copyTo(f2);
-*/
-
     int cols2 = ftI.cols;
     int rows2 = ftI.rows;
     ftI.copyTo(fourierTransform);
@@ -1112,7 +1084,6 @@ void DialogApplication::FFTTest()
 
     cv::merge(planes, 2, fourierTransform);
 
-    //fourierTransform = fourierTransform(cv::Rect(0, 0, fourierTransform.cols & -2, fourierTransform.rows & -2));
     int cx2 = fourierTransform.cols/2;
     int cy2 = fourierTransform.rows/2;
     cv::Mat x0(fourierTransform, cv::Rect(0, 0, cx2, cy2));   // Top-Left - Create a ROI per quadrant
@@ -1127,7 +1098,6 @@ void DialogApplication::FFTTest()
     x2.copyTo(x1);
     tmp2.copyTo(x2);
 
-
     // IFFT
     //std::cout << "Inverse transform...\n";
     cv::Mat inverseTransform;
@@ -1137,7 +1107,6 @@ void DialogApplication::FFTTest()
     cv::Mat finalImage;
     inverseTransform.convertTo(finalImage, CV_8U);
     //cv::imshow("inverseTransform", finalImage);
-
 
     if (outImg) {
         if (outImg->width != finalImage.cols || outImg->height != finalImage.rows) {
