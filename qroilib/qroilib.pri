@@ -24,7 +24,6 @@ HEADERS += $$PWD/engine/blob.h \
            $$PWD/engine/blobcontour.h \
            $$PWD/engine/bloblibraryconfiguration.h \
            $$PWD/engine/bloboperators.h \
-           $$PWD/engine/blobproperties.h \
            $$PWD/engine/blobresult.h \
            $$PWD/engine/componentlabeling.h \
            $$PWD/engine/edgessubpix.h \
@@ -204,7 +203,6 @@ FORMS += $$PWD/qroilib/documentview/messageview.ui \
 SOURCES += $$PWD/engine/blob.cpp \
            $$PWD/engine/blobcontour.cpp \
            $$PWD/engine/bloboperators.cpp \
-           $$PWD/engine/blobproperties.cpp \
            $$PWD/engine/blobresult.cpp \
            $$PWD/engine/componentlabeling.cpp \
            $$PWD/engine/edgessubpix.cpp \

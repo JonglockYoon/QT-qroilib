@@ -188,7 +188,7 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
 {
     //QString str;
     IplImage* grayImg = cvCreateImage(cvGetSize(grayImgIn), IPL_DEPTH_8U, 1);
-    CBlobResult blobs = CBlobResult(grayImgIn, nullptr, 0);
+    CBlobResult blobs = CBlobResult(grayImgIn, nullptr);
     int nBlobs = blobs.GetNumBlobs();
     for (int i = 0; i < nBlobs; i++)	// 여러개의 Blob이 있을때 한개씩 뽑아서 RANSAC을 돌린다.
     {

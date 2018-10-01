@@ -216,7 +216,7 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
 
 
     CBlobResult blobs;
-    blobs = CBlobResult(iplImg, nullptr, 0);
+    blobs = CBlobResult(iplImg, nullptr);
     int blobCount = blobs.GetNumBlobs();
     if (blobCount <= 0)
         return;

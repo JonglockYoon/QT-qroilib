@@ -1,7 +1,7 @@
 
 #include <limits.h>
 #include "bloboperators.h"
-
+using namespace cv;
 /***************************************************************************
   Implementaci?de les classes per al c?cul de caracter?tiques sobre el blob
 
@@ -54,34 +54,28 @@ double CBlobGetMoment::operator()(CBlob &blob)
 */
 double CBlobGetHullPerimeter::operator()(CBlob &blob)
 {
-	CvSeq *convexHull;
+	t_contours convexHull;
+	blob.GetConvexHull(convexHull);
 	double perimeter;
 
-	convexHull = blob.GetConvexHull();
-
-	if( convexHull )
-		perimeter = fabs(cvArcLength(convexHull,CV_WHOLE_SEQ,1));
+	if( convexHull.size()!=0 )
+		perimeter = fabs(arcLength(convexHull[0],true));
 	else
 		return 0;
-
-	cvClearSeq(convexHull);
 
 	return perimeter;
 }
 
 double CBlobGetHullArea::operator()(CBlob &blob)
 {
-	CvSeq *convexHull;
+	t_contours convexHull;
+	blob.GetConvexHull(convexHull);
 	double area;
-
-	convexHull = blob.GetConvexHull();
-
-	if( convexHull )
-		area = fabs(cvContourArea(convexHull));
+	
+	if( convexHull.size() )
+		area = fabs(contourArea(convexHull[0],true));
 	else
 		return 0;
-
-	cvClearSeq(convexHull);
 
 	return area;
 }
@@ -100,17 +94,16 @@ double CBlobGetMinXatMinY::operator()(CBlob &blob)
 {
 	double result = LONG_MAX;
 	
-	CvSeqReader reader;
-	CvPoint actualPoint;
+	//CvSeqReader reader;
+	//CvPoint actualPoint;
 	t_PointList externContour;
 	
 	externContour = blob.GetExternalContour()->GetContourPoints();
-	if( !externContour ) return result;
-	cvStartReadSeq( externContour, &reader);
-
-	for( int i=0; i< externContour->total; i++)
+	if( externContour.size()==0 ) return result;
+	t_PointList::iterator it=externContour.begin(),en=externContour.end();
+	for(it;it!=en;it++)
 	{
-		CV_READ_SEQ_ELEM( actualPoint, reader);
+		Point &actualPoint = *it;
 
 		if( (actualPoint.y == blob.MinY()) && (actualPoint.x < result) )
 		{
@@ -127,7 +120,7 @@ double CBlobGetMinXatMinY::operator()(CBlob &blob)
 - PARAMETERS:
 - RESULT:
 - RESTRICTIONS:
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -135,17 +128,17 @@ double CBlobGetMinYatMaxX::operator()(CBlob &blob)
 {
 	double result = LONG_MAX;
 	
-	CvSeqReader reader;
-	CvPoint actualPoint;
+	//CvSeqReader reader;
+	//CvPoint actualPoint;
 	t_PointList externContour;
 	
 	externContour = blob.GetExternalContour()->GetContourPoints();
-	if( !externContour ) return result;
-	cvStartReadSeq( externContour, &reader);
+	if( externContour.size()==0 ) return result;
+	t_PointList::iterator it=externContour.begin(),en=externContour.end();
 
-	for( int i=0; i< externContour->total; i++)
+	for( it;it!=en;it++)
 	{
-		CV_READ_SEQ_ELEM( actualPoint, reader);
+		Point actualPoint = *it;
 
 		if( (actualPoint.x == blob.MaxX()) && (actualPoint.y < result) )
 		{
@@ -162,7 +155,7 @@ double CBlobGetMinYatMaxX::operator()(CBlob &blob)
 - PARAMETERS:
 - RESULT:
 - RESTRICTIONS:
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -170,18 +163,17 @@ double CBlobGetMaxXatMaxY::operator()(CBlob &blob)
 {
 	double result = LONG_MIN;
 	
-	CvSeqReader reader;
-	CvPoint actualPoint;
+	//CvSeqReader reader;
+	//CvPoint actualPoint;
 	t_PointList externContour;
 	
 	externContour = blob.GetExternalContour()->GetContourPoints();
-	if( !externContour ) return result;
+	if( externContour.size()==0 ) return result;
 
-	cvStartReadSeq( externContour, &reader);
-
-	for( int i=0; i< externContour->total; i++)
+	t_PointList::iterator it=externContour.begin(),en=externContour.end();
+	for( it;it!=en;it++)
 	{
-		CV_READ_SEQ_ELEM( actualPoint, reader);
+		Point &actualPoint = *it;
 
 		if( (actualPoint.y == blob.MaxY()) && (actualPoint.x > result) )
 		{
@@ -198,7 +190,7 @@ double CBlobGetMaxXatMaxY::operator()(CBlob &blob)
 - PARAMETERS:
 - RESULT:
 - RESTRICTIONS:
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -206,19 +198,18 @@ double CBlobGetMaxYatMinX::operator()(CBlob &blob)
 {
 	double result = LONG_MIN;
 	
-	CvSeqReader reader;
-	CvPoint actualPoint;
+	//CvSeqReader reader;
+	//CvPoint actualPoint;
 	t_PointList externContour;
 	
 	externContour = blob.GetExternalContour()->GetContourPoints();
-	if( !externContour ) return result;
+	if( externContour.size()==0 ) return result;
 
-	cvStartReadSeq( externContour, &reader);
 
-	
-	for( int i=0; i< externContour->total; i++)
+	t_PointList::iterator it=externContour.begin(),en=externContour.end();
+	for( it;it!=en;it++)
 	{
-		CV_READ_SEQ_ELEM( actualPoint, reader);
+		Point &actualPoint = *it;
 
 		if( (actualPoint.x == blob.MinX()) && (actualPoint.y > result) )
 		{
@@ -237,7 +228,7 @@ double CBlobGetMaxYatMinX::operator()(CBlob &blob)
 - RESULT:
 - RESTRICTIONS:
 	- See below to see how the lenght and the breadth are aproximated
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -251,7 +242,7 @@ double CBlobGetElongation::operator()(CBlob &blob)
 
 	if( tmp > 0.0 )
 		ampladaC = (double) (blob.Perimeter()+sqrt(tmp))/4;
-	// error intr?sec en els c?culs de l'?ea i el per?etre 
+	// error intrínsec en els càlculs de l'àrea i el perímetre 
 	else
 		ampladaC = (double) (blob.Perimeter())/4;
 
@@ -274,7 +265,7 @@ double CBlobGetElongation::operator()(CBlob &blob)
 - PARAMETERS:
 - RESULT:
 - RESTRICTIONS:
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -296,7 +287,7 @@ double CBlobGetCompactness::operator()(CBlob &blob)
 - PARAMETERS:
 - RESULT:
 - RESTRICTIONS:
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -322,7 +313,7 @@ double CBlobGetRoughness::operator()(CBlob &blob)
 - RESULT:
 - RESTRICTIONS:
 	- The lenght is an aproximation to the real lenght
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -335,7 +326,7 @@ double CBlobGetLength::operator()(CBlob &blob)
 
 	if( tmp > 0.0 )
 		ampladaC = (double) (blob.Perimeter()+sqrt(tmp))/4;
-	// error intr?sec en els c?culs de l'?ea i el per?etre 
+	// error intrínsec en els càlculs de l'àrea i el perímetre 
 	else
 		ampladaC = (double) (blob.Perimeter())/4;
 
@@ -355,7 +346,7 @@ double CBlobGetLength::operator()(CBlob &blob)
 - RESULT:
 - RESTRICTIONS:
 	- The breadth is an aproximation to the real breadth
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -368,7 +359,7 @@ double CBlobGetBreadth::operator()(CBlob &blob)
 
 	if( tmp > 0.0 )
 		ampladaC = (double) (blob.Perimeter()+sqrt(tmp))/4;
-	// error intr?sec en els c?culs de l'?ea i el per?etre 
+	// error intrínsec en els càlculs de l'àrea i el perímetre 
 	else
 		ampladaC = (double) (blob.Perimeter())/4;
 
@@ -379,7 +370,7 @@ double CBlobGetBreadth::operator()(CBlob &blob)
 }
 
 /**
-	Calcula la dist?cia entre un punt i el centre del blob
+	Calcula la distància entre un punt i el centre del blob
 */
 /**
 - FUNCTION: CBlobGetDistanceFromPoint
@@ -388,7 +379,7 @@ double CBlobGetBreadth::operator()(CBlob &blob)
 - PARAMETERS:
 - RESULT:
 - RESTRICTIONS:
-- AUTHOR: Ricard Borr?
+- AUTHOR: Ricard Borràs
 - CREATION DATE: 25-05-2005.
 - MODIFICATION: Date. Author. Description.
 */
@@ -418,9 +409,10 @@ double CBlobGetDistanceFromPoint::operator()(CBlob &blob)
 */
 double CBlobGetXYInside::operator()(CBlob &blob)
 {
-	if( blob.GetExternalContour()->GetContourPoints() )
+	const t_PointList &contourPoints = blob.GetExternalContour()->GetContourPoints();
+	if( contourPoints.size()==0 )
 	{
-		return cvPointPolygonTest( blob.GetExternalContour()->GetContourPoints(), m_p,0) >= 0;
+		return pointPolygonTest(contourPoints,m_p,false) >=0;
 	}
 
 	return 0;
@@ -428,18 +420,18 @@ double CBlobGetXYInside::operator()(CBlob &blob)
 #ifdef BLOB_OBJECT_FACTORY
 
 /**
-- FUNCI? RegistraTotsOperadors
+- FUNCIÓ: RegistraTotsOperadors
 - FUNCIONALITAT: Registrar tots els operadors definits a blob.h
 - PARÀMETRES:
-	- fabricaOperadorsBlob: f?rica on es registraran els operadors
+	- fabricaOperadorsBlob: fàbrica on es registraran els operadors
 - RESULTAT:
 	- Modifica l'objecte fabricaOperadorsBlob
 - RESTRICCIONS:
-	- Nom? es registraran els operadors de blob.h. Si se'n volen afegir, cal afegir-los amb 
-	  el m?ode Register de la f?rica.
+	- Només es registraran els operadors de blob.h. Si se'n volen afegir, cal afegir-los amb 
+	  el mètode Register de la fàbrica.
 - AUTOR: rborras
-- DATA DE CREACI? 2006/05/18
-- MODIFICACI? Data. Autor. Descripci?
+- DATA DE CREACIÓ: 2006/05/18
+- MODIFICACIÓ: Data. Autor. Descripció.
 */
 void RegistraTotsOperadors( t_OperadorBlobFactory &fabricaOperadorsBlob )
 {

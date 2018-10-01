@@ -761,7 +761,7 @@ int CImgAlign::EdgeCorner(Qroilib::RoiObject *pData, IplImage* graySearchImgIn, 
     NoiseOut(pData, graySearchImg, -1, 312);
 
     CBlobResult blobs;
-    blobs = CBlobResult(graySearchImg, nullptr, 0);	// Use a black background color.
+    blobs = CBlobResult(graySearchImg, nullptr);
     int n = blobs.GetNumBlobs();
 
 #if 1
@@ -1004,7 +1004,7 @@ int CImgAlign::EdgeCornerByLine(Qroilib::RoiObject *pData, IplImage* grayCropped
     // 가장큰 Blob만 남김
     ////////////////////////
     CBlobResult blobs;
-    blobs = CBlobResult(grayCroppedImg, nullptr, 0);	// Use a black background color.
+    blobs = CBlobResult(grayCroppedImg, nullptr);
     double dLargeArea = 0;
     int nBlobs = blobs.GetNumBlobs();
     for (int i = 0; i < nBlobs; i++) {

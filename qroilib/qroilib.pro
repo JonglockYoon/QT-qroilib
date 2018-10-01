@@ -69,7 +69,6 @@ HEADERS += engine/blob.h \
            engine/blobcontour.h \
            engine/bloblibraryconfiguration.h \
            engine/bloboperators.h \
-           engine/blobproperties.h \
            engine/blobresult.h \
            engine/componentlabeling.h \
            engine/edgessubpix.h \
@@ -248,7 +247,6 @@ FORMS += qroilib/documentview/messageview.ui  \
 SOURCES += engine/blob.cpp \
            engine/blobcontour.cpp \
            engine/bloboperators.cpp \
-           engine/blobproperties.cpp \
            engine/blobresult.cpp \
            engine/componentlabeling.cpp \
            engine/edgessubpix.cpp \

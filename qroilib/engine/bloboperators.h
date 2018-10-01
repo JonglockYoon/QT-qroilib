@@ -33,7 +33,7 @@ public:
 	}
 };
 
-typedef COperadorBlob funcio_calculBlob;
+typedef COperadorBlob blobOperator;
 
 #ifdef BLOB_OBJECT_FACTORY
 	/**
@@ -71,6 +71,19 @@ public:
 	}
 };
 
+//! Class to get bool to_be_deleted
+class CBlobGetTBDeleted: public COperadorBlob
+{
+public:
+	double operator()(CBlob &blob)
+	{ 
+		return blob.to_be_deleted; 
+	}
+	const char *GetNom()
+	{
+		return "CBlobGetTBDeleted";
+	}
+};
 
 //! Classe per calcular l'?ea d'un blob
 //! Class to get the area of a blob
@@ -110,8 +123,8 @@ public:
 	CBlobGetExterior()
 	{
 		m_mask = NULL;
-		m_xBorder = false;
-		m_yBorder = false;
+		m_xBorder = true;
+		m_yBorder = true;
 	}
 	CBlobGetExterior(IplImage *mask, bool xBorder = true, bool yBorder = true)
 	{
@@ -139,16 +152,16 @@ class ROIDSHARED_EXPORT CBlobGetMean: public COperadorBlob
 public:
 	CBlobGetMean()
 	{
-		m_iplImage = NULL;
+		m_image = NULL;
 	}
 	CBlobGetMean( IplImage *image )
 	{
-		m_iplImage = image;
+		m_image = image;
 	};
 
     double operator()(CBlob &blob)
 	{ 
-		return blob.Mean(m_iplImage); 
+		return blob.Mean(m_image); 
 	}
 	const char *GetNom()
 	{
@@ -156,7 +169,7 @@ public:
 	}
 private:
 
-	IplImage *m_iplImage;
+	IplImage *m_image;
 };
 
 //! Classe per calcular la desviaci?est?dard dels nivells de gris d'un blob
@@ -166,15 +179,15 @@ class ROIDSHARED_EXPORT CBlobGetStdDev: public COperadorBlob
 public:
 	CBlobGetStdDev()
 	{
-		m_iplImage = NULL;
+		m_image = NULL;
 	}
 	CBlobGetStdDev( IplImage *image )
 	{
-		m_iplImage = image;
+		m_image = image;
 	};
     double operator()(CBlob &blob)
 	{ 
-		return blob.StdDev(m_iplImage); 
+		return blob.StdDev(m_image); 
 	}
 	const char *GetNom()
 	{
@@ -182,7 +195,7 @@ public:
 	}
 private:
 
-	IplImage *m_iplImage;
+	IplImage *m_image;
 
 };
 
@@ -472,8 +485,8 @@ public:
 	CBlobGetExternPerimeter()
 	{
 		m_mask = NULL;
-		m_xBorder = false;
-		m_yBorder = false;
+		m_xBorder = true;
+		m_yBorder = true;
 	}
 	CBlobGetExternPerimeter( IplImage *mask, bool xBorder = true, bool yBorder = true )
 	{

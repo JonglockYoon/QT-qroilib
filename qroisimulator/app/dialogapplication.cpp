@@ -422,7 +422,7 @@ void DialogApplication::centerOfPlusmaek(IplImage* iplImg)
     base.FilterLargeArea(img2);
 
     CBlobResult blobs;
-    blobs = CBlobResult(img2, NULL, 0);
+    blobs = CBlobResult(img2, NULL);
     int num = blobs.GetNumBlobs();
     if (num == 0)
         return;

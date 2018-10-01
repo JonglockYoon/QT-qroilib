@@ -15,6 +15,7 @@ win32 {
 
 DEFINES += Q_OS_WIN
 LIBS += -L"..\winlib"
+LIBS += -L"..\qroilib\pthread"
 #LIBS += -L"c:\opencv340\build\x64\vc15\lib"
 
 CONFIG(debug, debug|release) {
@@ -38,8 +39,10 @@ LIBS += "..\winlib\Release\lcms2.lib"
 LIBS += "..\winlib\Release\QZXing2.lib"
 }
 LIBS += -lws2_32
+LIBS += -lpthreadVC1
 
 INCLUDEPATH += "..\winlib\include"
+INCLUDEPATH += "..\qroilib\pthread"
 #INCLUDEPATH += "c:\opencv340\build\include"
 }
 

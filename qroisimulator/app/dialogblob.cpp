@@ -88,10 +88,12 @@ void DialogBlob::closeEvent(QCloseEvent *event)
             QObject::disconnect(pView, SIGNAL(processedImage(const QImage*)), this, SLOT(updatePlayerUI(const QImage*)));
         }
     } else {
-        OutWidget* pWidget = theMainWindow->vecOutWidget[source-1];
-        ViewOutPage* pView = pWidget->mViewOutPage;
-        if (pView) {
-            QObject::disconnect(pView, SIGNAL(processedImage(const QImage*)), this, SLOT(updatePlayerUI(const QImage*)));
+        if (theMainWindow->vecOutWidget.size() > source) {
+            OutWidget* pWidget = theMainWindow->vecOutWidget[source-1];
+            ViewOutPage* pView = pWidget->mViewOutPage;
+            if (pView) {
+                QObject::disconnect(pView, SIGNAL(processedImage(const QImage*)), this, SLOT(updatePlayerUI(const QImage*)));
+            }
         }
     }
 
@@ -249,7 +251,7 @@ int DialogBlob::NoiseOut(IplImage* grayImg)
 void DialogBlob::FilterArea(IplImage* grayImg)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
 
     int nBlobs = blobs.GetNumBlobs();
     for (int i = 0; i < nBlobs; i++) {
@@ -271,7 +273,7 @@ void DialogBlob::FilterArea(IplImage* grayImg)
 void DialogBlob::FilterDiameter(IplImage* grayImg)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
 
     int nBlobs = blobs.GetNumBlobs();
     for (int i = 0; i < nBlobs; i++) {
@@ -417,9 +419,9 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
 
 
     CBlobResult blobs;
-    blobs = CBlobResult(tmp, NULL, 0);
+    blobs = CBlobResult(tmp, nullptr);
     int nBlobs = blobs.GetNumBlobs();
-#if 0
+#if 1
     double width,length;
     for (int i = 0; i < nBlobs; i++)
     {
@@ -444,21 +446,21 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
         qDebug() << i << "(width,length):" << width << length;
         qDebug() << "    (area):" << blob->Area();
         qDebug() << "    (perimeter):" << blob->Perimeter();
-        qDebug() << "    (convex):" << blob->GetConvexHull();
         qDebug() << "    (stddev):" << blob->StdDev(iplImg);
 
         CvRect rect = blob->GetBoundingBox();
-        //CvBox2D box2d = blob->GetEllipse();
-        t_PointList convexseq = blob->GetConvexHull();
+        CvBox2D box2d = blob->GetEllipse();
+        t_contours convexseq;
+        blob->GetConvexHull(convexseq);
 
-        cvDrawContours(tmp, convexseq, CVX_WHITE, CVX_WHITE, 1, 1, 8);
-        cvDrawRect(tmp, CvPoint(rect.x, rect.y),CvPoint(rect.x+rect.width, rect.y+rect.height), CvScalar(255,255,255), 1, 8);
-        //DrawRotatedRect(tmp,box2d,CVX_WHITE,1,8,0);
+        //cvDrawContours(tmp, convexseq, CVX_WHITE, CVX_WHITE, 1, 1, 8);
+        //cvDrawRect(tmp, CvPoint(rect.x, rect.y),CvPoint(rect.x+rect.width, rect.y+rect.height), CvScalar(255,255,255), 1, 8);
+        DrawRotatedRect(tmp,box2d,CVX_WHITE,1,8,0);
 
 
         CBlobContour *bcontour = blob->GetExternalContour();
-        t_chainCodeList externseq = bcontour->GetContourPoints();
-        CvBox2D box2d1 = cvMinAreaRect2 (externseq,0);
+        t_PointList externseq = bcontour->GetContourPoints();
+        //CvBox2D box2d1 = cvMinAreaRect2 (externseq,0);
         //DrawRotatedRect(tmp,box2d1,CVX_WHITE,1,8,0);
 
         //CvBox2D box2d2 = cvMinAreaRect2 (convexseq,0);
@@ -469,7 +471,7 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
 #endif
 
     if (bJoin) { // All Blob Join
-        blobs = CBlobResult(tmp, NULL, 0);
+        blobs = CBlobResult(tmp, nullptr);
         int nBlobs = blobs.GetNumBlobs();
         if (nBlobs > 1)
         {

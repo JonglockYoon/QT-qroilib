@@ -57,7 +57,7 @@ int CImgProcBase::FilterBlobLength(IplImage* grayImg, int nMinLength, int nMaxLe
 {
     IplImage *pMask = cvCloneImage(grayImg);
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
 
     //double_stl_vector elong = blobs.GetSTLResult(CBlobGetLength());
     blobs.Filter(blobs, B_EXCLUDE, CBlobGetLength(), B_LESS, nMinLength); // 작은 Length제거
@@ -80,7 +80,7 @@ int CImgProcBase::FilterBlobBoundingBoxLength(IplImage* grayImg, int nMinLength,
 {
     IplImage *pMask = cvCloneImage(grayImg);
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
     int blobCount = blobs.GetNumBlobs();
     if (blobCount > 0) {
         for (int i = 0; i < blobCount; i++)
@@ -116,7 +116,7 @@ int CImgProcBase::FilterBlobBoundingBoxLength(IplImage* grayImg, int nMinLength,
 int CImgProcBase::FilterBlobBoundingBoxXLength(IplImage* grayImg, int nMinLength, int nMaxLength)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
     int blobCount = blobs.GetNumBlobs();
     if (blobCount > 0) {
         for (int i = 0; i < blobCount; i++)
@@ -150,7 +150,7 @@ int CImgProcBase::FilterBlobBoundingBoxXLength(IplImage* grayImg, int nMinLength
 int CImgProcBase::FilterBlobBoundingBoxYLength(IplImage* grayImg, int nMinLength, int nMaxLength)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
     int blobCount = blobs.GetNumBlobs();
     if (blobCount > 0) {
         for (int i = 0; i < blobCount; i++)
@@ -184,7 +184,7 @@ int CImgProcBase::FilterIncludeLargeBlob(IplImage* grayImg)
     //QString str;
     //IplImage *pMask = cvCloneImage(grayImg);
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
     double dLargeArea = 0;
 
     int n = blobs.GetNumBlobs();
@@ -211,7 +211,7 @@ int CImgProcBase::EraseLargeBlob(IplImage* grayImg)
 {
     IplImage *pMask = cvCloneImage(grayImg);
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
     double dLargeArea = 0;
 
     int n = blobs.GetNumBlobs();
@@ -581,7 +581,7 @@ void CImgProcBase::GetMidpoint(CvPoint p1, CvPoint p2, CvPoint *p3)
 int CImgProcBase::FilterLargeBlob(IplImage* grayImg, int nAxisLength)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, nullptr);
     blobs.Filter(blobs, B_EXCLUDE, CBlobGetMajorAxisLength(), B_GREATER, nAxisLength); // 블럽이 아주 큰것은 제거.
     IplImage *pMask = cvCloneImage(grayImg);
     cvZero(grayImg);
@@ -602,7 +602,7 @@ int CImgProcBase::FilterLargeBlob(IplImage* grayImg, int nAxisLength)
 int CImgProcBase::IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius)
 {
 
-    CBlobResult blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    CBlobResult blobs = CBlobResult(grayImg, NULL);
 
     // filter blobs.
     cvZero(grayImg);
@@ -630,7 +630,7 @@ int CImgProcBase::IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int 
 void CImgProcBase::FilterLargeArea(IplImage* grayImg)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, NULL);
 
     double dLargeArea = 0;
     int nBlobs = blobs.GetNumBlobs();
@@ -664,7 +664,7 @@ void CImgProcBase::FilterLargeArea(IplImage* grayImg)
 void CImgProcBase::FilterLargeDiameter(IplImage* grayImg)
 {
     CBlobResult blobs;
-    blobs = CBlobResult(grayImg, NULL, 0);	// Use a black background color.
+    blobs = CBlobResult(grayImg, NULL);
 
     CvRect LargeRect(0, 0);
     int index = -1;
