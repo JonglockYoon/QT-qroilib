@@ -55,8 +55,7 @@ public:
 
 
 protected:
-    //전체 원 둘레의 길이를 통해 반지름을 계산 : 원둘레 = 2 x PI x 반지름.
-    // 외곽선 근사화를 통해 원 둘레를 알 수 있다.
+    //반지름을 계산 : 원둘레 = 2 x PI x 반지름.
     double CalculRadiusFromCircumference(double dCircumValue)
     {
         return (dCircumValue / (2 * PI));
@@ -65,9 +64,6 @@ protected:
     cv::Point2f getCorner(std::vector<cv::Point2f>& corners, cv::Point2f center, int CornerType);
     double getObjectAngle(IplImage *src);
     double GetDistance2D(CvPoint p1, CvPoint p2);
-    void GetMidpoint(CvPoint p1, CvPoint p2, CvPoint *p3);
-    cv::Point getValueX(std::vector<cv::Point> points, int pos); // x point 평균처리
-    cv::Point getValueY(std::vector<cv::Point> points, int pos); // y point 평균처리
 
 public:
     cv::Point2f CenterOfMoment(CvSeq* c);

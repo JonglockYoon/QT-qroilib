@@ -495,70 +495,6 @@ void CImgProcBase::bhm_line(int x1, int y1, int x2, int y2, std::vector<cv::Poin
     }
 }
 
-cv::Point CImgProcBase::getValueX(std::vector<cv::Point> points, int pos)
-{
-    Point v[3] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
-    int cnt = 0;
-    Point pt;
-
-    pt.y = points[pos].y;
-    int size = points.size();
-    pos--;
-    if (pos >= 0 && pos < size)
-    {
-        v[cnt].x = points[pos].x;
-        cnt++;
-    }
-    pos++;
-    if (pos >= 0 && pos < size)
-    {
-        v[cnt].x = points[pos].x;
-        cnt++;
-    }
-    pos++;
-    if (pos >= 0 && pos < size)
-    {
-        v[cnt].x = points[pos].x;
-        cnt++;
-    }
-    pt.x = (v[0].x + v[1].x + v[2].x) / cnt;
-    return pt;
-}
-
-cv::Point CImgProcBase::getValueY(std::vector<cv::Point> points, int pos)
-{
-    Point v[3] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
-    int cnt = 0;
-    Point pt;
-
-    pt.x = points[pos].x;
-    int size = points.size();
-    pos--;
-    if (pos >= 0 && pos < size)
-    {
-        v[cnt].y = points[pos].y;
-        cnt++;
-    }
-    pos++;
-    if (pos >= 0 && pos < size)
-    {
-        v[cnt].y = points[pos].y;
-        cnt++;
-    }
-    pos++;
-    if (pos >= 0 && pos < size)
-    {
-        v[cnt].y = points[pos].y;
-        cnt++;
-    }
-    pt.y = (v[0].y + v[1].y + v[2].y) / cnt;
-    return pt;
-}
-
-bool operator<(const cv::Point& a, const cv::Point& b) {
-    return a.x < b.x;
-}
-
 double CImgProcBase::getObjectAngle(IplImage *src)
 {
     CvMoments cm;
@@ -570,19 +506,13 @@ double CImgProcBase::GetDistance2D(CvPoint p1, CvPoint p2)
 {
     return sqrt(pow((float)p1.x - p2.x, 2) + pow((float)p1.y - p2.y, 2));
 }
-void CImgProcBase::GetMidpoint(CvPoint p1, CvPoint p2, CvPoint *p3)
-{
-    p3->x = (int)((float)(p1.x + p2.x) / 2.0);
-    p3->y = (int)((float)(p1.y + p2.y) / 2.0);
-}
 
-
-// nAxisLength : 400
+// nAxisLength : pixel count
 int CImgProcBase::FilterLargeBlob(IplImage* grayImg, int nAxisLength)
 {
     CBlobResult blobs;
     blobs = CBlobResult(grayImg, nullptr);
-    blobs.Filter(blobs, B_EXCLUDE, CBlobGetMajorAxisLength(), B_GREATER, nAxisLength); // 블럽이 아주 큰것은 제거.
+    blobs.Filter(blobs, B_EXCLUDE, CBlobGetMajorAxisLength(), B_GREATER, nAxisLength); // 블럽 큰것 제거.
     IplImage *pMask = cvCloneImage(grayImg);
     cvZero(grayImg);
     int blobCount = blobs.GetNumBlobs();
