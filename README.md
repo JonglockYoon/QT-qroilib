@@ -42,11 +42,11 @@ https://blog.naver.com/jerry1455/221332701399 - qroilib image viewer(OpenCV Imag
 https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Library)?
 
 -----
-<a href="https://blog.naver.com/jerry1455/221368080208"> - OpenCV#5(OpenCV Blob APIs)</a></p>
-<a href="https://blog.naver.com/jerry1455/221365405520"> - OpenCV#4(blob feature)</a></p>
-<a href="https://blog.naver.com/jerry1455/221359367760"> - OpenCV#3(LineFit ,EdgeCorner,FindShape,CenterOfBlob)</a></p>
-<a href="https://blog.naver.com/jerry1455/221354695256"> - OpenCV#2(Canny,Sobel,Laplacian)</a></p>
-<a href="https://blog.naver.com/jerry1455/221341480823"> - OpenCV#1(Binarization,Morphology,Arithmetic)</a></p>
+https://blog.naver.com/jerry1455/221368080208 - OpenCV#5(OpenCV Blob APIs)</p>
+https://blog.naver.com/jerry1455/221365405520 - OpenCV#4(blob feature)</p>
+https://blog.naver.com/jerry1455/221359367760 - OpenCV#3(LineFit ,EdgeCorner,FindShape,CenterOfBlob)</p>
+https://blog.naver.com/jerry1455/221354695256 - OpenCV#2(Canny,Sobel,Laplacian)</p>
+https://blog.naver.com/jerry1455/221341480823 - OpenCV#1(Binarization,Morphology,Arithmetic)</p>
 
 -----
 
