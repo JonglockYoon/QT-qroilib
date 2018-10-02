@@ -688,6 +688,25 @@ CvRect CBlob::GetBoundingBox()
 */
 CvBox2D CBlob::GetEllipse()
 {
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvSeq* seq = cvCreateSeq(CV_SEQ_KIND_GENERIC | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), storage);
+
+    CBlobContour *bcontour = GetExternalContour();
+    t_PointList externseq = bcontour->GetContourPoints();
+
+    int sz = externseq.size();
+    for (int i=0; i<sz; i++) {
+        cv::Point pt = externseq[i];
+        cvSeqPush(seq, &pt);
+    }
+
+    // 2018.9.25 jlyoon - replace opencv api
+    m_ellipse = cvMinAreaRect2 (seq,storage);
+    if (seq) cvClearSeq(seq);
+    if (storage) cvReleaseMemStorage(&storage);
+    return m_ellipse;
+
+/*
 	// it is calculated?
 	if( m_ellipse.size.width != -1 )
 		return m_ellipse;
@@ -763,7 +782,7 @@ CvBox2D CBlob::GetEllipse()
 	}
         
 	return m_ellipse;
-
+*/
 }
 
 /**
