@@ -75,11 +75,8 @@ public:
     cv::Mat shiftFrame(cv::Mat frame, int pixels, eShiftDirection direction);
 
     bool checkCross(const cv::Point& AP1, const cv::Point& AP2, const cv::Point& BP1, const cv::Point& BP2, cv::Point* IP);
-    double isCross(cv::Point v1, cv::Point v2);
     bool getIntersectionPoint(cv::Point a1, cv::Point a2, cv::Point b1, cv::Point b2, cv::Point & intPnt);
     double Dist2LineSegment(double px, double py, double X1, double Y1, double X2, double Y2, double &nearX, double &nearY);
-    unsigned int GetLineEq_LineToPoint(double eqline[], double point[], double nleq[], double intspoint[]);
-    unsigned int GetLineEq_PointToPoint(double p1[], double p2[], double leq[]);
 
     void bhm_line(int x1, int y1, int x2, int y2, std::vector<cv::Point>* points);
     int GetAngleABC(cv::Point a, cv::Point b, cv::Point c);
@@ -120,6 +117,8 @@ public:
     int IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius);
 
     double ROIPixEdge(IplImage* croppedImage, int nDir, double dRejectLow, double dRejectHigh);
+private:
+    double isCross(cv::Point v1, cv::Point v2);
 
 };
 
