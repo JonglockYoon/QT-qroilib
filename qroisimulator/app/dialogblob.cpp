@@ -497,3 +497,4 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
 
     theMainWindow->outWidget(mName, tmp);
 }
+

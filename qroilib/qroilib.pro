@@ -37,7 +37,8 @@ LIBS += "..\winlib\Release\lcms2.lib"
 
 LIBS += -lws2_32
 LIBS += "..\qroilib\pthread\pthreadVC1.lib"
-INCLUDEPATH += "..\winlib\include"
+INCLUDEPATH += "..\winlib\include" \
+   ./pthread
 }
 
 linux {
@@ -51,8 +52,7 @@ LDFLAGS=-L # is this even necessary?
 INCLUDEPATH += . \
    ./qroilib \
    ./qroilib/document \
-   ./qroilib/roilib \
-   ./pthread
+   ./qroilib/roilib
 
 
 # The following define makes your compiler warn you if you use any
