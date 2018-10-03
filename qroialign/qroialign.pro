@@ -64,7 +64,7 @@ INCLUDEPATH += /usr/local/include
 }
 
 TEMPLATE = app
-TARGET = qroialign
+TARGET = ../../bin/qroialign
 
 INCLUDEPATH += . \
    ./app \

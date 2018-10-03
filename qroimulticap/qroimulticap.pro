@@ -62,7 +62,7 @@ INCLUDEPATH += /usr/local/include
 #LDFLAGS=-L # is this even necessary?
 
 TEMPLATE = app
-TARGET = qroimulticap
+TARGET = ../../bin/qroimulticap
 
 INCLUDEPATH += . \
    ./app \

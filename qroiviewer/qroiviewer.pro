@@ -58,7 +58,7 @@ INCLUDEPATH += /usr/local/include
 #LDFLAGS=-L # is this even necessary?
 
 TEMPLATE = app
-TARGET = qroiviewer
+TARGET = ../../bin/qroiviewer
 
 INCLUDEPATH += . \
    ./app \

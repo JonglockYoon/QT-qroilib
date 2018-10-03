@@ -64,7 +64,7 @@ INCLUDEPATH += /usr/local/include
 }
 
 TEMPLATE = app
-TARGET = qroistereo
+TARGET = ../../bin/qroistereo
 
 INCLUDEPATH += . \
    ./app \

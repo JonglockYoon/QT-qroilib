@@ -59,7 +59,7 @@ INCLUDEPATH += /usr/local/include
 }
 
 TEMPLATE = app
-TARGET = qgecam
+TARGET = ../../bin/qgecam
 
 INCLUDEPATH += . \
    ./app \

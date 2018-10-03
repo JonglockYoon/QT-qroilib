@@ -17,7 +17,8 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $$PWD \
    $$PWD/qroilib \
    $$PWD/qroilib/document \
-   $$PWD/qroilib/roilib
+   $$PWD/qroilib/roilib \
+   $$PWD/pthread
 
 # Input
 HEADERS += $$PWD/engine/blob.h \

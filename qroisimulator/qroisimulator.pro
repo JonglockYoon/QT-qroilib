@@ -72,7 +72,7 @@ INCLUDEPATH += /usr/local/include
 }
 
 TEMPLATE = app
-TARGET = qroisimulator
+TARGET = ../../bin/qroisimulator
 
 INCLUDEPATH += . \
    ./app \
