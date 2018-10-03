@@ -33,6 +33,7 @@ LIBS += "..\winlib\Release\lcms2.lib"
 LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
+TARGET = ../../bin/qroiviewer
 }
 
 linux {
@@ -53,12 +54,12 @@ LIBS += -lv4l2
 LIBS += -lqroilib
 
 INCLUDEPATH += /usr/local/include
+TARGET = ../bin/qroiviewer
 }
 
 #LDFLAGS=-L # is this even necessary?
 
 TEMPLATE = app
-TARGET = ../../bin/qroiviewer
 
 INCLUDEPATH += . \
    ./app \

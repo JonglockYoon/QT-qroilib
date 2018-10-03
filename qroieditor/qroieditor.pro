@@ -41,6 +41,7 @@ LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
 #INCLUDEPATH += "c:\opencv340\build\include"
+TARGET = ../../bin/qroieditor
 }
 
 linux {
@@ -61,12 +62,12 @@ LIBS += -lv4l2
 LIBS += -lqroilib
 
 INCLUDEPATH += /usr/local/include
+TARGET = ../bin/qroieditor
 }
 
 #LDFLAGS=-L # is this even necessary?
 
 TEMPLATE = app
-TARGET = ../../bin/qroieditor
 
 INCLUDEPATH += . \
    ./app \

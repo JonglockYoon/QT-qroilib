@@ -44,6 +44,7 @@ LIBS += -lpthreadVC1
 INCLUDEPATH += "..\winlib\include"
 INCLUDEPATH += "..\qroilib\pthread"
 #INCLUDEPATH += "c:\opencv340\build\include"
+TARGET = ../../bin/qroisimulator
 }
 
 linux {
@@ -69,10 +70,10 @@ LIBS += -lqroilib
 LIBS += -lQZXing
 
 INCLUDEPATH += /usr/local/include
+TARGET = ../bin/qroisimulator
 }
 
 TEMPLATE = app
-TARGET = ../../bin/qroisimulator
 
 INCLUDEPATH += . \
    ./app \

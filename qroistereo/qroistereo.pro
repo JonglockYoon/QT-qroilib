@@ -41,6 +41,7 @@ LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
 #INCLUDEPATH += "c:\opencv340\build\include"
+TARGET = ../../bin/qroistereo
 }
 
 linux {
@@ -61,10 +62,10 @@ LIBS += -lv4l2
 LIBS += -lqroilib
 
 INCLUDEPATH += /usr/local/include
+TARGET = ../bin/qroistereo
 }
 
 TEMPLATE = app
-TARGET = ../../bin/qroistereo
 
 INCLUDEPATH += . \
    ./app \

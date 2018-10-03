@@ -40,6 +40,7 @@ LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
 #INCLUDEPATH += "c:\opencv340\build\include"
+TARGET = ../../bin/qgecam
 }
 
 linux {
@@ -56,10 +57,10 @@ LIBS += -L/usr/local/lib
 LIBS += -L/usr/lib
 
 INCLUDEPATH += /usr/local/include
+TARGET = ../bin/qgecam
 }
 
 TEMPLATE = app
-TARGET = ../../bin/qgecam
 
 INCLUDEPATH += . \
    ./app \

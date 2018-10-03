@@ -1,6 +1,5 @@
 
 TEMPLATE = lib
-TARGET = ../../bin/qroilib
 
 DEFINES += ROID_LIBRARY
 
@@ -25,6 +24,7 @@ LIBS += "..\winlib\Debug\jpeg.lib"
 LIBS += "..\winlib\Debug\png.lib"
 LIBS += "..\winlib\Debug\zlib.lib"
 LIBS += "..\winlib\Debug\lcms2.lib"
+TARGET = ../../bin/qroilib
 }
 CONFIG(release, debug|release) {
 #LIBS += -L..\winlib -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320
@@ -46,6 +46,7 @@ QMAKE_CXXFLAGS += -std=c++11
 LIBS += -ljpeg -lexiv2 -lpng -lz -llcms2 -lX11 -lGLU
 #-lcap-ng -laudit
 INCLUDEPATH += /usr/local/include
+TARGET = ../bin/qroilib
 }
 LDFLAGS=-L # is this even necessary?
 
