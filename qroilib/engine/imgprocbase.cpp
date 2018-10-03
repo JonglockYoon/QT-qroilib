@@ -671,7 +671,7 @@ Point2f CImgProcBase::CenterOfMoment(CvSeq* c)
 }
 
 //
-// 라인이 직접 만나야지 true를 리턴(확장라인 계산하지않음)
+// 라인이 직접 만나야지 true를 리턴(확장라인이 만날때는 false)
 //  ref : http://www.gisdeveloper.co.kr/?p=89
 //
 bool CImgProcBase::checkCross(const cv::Point& AP1, const cv::Point& AP2, const cv::Point& BP1, const cv::Point& BP2, cv::Point* IP)
