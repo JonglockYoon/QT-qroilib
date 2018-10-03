@@ -8,7 +8,7 @@ QT       += multimediawidgets
 QT       += opengl
 
 
-include(../qroilib/qroilib.pri)
+#include(../qroilib/qroilib.pri)
 #include(../serial/qextserialport.pri)
 
 win32 {
