@@ -1,10 +1,11 @@
 # qroilib
-QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.4)
+QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.6)
 -----
 <pre>
 0.0.2 : blobcontour.h update
 0.0.3 : update CBlob::JoinBlob()
 0.0.4 : update BlobLib
+0.0.6 : update CImgProcBase::FilterLargeDiameter()
 </pre>
 -----
 
