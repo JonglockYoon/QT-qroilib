@@ -84,7 +84,7 @@ public:
     double calcAngle(cv::Point pt1, cv::Point pt2, cv::Point pt0);
 
 
-    int SubPixelHessianEdge(IplImage *src, vector<Contour> &contours);
+    double SubPixelHessianEdge(IplImage *src, int nDir);
     int SubPixelCorner(IplImage *src, vector<cv::Point2f> &points);
     double SubPixelRampEdgeImage(IplImage* edgeImage, int nDir);
 

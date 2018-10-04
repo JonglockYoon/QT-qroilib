@@ -409,7 +409,7 @@ void DialogApplication::DrawMark(IplImage* iplImg, int x, int y)
 void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
 {
 /*
-    test();
+    //test();
 
     if (!outImg)
         outImg = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
@@ -421,7 +421,7 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
     cv::Point2f pt;// = img.FindCenterOfBlob(outImg);
     //qDebug() << pt.x << pt.y;
 
-    double d = img.SubPixelRampEdgeImage(outImg, 0);
+    double d = img.ROIPixEdge(outImg, 0, 0.4, 0.4); // 상하 40%는 버립니다.
     qDebug() << d;
     pt.x = d;
     pt.y = iplImg->height / 2;

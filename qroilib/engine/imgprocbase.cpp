@@ -793,8 +793,10 @@ double CImgProcBase::Dist2LineSegment(double px, double py, double X1, double Y1
 // Hessian matrix 알고리즘을 이용한 Subpixel Edge를 구함
 // 여러 edge contour를 구한다.
 //
-int CImgProcBase::SubPixelHessianEdge(IplImage *src, vector<Contour> &contours)
+double CImgProcBase::SubPixelHessianEdge(IplImage *src, int nDir)
 {
+    vector<Contour> contours;
+
     double alpha = 1.0;
     int low = 10;
     int high = 10;
@@ -809,13 +811,171 @@ int CImgProcBase::SubPixelHessianEdge(IplImage *src, vector<Contour> &contours)
     // hierarchy, mode  - have the same meanings as in cv::findContours
     EdgesSubPix(msrc, alpha, low, high, contours, hierarchy, mode);
 
-    return 0;
+
+
+    // 윤곽선이 1개 이상 형성될것이므로 ROI Direction에 따라 첫번째 contour를 선택한다
+    typedef struct {
+        cv::Point2f sum;
+        cv::Point2f avg;
+        int count;
+        int seq;
+    } EDGE;
+    vector<EDGE> points;
+
+    //points.resize(contours.size());
+    for (size_t i = 0; i < contours.size(); ++i)
+    {
+        EDGE edge;
+        edge.seq = i;
+        for (size_t j = 0; j < contours[i].points.size(); ++j)
+        {
+            cv::Point2f pt = contours[i].points[j];
+            edge.sum.x += pt.x;
+            edge.sum.y += pt.y;
+        }
+        edge.count = contours[i].points.size();
+        points.push_back(edge);
+    }
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        points[i].avg = points[i].sum / points[i].count;
+    }
+
+    //int nDir = 0;
+    int nDetectMethod = 0; // Average
+//    CParam *pParam = pData->getParam(_T("Detect method")); // _T("Average,First")
+//    if (pParam)
+//        nDetectMethod = (int)_ttoi(pParam->Value.c_str());
+//    pParam = pData->getParam(_T("Direction"));
+//    if (pParam)
+//        nDir = (int)_ttoi(pParam->Value.c_str());
+
+    switch (nDir) // _T("Left2Right,Right2Left,Top2Bottom,Bottom2Top")),
+    {
+    case 0:
+        std::stable_sort(points.begin(), points.end(), [](const EDGE lhs, const EDGE rhs)->bool {
+            if (lhs.avg.x < rhs.avg.x) // assending
+                return true;
+            return false;
+        });
+        break;
+    case 1:
+        std::stable_sort(points.begin(), points.end(), [](const EDGE lhs, const EDGE rhs)->bool {
+            if (lhs.avg.x > rhs.avg.x) // descending
+                return true;
+            return false;
+        });
+        break;
+    case 2:
+        std::stable_sort(points.begin(), points.end(), [](const EDGE lhs, const EDGE rhs)->bool {
+            if (lhs.avg.y < rhs.avg.y) // assending
+                return true;
+            return false;
+        });
+        break;
+    case 3:
+        std::stable_sort(points.begin(), points.end(), [](const EDGE lhs, const EDGE rhs)->bool {
+            if (lhs.avg.y > rhs.avg.y) // descending
+                return true;
+            return false;
+        });
+        break;
+
+    }
+
+    int select = -1;
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        int seq = points[i].seq;
+        if (contours[seq].points.size() > (src->width / 4)) // ROI영역의 폭의 1/4만큼의 edge라인이 형성된것중 x or y가 적은(소팅결과) edge
+        {
+            select = seq;
+            break;
+        }
+    }
+    //  첫번째 contour 선택 완료
+
+    if (select < 0)
+        return -1;
+
+    // 선택된 Contour의 각 point를 가져와서 튀는 값은 버리고 중간값들중 첫번째 또는 평균 위치를 구한다.
+    // Sorting해서 상위 40%, 하위 40%를 버리고 중간지점의 point만 취한다.
+    Contour &contour = contours[select];
+    switch (nDir)
+    {
+    case 0: // 세로선
+    case 1:
+        std::stable_sort(contour.points.begin(), contour.points.end(), [](const Point2f lhs, const Point2f rhs)->bool {
+            if (lhs.x < rhs.x) // assending
+                return true;
+            return false;
+        });
+        break;
+    case 2: // 가로선
+    case 3:
+        std::stable_sort(contour.points.begin(), contour.points.end(), [](const Point2f lhs, const Point2f rhs)->bool {
+            if (lhs.y < rhs.y) // assending
+                return true;
+            return false;
+        });
+        break;
+    }
+
+    double dVal = 0;
+    CvPoint2D32f pt = { 0, 0 };
+    if (nDetectMethod == 0) // Average
+    {
+        // 소팅을 한 결과 테이블에서 상하 40%를 버리고 중간 20%의 중간값을 구한다.
+        float sz = contour.points.size();
+        int first = sz * 0.4;
+        int last = sz - (sz * 0.4);
+        for (int i = first; i < last; i++)
+        {
+            pt.x += contour.points[i].x;
+            pt.y += contour.points[i].y;
+        }
+
+        sz = last - first;
+        if (sz > 0) {
+            pt.x /= sz;
+            pt.y /= sz;
+        }
+    }
+    else {	// First
+        //제일처음 만나는 edge를 구한다
+        float sz = contour.points.size();
+        if (sz > 0) {
+            if (nDir == 0)  { // Left2Right 세로선
+                pt.x += contour.points[0].x;
+                pt.y += contour.points[0].y;
+            }
+            else if (nDir == 1)  { // Right2Left 세로선
+                pt.x += contour.points[sz - 1].x;
+                pt.y += contour.points[sz - 1].y;
+            }
+            else if (nDir == 2)  { // Top2Bottom 가로선
+                pt.x += contour.points[0].x;
+                pt.y += contour.points[0].y;
+            }
+            else {				//Bottom2Top
+                pt.x += contour.points[sz - 1].x;
+                pt.y += contour.points[sz - 1].y;
+            }
+        }
+    }
+
+    if (nDir == 0 || nDir == 1) // x 위치
+        dVal = pt.x;
+    else
+        dVal = pt.y; // y 위치
+
+    return dVal;
 }
 
 
 //
 // 경사진면의 edge를 구한다
-// nCnt - threshold경계면부터 검색할 범위(0 ~ 50)
+// nCnt - threshold경계면부터 검색할 범위(0 ~ 512)
 //
 // nDir = 0 : Left2Right, Top2Bottom
 //        1 : Right2Left, Bottom2Top
@@ -823,10 +983,10 @@ double CImgProcBase::SubPixelRampEdge(unsigned char *pixelData, int pCnt)
 {
     double dLoc = 0.0;
     int i;
-    int ffx[50];
+    int ffx[512+1];
     int iSumfx;
 
-    if (pCnt > 50)
+    if (pCnt > 512)
         return 0;
     memset(ffx, 0, sizeof(ffx));
     iSumfx = 0;
@@ -1326,7 +1486,8 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
     IplImage* grayImg;
 
     CvRect r = CvRect(0,0,croppedImage->width, croppedImage->height);
-    int x, y, width, height;
+    int x=0, y=0, width=r.width, height=r.height;
+/*
     // edge를 추출할 영역을 구한다.
     switch (nDir) {
     case 0 : // Left2Right
@@ -1354,7 +1515,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
         height = r.height / 2;
         break;
     }
-
+*/
     grayImg = cvCreateImage(cvSize(width, height), croppedImage->depth, croppedImage->nChannels);
     CopyImageROI(croppedImage, grayImg, cvRect(x, y, width, height));
 
@@ -1373,11 +1534,10 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
         return -1;
 
     int nColor;
-    int nPolarity = 1;
-    if (nPolarity == 0)
-        nColor = 0; // White2Black
+    if (nDir == 0 || nDir == 2)
+        nColor = imageData[0];
     else
-        nColor = 255; // Black2White
+        nColor = imageData[width-1];
 
     uchar* data = (uchar*)grayImg->imageData;
     int widthStep = grayImg->widthStep;
@@ -1385,6 +1545,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
     int cy = grayImg->height;
 
     // Threshold한 결과 이미지의 경계면을 구한다. Left2Right,Right2Left,Top2Bottom,Bottom2Top에 따라서
+/*
     switch (nDir)
     {
     case 0: //Left2Right
@@ -1445,6 +1606,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
         break;
     }
     if (vecEdges.size() == 0)
+*/
     {
         switch (nDir)
         {
@@ -1551,13 +1713,13 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
 
     switch (nDir) {
         case 0: // Left2Right
-            dEdge = dVal + r.width/2 + r.x;
+            dEdge = dVal + r.x;
             break;
         case 1: // Right2Left
             dEdge = dVal + r.x;
             break;
         case 2: // Top2Bottom
-            dEdge = dVal + r.height/2 + r.y;
+            dEdge = dVal + r.y;
             break;
         case 3: // Bottom2Top
             dEdge = dVal + r.y;
