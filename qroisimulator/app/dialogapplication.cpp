@@ -392,7 +392,7 @@ void test()
 }
 void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
 {
-
+/*
     test();
 
     if (!outImg)
@@ -408,7 +408,7 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
 
     theMainWindow->outWidget(mName, outImg);
     return;
-
+*/
     switch(method)
     {
     case 0:
