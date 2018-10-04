@@ -421,7 +421,7 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     CBlobResult blobs;
     blobs = CBlobResult(tmp, nullptr);
     int nBlobs = blobs.GetNumBlobs();
-#if 1
+#if 0
     double width,length;
     for (int i = 0; i < nBlobs; i++)
     {
