@@ -529,7 +529,7 @@ int CImgProcBase::FilterLargeBlob(IplImage* grayImg, int nAxisLength)
     return 0;
 }
 
-int CImgProcBase::IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius)
+int CImgProcBase::IncludeRadiusBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius)
 {
 
     CBlobResult blobs = CBlobResult(grayImg, NULL);
