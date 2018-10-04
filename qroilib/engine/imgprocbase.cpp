@@ -793,7 +793,7 @@ double CImgProcBase::Dist2LineSegment(double px, double py, double X1, double Y1
 // Hessian matrix 알고리즘을 이용한 Subpixel Edge를 구함
 // 여러 edge contour를 구한다.
 //
-int CImgProcBase::SubPixelHessianEigenEdge(IplImage *src, vector<Contour> &contours)
+int CImgProcBase::SubPixelHessian(IplImage *src, vector<Contour> &contours)
 {
     double alpha = 1.0;
     int low = 10;
