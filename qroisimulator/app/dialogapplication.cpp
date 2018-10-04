@@ -392,18 +392,23 @@ void test()
 }
 void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
 {
-/*
+
     test();
 
     if (!outImg)
         outImg = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
 
     CImgProcBase img;
-    cv::Mat m = img.shiftFrame(cvarrToMat(iplImg), 20, CImgProcBase::ShiftRight);
-    cvCopy(&IplImage(m), outImg);
+    //cv::Mat m = img.shiftFrame(cvarrToMat(iplImg), 20, CImgProcBase::ShiftRight);
+    //cvCopy(&IplImage(m), outImg);
+    cvCopy(iplImg, outImg);
+    img.FilterLargeDiameter(outImg);
+
+
+
     theMainWindow->outWidget(mName, outImg);
     return;
-*/
+
     switch(method)
     {
     case 0:

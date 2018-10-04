@@ -24,7 +24,6 @@ LIBS += "..\winlib\Debug\jpeg.lib"
 LIBS += "..\winlib\Debug\png.lib"
 LIBS += "..\winlib\Debug\zlib.lib"
 LIBS += "..\winlib\Debug\lcms2.lib"
-TARGET = ../../bin/qroilib
 }
 CONFIG(release, debug|release) {
 #LIBS += -L..\winlib -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320
@@ -39,6 +38,7 @@ LIBS += -lws2_32
 LIBS += "..\qroilib\pthread\pthreadVC1.lib"
 INCLUDEPATH += "..\winlib\include" \
    ./pthread
+TARGET = ../../bin/qroilib
 }
 
 linux {
