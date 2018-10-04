@@ -220,10 +220,10 @@ int CImgProcBase::EraseLargeBlob(IplImage* grayImg)
         double_stl_vector area = blobs.GetSTLResult(CBlobGetArea());
         //std::sort(area.begin(), area.end(), sort_using_greater_than);
         std::stable_sort(area.begin(), area.end(), [](const double lhs, const double rhs)->bool {
-            return lhs < rhs;
+            return lhs > rhs;
         });
         dLargeArea = area[0];
-        blobs.Filter(blobs, B_EXCLUDE, CBlobGetArea(), B_EQUAL, dLargeArea);
+        blobs.Filter(blobs, B_EXCLUDE, CBlobGetArea(), B_GREATER_OR_EQUAL, dLargeArea);
     }
 
     cvZero(grayImg);
@@ -529,7 +529,7 @@ int CImgProcBase::FilterLargeBlob(IplImage* grayImg, int nAxisLength)
     return 0;
 }
 
-int CImgProcBase::IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius)
+int CImgProcBase::IncludeRadiusBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius)
 {
 
     CBlobResult blobs = CBlobResult(grayImg, NULL);
@@ -793,7 +793,7 @@ double CImgProcBase::Dist2LineSegment(double px, double py, double X1, double Y1
 // Hessian matrix 알고리즘을 이용한 Subpixel Edge를 구함
 // 여러 edge contour를 구한다.
 //
-int CImgProcBase::SubPixelHessianEigenEdge(IplImage *src, vector<Contour> &contours)
+int CImgProcBase::SubPixelHessianEdge(IplImage *src, vector<Contour> &contours)
 {
     double alpha = 1.0;
     int low = 10;
@@ -1315,8 +1315,8 @@ Point2f CImgProcBase::FindCenterOfBlob(IplImage * pImage)
 
 
 //
-// 에지의 Gray변화가 많은 부분의 위치를 추출
-// Threshold를 이용하여 Edge의 경계면을 추출하고 경계면으로부터 Subpixel edge를 추출한다.
+// Threshold 이미지에서
+// Edge의 경계면을 추출하고 경계면으로부터 Subpixel edge를 추출한다.
 // * Hessian Matrix 를 이용한것보다 좀더 경사진면에서의 edge를 구할수 있다.
 //
 // nDir = Left2Right,Right2Left,Top2Bottom,Bottom2Top

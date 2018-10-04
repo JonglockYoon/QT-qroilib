@@ -236,7 +236,7 @@ void MainWindow::setSaveImage()
         }
         //QApplication::setOverrideCursor(Qt::WaitCursor);
         QTimer::singleShot(1, [=] {
-            pimg->save(fileName);
+            pimg->save(fileName); // , "jpeg", 100
             //QApplication::restoreOverrideCursor();
         });
     }

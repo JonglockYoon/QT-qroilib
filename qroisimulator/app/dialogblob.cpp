@@ -421,7 +421,7 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
     CBlobResult blobs;
     blobs = CBlobResult(tmp, nullptr);
     int nBlobs = blobs.GetNumBlobs();
-#if 1
+#if 0
     double width,length;
     for (int i = 0; i < nBlobs; i++)
     {
@@ -452,6 +452,8 @@ void DialogBlob::ExecBlob(IplImage* iplImg)
         CvBox2D box2d = blob->GetEllipse();
         t_contours convexseq;
         blob->GetConvexHull(convexseq);
+        cv::Point2f pt = blob->getCenter();
+        qDebug() << pt.x << pt.y;
 
         //cvDrawContours(tmp, convexseq, CVX_WHITE, CVX_WHITE, 1, 1, 8);
         //cvDrawRect(tmp, CvPoint(rect.x, rect.y),CvPoint(rect.x+rect.width, rect.y+rect.height), CvScalar(255,255,255), 1, 8);

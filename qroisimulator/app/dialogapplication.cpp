@@ -390,9 +390,25 @@ void test()
     qDebug() << d << nX << nY;
 
 }
+
+void DialogApplication::DrawMark(IplImage* iplImg, int x, int y)
+{
+    CvPoint pt1, pt2;
+    pt1.x = x - 40;
+    pt1.y = y;
+    pt2.x = x + 40;
+    pt2.y = y;
+    cvLine(iplImg, pt1, pt2, CV_RGB(192, 192, 192), 1, 8, 0);
+    pt1.x = x;
+    pt1.y = y - 40;
+    pt2.x = x;
+    pt2.y = y + 40;
+    cvLine(iplImg, pt1, pt2, CV_RGB(192, 192, 192), 1, 8, 0);
+}
+
 void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
 {
-
+/*
     test();
 
     if (!outImg)
@@ -402,13 +418,19 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
     //cv::Mat m = img.shiftFrame(cvarrToMat(iplImg), 20, CImgProcBase::ShiftRight);
     //cvCopy(&IplImage(m), outImg);
     cvCopy(iplImg, outImg);
-    img.FilterLargeDiameter(outImg);
+    cv::Point2f pt;// = img.FindCenterOfBlob(outImg);
+    //qDebug() << pt.x << pt.y;
 
+    double d = img.SubPixelRampEdgeImage(outImg, 0);
+    qDebug() << d;
+    pt.x = d;
+    pt.y = iplImg->height / 2;
+    DrawMark(outImg, pt.x, pt.y);
 
 
     theMainWindow->outWidget(mName, outImg);
     return;
-
+*/
     switch(method)
     {
     case 0:

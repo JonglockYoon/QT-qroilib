@@ -84,10 +84,9 @@ public:
     double calcAngle(cv::Point pt1, cv::Point pt2, cv::Point pt0);
 
 
-    int SubPixelHessianEigenEdge(IplImage *src, vector<Contour> &contours);
+    int SubPixelHessianEdge(IplImage *src, vector<Contour> &contours);
     int SubPixelCorner(IplImage *src, vector<cv::Point2f> &points);
     double SubPixelRampEdgeImage(IplImage* edgeImage, int nDir);
-    double SubPixelRampEdge(unsigned char *fx, int pCnt);
 
 
     void AffineTransform(std::vector<cv::Point2f> vec, cv::Point2f srcTri[], cv::Point2f dstTri[]);
@@ -114,11 +113,12 @@ public:
     int EraseLargeBlob(IplImage* grayImg);
 
     int FilterLargeBlob(IplImage* grayImg, int nAxisLength);
-    int IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius);
+    int IncludeRadiusBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius);
 
     double ROIPixEdge(IplImage* croppedImage, int nDir, double dRejectLow, double dRejectHigh);
 private:
     double isCross(cv::Point v1, cv::Point v2);
+    double SubPixelRampEdge(unsigned char *fx, int pCnt);
 
 };
 

@@ -86,6 +86,7 @@ private slots:
 protected:
     void closeEvent(QCloseEvent *event);
 public:
+    void DrawMark(IplImage* iplImg, int x, int y);
     void ExecApplication(IplImage* iplImg, IplImage* iplImg2);
     void ExecRansacLinefit(IplImage* iplImg, int offset);
 
