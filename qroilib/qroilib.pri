@@ -6,7 +6,8 @@ include(./qtpropertybrowser/src/qtpropertybrowser.pri)
 
 win32 {
 #INCLUDEPATH += "C:\opencv\buildQT\include"
-INCLUDEPATH += "..\winlib\include"
+INCLUDEPATH += "..\winlib\include" \
+   $$PWD/pthread
 }
 
 linux {
@@ -17,8 +18,7 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $$PWD \
    $$PWD/qroilib \
    $$PWD/qroilib/document \
-   $$PWD/qroilib/roilib \
-   $$PWD/pthread
+   $$PWD/qroilib/roilib
 
 # Input
 HEADERS += $$PWD/engine/blob.h \
