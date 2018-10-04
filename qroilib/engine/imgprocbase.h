@@ -114,7 +114,7 @@ public:
     int EraseLargeBlob(IplImage* grayImg);
 
     int FilterLargeBlob(IplImage* grayImg, int nAxisLength);
-    int IncludeRangeBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius);
+    int IncludeRadiusBlob(IplImage* grayImg, int nMinCircleRadius, int nMaxCircleRadius);
 
     double ROIPixEdge(IplImage* croppedImage, int nDir, double dRejectLow, double dRejectHigh);
 private:
