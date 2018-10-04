@@ -220,10 +220,10 @@ int CImgProcBase::EraseLargeBlob(IplImage* grayImg)
         double_stl_vector area = blobs.GetSTLResult(CBlobGetArea());
         //std::sort(area.begin(), area.end(), sort_using_greater_than);
         std::stable_sort(area.begin(), area.end(), [](const double lhs, const double rhs)->bool {
-            return lhs < rhs;
+            return lhs > rhs;
         });
         dLargeArea = area[0];
-        blobs.Filter(blobs, B_EXCLUDE, CBlobGetArea(), B_EQUAL, dLargeArea);
+        blobs.Filter(blobs, B_EXCLUDE, CBlobGetArea(), B_GREATER_OR_EQUAL, dLargeArea);
     }
 
     cvZero(grayImg);
