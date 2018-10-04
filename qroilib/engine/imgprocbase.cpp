@@ -602,7 +602,7 @@ void CImgProcBase::FilterLargeDiameter(IplImage* grayImg)
     for (int i = 0; i < nBlobs; i++) {
         CBlob *p = blobs.GetBlob(i);
         CvRect r = p->GetBoundingBox();
-        if (r.height > LargeRect.height || r.width > LargeRect.width)
+        if (max(r.height,r.width) > max(LargeRect.height,LargeRect.width))
         {
             LargeRect = r;
             index = i;
