@@ -1487,35 +1487,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
 
     CvRect r = CvRect(0,0,croppedImage->width, croppedImage->height);
     int x=0, y=0, width=r.width, height=r.height;
-/*
-    // edge를 추출할 영역을 구한다.
-    switch (nDir) {
-    case 0 : // Left2Right
-        x = r.width / 2;
-        width = r.width / 2;
-        y = r.y;
-        height = r.height;
-        break;
-    case 1: // Right2Left
-        x = 0;
-        width = r.width / 2;
-        y = r.y;
-        height = r.height;
-        break;
-    case 2: // Top2Bottom
-        x = r.x;
-        width = r.width;
-        y = r.height / 2;
-        height = r.height / 2;
-        break;
-    case 3: // Bottom2Top
-        x = r.x;
-        width = r.width;
-        y = 0;
-        height = r.height / 2;
-        break;
-    }
-*/
+
     grayImg = cvCreateImage(cvSize(width, height), croppedImage->depth, croppedImage->nChannels);
     CopyImageROI(croppedImage, grayImg, cvRect(x, y, width, height));
 
@@ -1545,7 +1517,6 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
     int cy = grayImg->height;
 
     // Threshold한 결과 이미지의 경계면을 구한다. Left2Right,Right2Left,Top2Bottom,Bottom2Top에 따라서
-/*
     switch (nDir)
     {
     case 0: //Left2Right
@@ -1555,8 +1526,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
             {
                 int index = x + y*widthStep;
                 if (data[index] != nColor) {
-                    if (x > (cx / 2))
-                        vecEdges.push_back(cv::Point2f(x, y));
+                    vecEdges.push_back(cv::Point2f(x, y));
                     break;
                 }
             }
@@ -1569,8 +1539,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
             {
                 int index = x + y*widthStep;
                 if (data[index] != nColor) {
-                    if (x < (cx / 2))
-                        vecEdges.push_back(cv::Point2f(x, y));
+                    vecEdges.push_back(cv::Point2f(x, y));
                     break;
                 }
             }
@@ -1583,8 +1552,7 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
             {
                 int index = x + y*widthStep;
                 if (data[index] != nColor) {
-                    if (y > (cy / 2))
-                        vecEdges.push_back(cv::Point2f(x, y));
+                    vecEdges.push_back(cv::Point2f(x, y));
                     break;
                 }
             }
@@ -1597,74 +1565,13 @@ double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dReject
             {
                 int index = x + y*widthStep;
                 if (data[index] != nColor) {
-                    if (y < (cy / 2))
-                        vecEdges.push_back(cv::Point2f(x, y));
+                    vecEdges.push_back(cv::Point2f(x, y));
                     break;
                 }
             }
         }
         break;
     }
-    if (vecEdges.size() == 0)
-*/
-    {
-        switch (nDir)
-        {
-        case 0: //Left2Right
-            for (int y = 0; y < cy; y++)
-            {
-                for (int x = 0; x < cx; x++)
-                {
-                    int index = x + y*widthStep;
-                    if (data[index] != nColor) {
-                        vecEdges.push_back(cv::Point2f(x, y));
-                        break;
-                    }
-                }
-            }
-            break;
-        case 1: //Right2Left
-            for (int y = 0; y < cy; y++)
-            {
-                for (int x = cx - 1; x >= 0; x--)
-                {
-                    int index = x + y*widthStep;
-                    if (data[index] != nColor) {
-                        vecEdges.push_back(cv::Point2f(x, y));
-                        break;
-                    }
-                }
-            }
-            break;
-        case 2: //Top2Bottom
-            for (int x = 0; x < cx; x++)
-            {
-                for (int y = 0; y < cy; y++)
-                {
-                    int index = x + y*widthStep;
-                    if (data[index] != nColor) {
-                        vecEdges.push_back(cv::Point2f(x, y));
-                        break;
-                    }
-                }
-            }
-            break;
-        case 3: //Bottom2Top
-            for (int x = 0; x < cx; x++)
-            {
-                for (int y = cy - 1; y >= 0; y--)
-                {
-                    int index = x + y*widthStep;
-                    if (data[index] != nColor) {
-                        vecEdges.push_back(cv::Point2f(x, y));
-                        break;
-                    }
-                }
-            }
-            break;
-        }
-    }
-
 
     switch (nDir) {
     case 0: // 세로선
