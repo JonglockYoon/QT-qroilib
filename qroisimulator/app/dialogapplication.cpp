@@ -375,22 +375,6 @@ cv::Mat DialogApplication::convertFFTMag()
     return displayImage;
 }
 
-void test()
-{
-    cv::Point pt[4] = { {0, 0}, {3, 3}, {10, 0}, {0, 10} };
-    cv::Point intPnt;
-    CImgProcBase img;
-    bool rtn1 = img.getIntersectionPoint(pt[0],pt[1],pt[2],pt[3], intPnt);
-    qDebug() << rtn1 << intPnt.x << intPnt.y;
-    bool rtn2 = img.checkCross(pt[0],pt[1],pt[2],pt[3], &intPnt);
-    qDebug() << rtn2 << intPnt.x << intPnt.y;
-
-    double nX, nY;
-    double d = img.Dist2LineSegment(pt[1].x, pt[1].y, pt[2].x, pt[2].y, pt[3].x, pt[3].y, nX, nY);
-    qDebug() << d << nX << nY;
-
-}
-
 void DialogApplication::DrawMark(IplImage* iplImg, int x, int y)
 {
     CvPoint pt1, pt2;
@@ -408,35 +392,6 @@ void DialogApplication::DrawMark(IplImage* iplImg, int x, int y)
 
 void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
 {
-/*
-    //test();
-
-    if (!outImg)
-        outImg = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
-
-    CImgProcBase img;
-    //cv::Mat m = img.shiftFrame(cvarrToMat(iplImg), 20, CImgProcBase::ShiftRight);
-    //cvCopy(&IplImage(m), outImg);
-    cvCopy(iplImg, outImg);
-    cv::Point2f pt;// = img.FindCenterOfBlob(outImg);
-    //qDebug() << pt.x << pt.y;
-
-//    double d = img.ROIPixEdge(outImg, 0, 0.4, 0.4); // 상하 40%는 버립니다.
-//    qDebug() << d;
-//    pt.x = d;
-//    pt.y = iplImg->height / 2;
-//    DrawMark(outImg, pt.x, pt.y);
-
-//    cv::Point apt[4] = { {0, 0}, {0, 10}, {10, 0} };
-//    int a2 = img.GetAngleABC(apt[0], apt[1], apt[2]);
-//    qDebug() << a2 << a1;
-
-    double a3 = img.getObjectAngle(outImg);
-    qDebug() << a3;
-
-    theMainWindow->outWidget(mName, outImg);
-    return;
-*/
     switch(method)
     {
     case 0:

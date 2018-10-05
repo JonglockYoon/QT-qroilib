@@ -126,6 +126,7 @@ private:
     IplImage* outImg = nullptr;
 
     CvPoint plusmarkpt[4];
+
 };
 
 #endif // DIALOGapp_H

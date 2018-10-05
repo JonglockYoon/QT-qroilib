@@ -1262,7 +1262,7 @@ int CImgProcBase::find_thresholdOTSU(IplImage* image)
 //dstTri[3] = Point2f(0, 100);
 // //http://lueseypid.tistory.com/111
 
-void CImgProcBase::AffineTransform(std::vector<Point2f> vec, cv::Point2f srcTri[], cv::Point2f dstTri[])
+void CImgProcBase::AffineTransform(std::vector<Point2f> &vec, cv::Point2f srcTri[], cv::Point2f dstTri[])
 {
     Mat m(2, 3, CV_32F);
     m = getAffineTransform(srcTri, dstTri);

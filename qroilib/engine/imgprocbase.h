@@ -89,7 +89,7 @@ public:
     double SubPixelRampEdgeImage(IplImage* edgeImage, int nDir);
 
 
-    void AffineTransform(std::vector<cv::Point2f> vec, cv::Point2f srcTri[], cv::Point2f dstTri[]);
+    void AffineTransform(std::vector<cv::Point2f> &vec, cv::Point2f srcTri[], cv::Point2f dstTri[]);
     void WarpPerspectiveImage(IplImage* img, CvPoint2D32f srcTri[], CvPoint2D32f dstTri[]);
     void WarpAffineImage(IplImage* img, CvPoint2D32f srcTri[], CvPoint2D32f dstTri[]);
     void RotateImage(IplImage* img, double angle, CvPoint2D32f center, double scale);

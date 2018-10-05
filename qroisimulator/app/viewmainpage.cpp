@@ -501,7 +501,7 @@ IplImage* ViewMainPage::getIplcolor()
         cvCopy(iplImg, colorImg);
     else if (iplImg->nChannels == 4) {
         if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
-            cvCvtColor(iplImg, colorImg, CV_BGRA2RGB);
+            cvCvtColor(iplImg, colorImg, CV_BGRA2BGR);
         else
             cvCvtColor(iplImg, colorImg, CV_RGBA2RGB);
     }
