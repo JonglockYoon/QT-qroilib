@@ -157,9 +157,10 @@ void OrthogonalRenderer::drawRoiObject(QPainter *painter,
     const qreal lineWidth = objectLineWidth();
     //const qreal scale = painterScale();
     const qreal scale = v->zoom();
-    const qreal shadowDist = (lineWidth == 0 ? 1 : lineWidth) / scale;
-    const QPointF shadowOffset = QPointF(shadowDist * 0.5,
-                                         shadowDist * 0.5);
+//    const qreal shadowDist = (lineWidth == 0 ? 1 : lineWidth) / scale;
+//    const QPointF shadowOffset = QPointF(shadowDist * 0.5,
+//                                         shadowDist * 0.5);
+    const QPointF shadowOffset = QPointF(1.5, 1.5);
 
     QPen linePen(color, lineWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
     QPen dotPen(color, lineWidth, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin);
@@ -232,7 +233,7 @@ void OrthogonalRenderer::drawRoiObject(QPainter *painter,
             // Draw the shadow
             painter->setPen(shadowPen);
             painter->drawRect(rect.translated(shadowOffset));
-
+//qDebug() << "shadowOffset" << shadowOffset;
             painter->setPen(linePen);
             painter->setBrush(fillBrush);
             painter->drawRect(rect);
