@@ -94,10 +94,27 @@ void DialogArithmeticlogic::changeRealtime(bool checked)
 void DialogArithmeticlogic::activatedComboBoxSource0(int act)
 {
     source0 = act;
+
+    ui->comboBoxSource0->clear();
+    ui->comboBoxSource0->insertItem(0, QIcon(), QString::fromLocal8Bit("qroisimulator"));
+    int size = theMainWindow->vecOutWidget.size();
+    for (int i=0; i<size; i++) {
+        OutWidget* pWidget = theMainWindow->vecOutWidget[i];
+        ui->comboBoxSource0->insertItem(i+1, QIcon(), pWidget->windowTitle());
+    }
+    ui->comboBoxSource0->setCurrentIndex(act);
 }
 void DialogArithmeticlogic::activatedComboBoxSource1(int act)
 {
     source1 = act;
+
+    ui->comboBoxSource1->clear();
+    int size = theMainWindow->vecOutWidget.size();
+    for (int i=0; i<size; i++) {
+        OutWidget* pWidget = theMainWindow->vecOutWidget[i];
+        ui->comboBoxSource1->insertItem(i, QIcon(), pWidget->windowTitle());
+    }
+    ui->comboBoxSource1->setCurrentIndex(act);
 }
 
 void DialogArithmeticlogic::on_pushButtonClose_clicked()

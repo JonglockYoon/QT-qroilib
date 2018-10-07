@@ -13,7 +13,7 @@ windows
 -------
 pre compile library : winlib 
 
-$ unzip opencv_world340d.dll.zip
+..\bin>unzip opencv_world340d.dll.zip
 
-we need dlls to the executable file location (debug ro release)
+we need dlls to the executable file location (debug or release)
 

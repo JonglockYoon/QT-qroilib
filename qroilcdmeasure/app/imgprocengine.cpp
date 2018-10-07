@@ -1382,3 +1382,9 @@ void CImgProcEngine::SaveOutImage(IplImage* pImgOut, RoiObject *pData, QString s
 
     //qDebug() << "SaveOutImage:" << str;
 }
+
+int CImgProcEngine::DeleteBoundaryContactBlob(RoiObject *pData, IplImage* grayImg, int nDbg)
+{
+
+}
+

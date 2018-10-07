@@ -252,6 +252,15 @@ void DialogEdge::setEditGaussian(const QString &val)
 void DialogEdge::activatedComboBoxSource(int act)
 {
     source = act;
+
+    ui->comboBoxSource->clear();
+    ui->comboBoxSource->insertItem(0, QIcon(), QString::fromLocal8Bit("qroisimulator"));
+    int size = theMainWindow->vecOutWidget.size();
+    for (int i=0; i<size; i++) {
+        OutWidget* pWidget = theMainWindow->vecOutWidget[i];
+        ui->comboBoxSource->insertItem(i+1, QIcon(), pWidget->windowTitle());
+    }
+    ui->comboBoxSource->setCurrentIndex(act);
 }
 void DialogEdge::activatedComboBoxEdgeMethod(int act)
 {

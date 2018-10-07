@@ -71,5 +71,7 @@ public:
     Qroilib::DetectResult m_DetectResult;
     QVector<CvPoint2D32f>	alignpt;
     QVector<CvPoint2D32f>	insppt;
+
+    int DeleteBoundaryContactBlob(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg);
 };
 

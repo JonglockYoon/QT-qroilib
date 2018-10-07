@@ -249,35 +249,11 @@ void RoiPropertyEditor::clickedInspButtonSlot()
 {
     m_timer.stop();
 
-    ViewMainPage* pMainView = theMainWindow->viewMainPage();
-    DocumentView* pdocview = pMainView->currentView();
+    ViewMainPage* pView = theMainWindow->viewMainPage();
 
-    ObjectListGet();
-
-    const QImage *camimg = pdocview->image();
-    if (camimg->isNull())
+    IplImage *grayImg = pView->getIplgray();
+    if (grayImg == nullptr)
         return;
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    qimage_to_mat(camimg, frame);
-
-    riplImg = frame;
-    iplImg = &riplImg;
-
-    CvSize isize = cvSize(iplImg->width, iplImg->height);
-    if (grayImg)
-        cvReleaseImage(&grayImg);
-    grayImg = cvCreateImage(isize, IPL_DEPTH_8U, 1);
-    if (iplImg->nChannels == 3)
-        cvCvtColor(iplImg, grayImg, CV_RGB2GRAY);
-    else if (iplImg->nChannels == 4) {
-        if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
-            cvCvtColor(iplImg, grayImg, CV_BGRA2GRAY);
-        else
-            cvCvtColor(iplImg, grayImg, CV_RGBA2GRAY);
-    } else
-        cvCopy(iplImg, grayImg);
-
 
     mObject->setBounds(parentObject->bounds()); // dialog창을 띄워놓고 ROI영역을 변경할수 있으므로..
 
@@ -288,11 +264,7 @@ void RoiPropertyEditor::clickedInspButtonSlot()
     //cv::Mat mat = cv::cvarrToMat(grayImg);
     //mat_to_qimage(mat, img);
 
-    if (pdocview->document()) {
-            //pdocview->document()->setImageInternal(img);
-            //pdocview->imageView()->updateBuffer();
-            m_timer.start(200, this);
-    }
+    m_timer.start(200, this);
 
     QApplication::restoreOverrideCursor();
 
