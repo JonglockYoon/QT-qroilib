@@ -3,7 +3,6 @@
 3. file -> measurement lcd
 
     implementation...
-
     1) color to gray image
     2) blob roi area 
     3) erase boundary roi

@@ -285,8 +285,8 @@ void RoiPropertyEditor::clickedInspButtonSlot()
     theMainWindow->pImgProcEngine->InspectOneItem(grayImg, mObject);
 
     // 결과이미지를 화면에 반영.
-    cv::Mat mat = cv::cvarrToMat(grayImg);
-    mat_to_qimage(mat, img);
+    //cv::Mat mat = cv::cvarrToMat(grayImg);
+    //mat_to_qimage(mat, img);
 
     if (pdocview->document()) {
             //pdocview->document()->setImageInternal(img);
