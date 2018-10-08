@@ -1,5 +1,7 @@
 ﻿// imgprocengine.cpp
 //
+//Copyright 2018, Created by Yoon Jong-lock <jerry1455@gmail>
+//
 // Qroilib를 이용할때 이용가능한 opencv함수들을 모아놓은 module이다.
 // application개발시 필요한 함수들만 다시 구성해서 새로운 engine module을 만드는것이
 // 유지보수에 이롭다.
@@ -1335,7 +1337,7 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
 {
     if (iplImage == nullptr) return;
 
-    QRectF rect = pData->bounds();	// Area로 등록된 ROI
+    QRectF rect = pData->bounds();	// Area of the ROI
     rect.normalized();
 
     if (rect.left() < 0)	rect.setLeft(0);
@@ -1444,7 +1446,7 @@ int CImgProcEngine::MakeMask(RoiObject *pData, IplImage* grayImg, int nDbg)
         CBlob *p = blobs.GetBlob(i);
         CvRect r = p->GetBoundingBox();
 
-        // 경계와 걸쳐 있는 Blob들을 삭제.
+        // erase blob boundary connected blob.
         if (r.x == 0 || r.y == 0)
             p->ClearContours();
         else if (r.width+r.x == width)
@@ -1452,7 +1454,7 @@ int CImgProcEngine::MakeMask(RoiObject *pData, IplImage* grayImg, int nDbg)
         else if (r.height+r.y == height)
             p->ClearContours();
 
-        // Area가 500이하의 Blob들을 삭제.
+        // erase blob Area less then 500.
         double area = p->Area();
         if (area < 500.0)
             p->ClearContours();
@@ -1564,7 +1566,7 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
 {    
     QString str;
     IplImage* croppedImage;
-    QRectF rect = pData->bounds();	// Area로 등록된 ROI.
+    QRectF rect = pData->bounds();	// Area of the ROI.
     rect.normalized();
 
     if (rect.left() < 0)	rect.setLeft(0);
@@ -1584,7 +1586,7 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
         SaveOutImage(croppedImage, pData, str, false);
     }
 
-    // 마스크를 생성합니다.
+    // create Mask image.
     IplImage* mask = cvCloneImage(croppedImage);
     MakeMask(pData, mask, 200);
 
@@ -1601,6 +1603,7 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
     blobs = CBlobResult(mask, nullptr);
     int nBlobs = blobs.GetNumBlobs();
     IplImage* tmp;
+    CvPoint2D32f oldpt2 = CvPoint2D32f(-100, -100); // old pt2
     for (int i = 0; i < nBlobs; i++)
     {
         CBlob *p = blobs.GetBlob(i);
@@ -1639,6 +1642,17 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
         text.sprintf("%.2f", pt2.y-pt1.y);
         cvPutText(iplImg, text.toLatin1(), cvPoint(pt1.x, (pt1.y+pt2.y)/2+14), &font, cvScalar(0, 0, 0, 0));
 
+        double dx = pt1.x - oldpt2.x;
+        if (dx > 0 && dx < 20) {
+            CvPoint2D32f pt3 = CvPoint2D32f(oldpt2.x, pt1.y+35);
+            CvPoint2D32f pt4 = CvPoint2D32f(pt1.x, pt1.y+35);
+            cv::arrowedLine(m, pt3, pt4, CV_RGB(0, 255, 0), 1, 8, 0, 0.01);
+            cv::arrowedLine(m, pt4, pt3, CV_RGB(0, 255, 0), 1, 8, 0, 0.01);
+
+            text.sprintf("%.2f", dx);
+            cvPutText(iplImg, text.toLatin1(), cvPoint(pt1.x-20, pt1.y+30), &font, cvScalar(0, 0, 0, 0));
+        }
+
 
         MeasureByCannyEdge(pData, tmp);
         if (m_bSaveEngineImg){
@@ -1647,6 +1661,7 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
         }
 
         if (tmp) cvReleaseImage(&tmp);
+        oldpt2 = pt2;
     }
 
     if (mask) cvReleaseImage(&mask);

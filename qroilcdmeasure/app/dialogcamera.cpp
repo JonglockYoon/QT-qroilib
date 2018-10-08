@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2017
-// All rights reserved by 영진하이텍.
+//Copyright 2018, Created by Yoon Jong-lock <jerry1455@gmail>
+//
 //
 
 #ifndef Q_OS_WIN
