@@ -29,6 +29,10 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 다음 블로그에 각 Program의 설명들이 있습니다.
 </pre>
+https://blog.naver.com/jerry1455/221371946121 - qroilib compile and run on Raspberry pi
+https://blog.naver.com/jerry1455/221370404281 - qroilib ImgProcBase class APIs
+https://blog.naver.com/jerry1455/221370304964 - qroilib compile and run on ubuntu 18.04
+https://blog.naver.com/jerry1455/221369110092 - qroilib Simulator (OpenCV FFT, Pattern Erase)
 https://blog.naver.com/jerry1455/221360187807 - qroilib Simulator (OpenCV code scanner, color detect)
 https://blog.naver.com/jerry1455/221359626135 - qroilib Simulator (OpenCV feature detect, matching)
 https://blog.naver.com/jerry1455/221355750336 - qroilib Simulator (OpenCV contour extract)
