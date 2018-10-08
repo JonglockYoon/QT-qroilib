@@ -72,6 +72,11 @@ public:
     QVector<CvPoint2D32f>	alignpt;
     QVector<CvPoint2D32f>	insppt;
 
-    int DeleteBoundaryContactBlob(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg);
+    int AdaptiveThreshold(IplImage* grayImg, IplImage* outImg);
+    int MakeMask(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg);
+
+    int MeasureBySubpixelEdge(Qroilib::RoiObject *pData, IplImage* grayImg, CvPoint2D32f &pt1, CvPoint2D32f &pt2);
+    int MeasureByCannyEdge(Qroilib::RoiObject *pData, IplImage* grayImg);
+    int MeasureLCDPixelSize(Qroilib::RoiObject *pData, IplImage* grayImg);
 };
 

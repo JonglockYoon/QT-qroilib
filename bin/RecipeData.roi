@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="2460" height="2062" roiwidth="1" roiheight="1" nextobjectid="1">
  <objectgroup name="channel1" x="-1" y="-1">
-  <object id="1" name="noname1007104758" x="862.327" y="721.434" width="731.769" height="562.818">
+  <object id="1" name="noname1007104758" x="1012.54" y="721.434" width="499.623" height="685.719">
    <rectangle/>
    <param InspectType="502">
     <param00 steptype="1" name="Direction" valuetype="4" value="0" detail="Left2Right,Right2Left,Top2Bottom,Bottom2Top"/>

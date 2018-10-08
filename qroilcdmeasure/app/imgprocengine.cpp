@@ -1383,8 +1383,382 @@ void CImgProcEngine::SaveOutImage(IplImage* pImgOut, RoiObject *pData, QString s
     //qDebug() << "SaveOutImage:" << str;
 }
 
-int CImgProcEngine::DeleteBoundaryContactBlob(RoiObject *pData, IplImage* grayImg, int nDbg)
+const int WinSize = 37;
+const int AreaSize = 7;
+
+int CImgProcEngine::AdaptiveThreshold(IplImage* grayImg, IplImage* outImg)
 {
+    QString str;
+    int nBlkSize = WinSize;//Local variable binarize window size
+    int C = AreaSize;//Local variable binarize threshold
+
+    int cx = grayImg->width;
+    int cy = grayImg->height;
+
+    static cv::Mat dst;
+    //세번째 255는 최대값.  이렇게 하면 0과 255로 이루어진 영상으로 됨
+    //마지막에서 두번째값은 threshold 계산 때 주변 픽셀 사용하는 크기.  3,5,7 식으로 홀수로 넣어줌
+    //마지막은 Constant subtracted from mean or weighted mean. It may be negative
+
+    //if (nBlkSize == 0)
+    //	nBlkSize = 51;
+    //if (C == 0)
+    //	C = 11;
+    if (nBlkSize > min(cx, cy) / 4)
+        nBlkSize = min(cx, cy) / 4;
+    if (nBlkSize % 2 == 0) // 강제로 홀수로 만든다.
+        nBlkSize++;
+    cv::Mat m1 = cv::cvarrToMat(grayImg); //cv::Mat(s)
+    cv::adaptiveThreshold(m1, dst, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, nBlkSize, C);
+
+    IplImage iplImage = dst;
+    cvCopy(&iplImage, outImg);
+
+    return 0;
+}
+
+int CImgProcEngine::MakeMask(RoiObject *pData, IplImage* grayImg, int nDbg)
+{
+    QString str;
+    int width = grayImg->width;
+    int height = grayImg->height;
+
+    AdaptiveThreshold(grayImg, grayImg);
+
+    int filterSize = 3;
+    IplConvKernel *element = nullptr;
+    element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
+    cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_CLOSE, 1);
+    cvReleaseStructuringElement(&element);
+
+    if (m_bSaveEngineImg){
+        str.sprintf(("%03d_Mask1.jpg"), nDbg);
+        SaveOutImage(grayImg, pData, str, false);
+    }
+
+    CBlobResult blobs;
+    blobs = CBlobResult(grayImg, nullptr);
+    int nBlobs = blobs.GetNumBlobs();
+    for (int i = 0; i < nBlobs; i++)
+    {
+        CBlob *p = blobs.GetBlob(i);
+        CvRect r = p->GetBoundingBox();
+
+        // 경계와 걸쳐 있는 Blob들을 삭제.
+        if (r.x == 0 || r.y == 0)
+            p->ClearContours();
+        else if (r.width+r.x == width)
+            p->ClearContours();
+        else if (r.height+r.y == height)
+            p->ClearContours();
+
+        // Area가 500이하의 Blob들을 삭제.
+        double area = p->Area();
+        if (area < 500.0)
+            p->ClearContours();
+    }
+    nBlobs = blobs.GetNumBlobs();
+    cvZero(grayImg);
+    for (int i = 0; i < nBlobs; i++)
+    {
+        CBlob *p = blobs.GetBlob(i);
+        if (p->IsEmpty()) // Deleted blob.
+            continue;
+        CvRect r = p->GetBoundingBox();
+        cvDrawRect(grayImg, CvPoint(r.x, r.y),CvPoint(r.x+r.width, r.y+r.height), CvScalar(255,255,255), CV_FILLED);
+    }
+    //cvDilate(grayImg, grayImg, nullptr, 2);
+
+    if (m_bSaveEngineImg){
+        str.sprintf(("%03d_Mask2.jpg"), nDbg+1);
+        SaveOutImage(grayImg, pData, str, false);
+    }
+
+    return 0;
+}
+
+int CImgProcEngine::MeasureByCannyEdge(RoiObject *pData, IplImage* grayImg)
+{
+    QString str;
+    try {
+        cvSmooth(grayImg, grayImg, CV_GAUSSIAN, 7, 7);
+    } catch (...) {
+        qDebug() << "Error cvSmooth()";
+        return -1;
+    }
+
+    cvCanny(grayImg, grayImg, 11, 25);
+
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvSeq* contours = 0;
+    cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    IplImage* tmp = cvCloneImage(grayImg);
+    cvZero(tmp);
+    while (contours)
+    {
+         CvSeq *c = contours;
+         for (int i = 0; i < c->total; i++)
+         {
+             CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, c, i);
+         }
+         contours = contours->h_next;
+
+         //Scalar color = Scalar( 255,255,255);
+         //cvDrawContours(tmp, contours, color, color, 2, 1, 8, cvPoint(0, 0));
+     }
+     cvReleaseMemStorage(&storage);
+
+#if 0
+
+     vector<Point> ConvexHullPoints =  contoursConvexHull(contours);
+
+     polylines( drawing, ConvexHullPoints, true, Scalar(0,0,255), 2 );
+     imshow("Contours", drawing);
+
+     polylines( src, ConvexHullPoints, true, Scalar(0,0,255), 2 );
+#endif
 
 }
 
+int CImgProcEngine::MeasureBySubpixelEdge(RoiObject *pData, IplImage* grayImg, CvPoint2D32f &pt1, CvPoint2D32f &pt2)
+{
+    //x : 50 ~ 60
+    //y : 40 ~ 150
+
+    IplImage* croppedImage;
+
+    cvSetImageROI(grayImg, cvRect(0, 40, 12, 100));
+    croppedImage = cvCreateImage(cvSize(12, 100), grayImg->depth, grayImg->nChannels);
+    cvCopy(grayImg, croppedImage);
+    cvResetImageROI(grayImg);
+    pt1.x = SubPixelRampEdgeImage(croppedImage, 0); // Left2Right
+    cvReleaseImage(&croppedImage);
+
+    cvSetImageROI(grayImg, cvRect(grayImg->width-12, 40, 12, 100));
+    croppedImage = cvCreateImage(cvSize(12, 100), grayImg->depth, grayImg->nChannels);
+    cvCopy(grayImg, croppedImage);
+    cvResetImageROI(grayImg);
+    pt2.x = SubPixelRampEdgeImage(croppedImage, 1); // Right2Left
+    pt2.x += (grayImg->width-12);
+    cvReleaseImage(&croppedImage);
+
+    cvSetImageROI(grayImg, cvRect(50, 0, 10, 14));
+    croppedImage = cvCreateImage(cvSize(10, 14), grayImg->depth, grayImg->nChannels);
+    cvCopy(grayImg, croppedImage);
+    cvResetImageROI(grayImg);
+    pt1.y = SubPixelRampEdgeImage(croppedImage, 2); // Top2Bottom
+    cvReleaseImage(&croppedImage);
+
+    cvSetImageROI(grayImg, cvRect(50, grayImg->height-14, 10, 14));
+    croppedImage = cvCreateImage(cvSize(10, 14), grayImg->depth, grayImg->nChannels);
+    cvCopy(grayImg, croppedImage);
+    cvResetImageROI(grayImg);
+    pt2.y = SubPixelRampEdgeImage(croppedImage, 3); // Bottom2Top
+    pt2.y += (grayImg->height-14);
+    cvReleaseImage(&croppedImage);
+
+    return 0;
+}
+
+int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
+{    
+    QString str;
+    IplImage* croppedImage;
+    QRectF rect = pData->bounds();	// Area로 등록된 ROI.
+    rect.normalized();
+
+    if (rect.left() < 0)	rect.setLeft(0);
+    if (rect.top() < 0)	rect.setTop(0);
+    if (rect.right() >= iplImg->width) rect.setRight(iplImg->width);
+    if (rect.bottom() >= iplImg->height) rect.setBottom(iplImg->height);
+    pData->setBounds(rect);
+
+    cv::Point2f left_top = cv::Point2f(rect.left(), rect.top());
+    cvSetImageROI(iplImg, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
+    croppedImage = cvCreateImage(cvSize(rect.width(), rect.height()), iplImg->depth, iplImg->nChannels);
+    cvCopy(iplImg, croppedImage);
+    cvResetImageROI(iplImg);
+
+    if (m_bSaveEngineImg){
+        str.sprintf(("%03d_Source.jpg"), 100);
+        SaveOutImage(croppedImage, pData, str, false);
+    }
+
+    // 마스크를 생성합니다.
+    IplImage* mask = cvCloneImage(croppedImage);
+    MakeMask(pData, mask, 200);
+
+#define LM 6
+#define RM 4
+
+    CvFont font;
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5, 0, 1, CV_AA);
+
+    // nBlobs 만큼의 Thread를 생성해서 동작시켜면 CPU의 효율을 최대로 활용할수 있습니다.
+    // 너무 많은 Thread를 생성하면 역 효과가 나타날수 있으므로,
+    // 사용하는 System의 성능에 따라 생성하는 Thread의 갯수는 제한 하는것이 바람직합니다.
+    CBlobResult blobs;
+    blobs = CBlobResult(mask, nullptr);
+    int nBlobs = blobs.GetNumBlobs();
+    IplImage* tmp;
+    for (int i = 0; i < nBlobs; i++)
+    {
+        CBlob *p = blobs.GetBlob(i);
+        CvRect r = p->GetBoundingBox();
+        r.x -= LM;
+        r.y -= LM;
+        r.width += (LM+RM);
+        r.height += (LM*2);
+
+        cvSetImageROI(croppedImage, cvRect(r.x, r.y, r.width, r.height));
+        tmp = cvCreateImage(cvSize(r.width, r.height), croppedImage->depth, croppedImage->nChannels);
+        cvCopy(croppedImage, tmp);
+        cvResetImageROI(croppedImage);
+
+
+        if (m_bSaveEngineImg){
+            str.sprintf(("%03d_Pixel.jpg"), 300+i);
+            SaveOutImage(tmp, pData, str, false);
+        }
+
+        CvPoint2D32f pt1;
+        CvPoint2D32f pt2;
+        MeasureBySubpixelEdge(pData, tmp, pt1, pt2);
+
+        cv:Mat m = cvarrToMat(iplImg);
+        pt1.x += (r.x + rect.left());
+        pt1.y += (r.y + rect.top());
+        pt2.x += (r.x + rect.left());
+        pt2.y += (r.y + rect.top());
+        cv::arrowedLine(m, pt1, pt2, CV_RGB(0, 255, 0), 1, 8, 0, 0.05);
+        cv::arrowedLine(m, pt2, pt1, CV_RGB(0, 255, 0), 1, 8, 0, 0.05);
+
+        QString text;
+        text.sprintf("%.2f", pt2.x-pt1.x);
+        cvPutText(iplImg, text.toLatin1(), cvPoint(pt1.x, (pt1.y+pt2.y)/2-14), &font, cvScalar(0, 0, 0, 0));
+        text.sprintf("%.2f", pt2.y-pt1.y);
+        cvPutText(iplImg, text.toLatin1(), cvPoint(pt1.x, (pt1.y+pt2.y)/2+14), &font, cvScalar(0, 0, 0, 0));
+
+
+        MeasureByCannyEdge(pData, tmp);
+        if (m_bSaveEngineImg){
+            str.sprintf(("%03d_PixelCanny.jpg"), 400+i);
+            SaveOutImage(tmp, pData, str, false);
+        }
+
+        if (tmp) cvReleaseImage(&tmp);
+    }
+
+    if (mask) cvReleaseImage(&mask);
+
+    //cvShowImage("iplImg", iplImg);
+    theMainWindow->outWidget("result", iplImg);
+
+     return 0;
+}
+
+/*
+
+import cv2
+import numpy as np
+
+def find_if_close(cnt1,cnt2):
+    row1,row2 = cnt1.shape[0],cnt2.shape[0]
+    for i in xrange(row1):
+        for j in xrange(row2):
+            dist = np.linalg.norm(cnt1[i]-cnt2[j])
+            if abs(dist) < 50 :
+                return True
+            elif i==row1-1 and j==row2-1:
+                return False
+
+img = cv2.imread('dspcnt.jpg')
+gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+ret,thresh = cv2.threshold(gray,127,255,0)
+contours,hier = cv2.findContours(thresh,cv2.RETR_EXTERNAL,2)
+
+LENGTH = len(contours)
+status = np.zeros((LENGTH,1))
+
+for i,cnt1 in enumerate(contours):
+    x = i
+    if i != LENGTH-1:
+        for j,cnt2 in enumerate(contours[i+1:]):
+            x = x+1
+            dist = find_if_close(cnt1,cnt2)
+            if dist == True:
+                val = min(status[i],status[x])
+                status[x] = status[i] = val
+            else:
+                if status[x]==status[i]:
+                    status[x] = i+1
+
+unified = []
+maximum = int(status.max())+1
+for i in xrange(maximum):
+    pos = np.where(status==i)[0]
+    if pos.size != 0:
+        cont = np.vstack(contours[i] for i in pos)
+        hull = cv2.convexHull(cont)
+        unified.append(hull)
+
+cv2.drawContours(img,unified,-1,(0,255,0),2)
+cv2.drawContours(thresh,unified,-1,255,-1)
+
+ */
+
+/*
+
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include <stdlib.h>
+#include <stdio.h>
+
+using namespace cv;
+using namespace std;
+
+vector<Point> contoursConvexHull( vector<vector<Point> > contours )
+{
+    vector<Point> result;
+    vector<Point> pts;
+    for ( size_t i = 0; i< contours.size(); i++)
+        for ( size_t j = 0; j< contours[i].size(); j++)
+            pts.push_back(contours[i][j]);
+    convexHull( pts, result );
+    return result;
+}
+
+int main( int, char** argv )
+{
+    Mat src, srcGray,srcBlur,srcCanny;
+
+    src = imread( argv[1], 1 );
+    cvtColor(src, srcGray, CV_BGR2GRAY);
+    blur(srcGray, srcBlur, Size(3, 3));
+
+    Canny(srcBlur, srcCanny, 0, 100, 3, true);
+
+    vector<vector<Point> > contours;
+
+    findContours( srcCanny, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+
+    Mat drawing = Mat::zeros(srcCanny.size(), CV_8UC3);
+
+    for (int i = 0; i< contours.size(); i++)
+    {
+        Scalar color = Scalar( 255,255,255);
+        drawContours( drawing, contours, i, color, 2 );
+    }
+
+    vector<Point> ConvexHullPoints =  contoursConvexHull(contours);
+
+    polylines( drawing, ConvexHullPoints, true, Scalar(0,0,255), 2 );
+    imshow("Contours", drawing);
+
+    polylines( src, ConvexHullPoints, true, Scalar(0,0,255), 2 );
+    imshow("contoursConvexHull", src);
+    waitKey();
+    return 0;
+}
+
+ */

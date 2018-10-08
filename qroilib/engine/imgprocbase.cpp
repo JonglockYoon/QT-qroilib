@@ -252,7 +252,10 @@ int CImgProcBase::GetAngleABC(Point a, Point b, Point c)
     return (int)floor(alpha * 180.0 / CV_PI + 0.5);
 }
 
-
+//
+// 이미지의 중심에 Edge가 위치하고 있어야한다. 즉, Threshold등을 통하여 찾고자하는 Edge를
+// 중심부에 위치를 해 놓아야 정확한 subpixel edge(경사가 가파른 구간)위치를구한다.
+//
 double CImgProcBase::SubPixelRampEdgeImage(IplImage* edgeImage, int nDir)
 {
     vector<cv::Point2f> vecEdges;

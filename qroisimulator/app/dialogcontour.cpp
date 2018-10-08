@@ -306,6 +306,8 @@ void DialogContour::ExecContour(IplImage* iplImg, IplImage* iplImg2)
 
 void DialogContour::DrawContour(IplImage* iplImg)
 {
+    cvShowImage("iplImg", iplImg);
+
     if (outImg) {
         if (outImg->width != iplImg->width || outImg->height != iplImg->height) {
             cvReleaseImage(&outImg);
@@ -323,7 +325,7 @@ void DialogContour::DrawContour(IplImage* iplImg)
 
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* contours = 0;
-    cvFindContours(iplImg, storage, &contours, sizeof(CvContour), CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    cvFindContours(iplImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
     cvZero(outImg);
     if (!bApproxPoly) {
