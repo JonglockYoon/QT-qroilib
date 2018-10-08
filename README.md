@@ -1,5 +1,5 @@
 # qroilib
-QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.7)
+QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.8)
 -----
 <pre>
 0.0.2 : blobcontour.h update
@@ -7,6 +7,7 @@ QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.7)
 0.0.4 : update BlobLib
 0.0.6 : update CImgProcBase::FilterLargeDiameter()
 0.0.7 : update CImgProcBase::AffineTransform()
+0.0.8 : update OrthogonalRenderer::drawRoiObject()
 </pre>
 -----
 
