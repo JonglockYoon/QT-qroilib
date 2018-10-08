@@ -1,5 +1,5 @@
 # qroilib
-QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.7)
+QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.8)
 -----
 <pre>
 0.0.2 : blobcontour.h update
@@ -7,6 +7,7 @@ QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.7)
 0.0.4 : update BlobLib
 0.0.6 : update CImgProcBase::FilterLargeDiameter()
 0.0.7 : update CImgProcBase::AffineTransform()
+0.0.8 : update OrthogonalRenderer::drawRoiObject()
 </pre>
 -----
 
@@ -28,6 +29,10 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 다음 블로그에 각 Program의 설명들이 있습니다.
 </pre>
+https://blog.naver.com/jerry1455/221371946121 - qroilib compile and run on Raspberry pi
+https://blog.naver.com/jerry1455/221370404281 - qroilib ImgProcBase class APIs
+https://blog.naver.com/jerry1455/221370304964 - qroilib compile and run on ubuntu 18.04
+https://blog.naver.com/jerry1455/221369110092 - qroilib Simulator (OpenCV FFT, Pattern Erase)
 https://blog.naver.com/jerry1455/221360187807 - qroilib Simulator (OpenCV code scanner, color detect)
 https://blog.naver.com/jerry1455/221359626135 - qroilib Simulator (OpenCV feature detect, matching)
 https://blog.naver.com/jerry1455/221355750336 - qroilib Simulator (OpenCV contour extract)
