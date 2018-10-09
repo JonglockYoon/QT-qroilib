@@ -501,7 +501,7 @@ IplImage* ViewMainPage::getIplcolor()
         cvCopy(iplImg, colorImg);
     else if (iplImg->nChannels == 4) {
         if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
-            cvCvtColor(iplImg, colorImg, CV_BGRA2BGR);
+            cvCvtColor(iplImg, colorImg, CV_BGRA2RGB);
         else
             cvCvtColor(iplImg, colorImg, CV_RGBA2RGB);
     }
@@ -553,12 +553,18 @@ bool ViewMainPage::eventFilter(QObject *obj, QEvent *event)
                 int g = src.green();
                 int b = src.blue();
 
+                cv::Mat HSV;
+                cv::Mat RGB(1,1,CV_8UC3,cv::Scalar(b,g,r));
+                cv::cvtColor(RGB, HSV,CV_BGR2HSV);
+                cv::Vec3b hsv=HSV.at<cv::Vec3b>(0,0);
+                int H=(int)hsv.val[0]; // 0 ~ 179
+
                 QString str, str1;
                 str.sprintf("x:%d y:%d  r:%d g:%d b:%d", x,y ,r,g,b);
                 double gray = r * 0.2126f + g * 0.7152f + b * 0.0722f;
                 if (gray < 0.0) gray = 0;
                 if (gray > 255.0) gray = 255;
-                str1.sprintf(" Gray: %3.0f", ceil(gray));
+                str1.sprintf(" Hue:%d Gray: %3.0f", H, ceil(gray));
                 str += str1;
 
                 mStatusLabel->setText(str);

@@ -410,13 +410,16 @@ void MainWindow::setMeasureImage()
     IplImage *iplImg = pView->getIplgray();
     if (iplImg == nullptr)
         return;
+    IplImage *colorImg = pView->getIplcolor();
+    if (colorImg == nullptr)
+        return;
 
     RoiObject *pData = nullptr;
     for (const Layer *layer : v->mRoi->objectGroups()) {
         const ObjectGroup &objectGroup = *static_cast<const ObjectGroup*>(layer);
         for (const Qroilib::RoiObject *roiObject : objectGroup) {
             pData = (RoiObject *)roiObject;
-            pImgProcEngine->MeasureLCDPixelSize(pData, iplImg);
+            pImgProcEngine->MeasureLCDPixelSize(pData, iplImg, colorImg);
         }
     }
 }

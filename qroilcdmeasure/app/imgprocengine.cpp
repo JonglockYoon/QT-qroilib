@@ -2,9 +2,6 @@
 //
 //Copyright 2018, Created by Yoon Jong-lock <jerry1455@gmail>
 //
-// Qroilib를 이용할때 이용가능한 opencv함수들을 모아놓은 module이다.
-// application개발시 필요한 함수들만 다시 구성해서 새로운 engine module을 만드는것이
-// 유지보수에 이롭다.
 //
 #include <stdio.h>
 #include <QDir>
@@ -1390,7 +1387,6 @@ const int AreaSize = 7;
 
 int CImgProcEngine::AdaptiveThreshold(IplImage* grayImg, IplImage* outImg)
 {
-    QString str;
     int nBlkSize = WinSize;//Local variable binarize window size
     int C = AreaSize;//Local variable binarize threshold
 
@@ -1469,7 +1465,6 @@ int CImgProcEngine::MakeMask(RoiObject *pData, IplImage* grayImg, int nDbg)
         CvRect r = p->GetBoundingBox();
         cvDrawRect(grayImg, CvPoint(r.x, r.y),CvPoint(r.x+r.width, r.y+r.height), CvScalar(255,255,255), CV_FILLED);
     }
-    //cvDilate(grayImg, grayImg, nullptr, 2);
 
     if (m_bSaveEngineImg){
         str.sprintf(("%03d_Mask2.jpg"), nDbg+1);
@@ -1479,7 +1474,7 @@ int CImgProcEngine::MakeMask(RoiObject *pData, IplImage* grayImg, int nDbg)
     return 0;
 }
 
-int CImgProcEngine::MeasureByCannyEdge(RoiObject *pData, IplImage* grayImg)
+int CImgProcEngine::MeasureByCannyEdge(RoiObject *pData, IplImage* grayImg, int nDbg)
 {
     QString str;
     try {
@@ -1489,44 +1484,73 @@ int CImgProcEngine::MeasureByCannyEdge(RoiObject *pData, IplImage* grayImg)
         return -1;
     }
 
-    cvCanny(grayImg, grayImg, 11, 25);
+    cvCanny(grayImg, grayImg, 11, 15);
+    if (m_bSaveEngineImg){
+        str.sprintf(("%03d_Canny.jpg"), 400+nDbg);
+        SaveOutImage(grayImg, pData, str, false);
+    }
+
 
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* contours = 0;
     cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    IplImage* tmp = cvCloneImage(grayImg);
-    cvZero(tmp);
-    while (contours)
+    if (contours == nullptr) {
+        cvReleaseMemStorage(&storage);
+        return -1;
+    }
+
+    std::vector<CvSeq*> vecContours;
+    while (contours) {
+        vecContours.push_back(contours);
+        contours = contours->h_next;
+    }
+
+    cvZero(grayImg);
+    for (int i = 0; i < vecContours.size(); i++)
     {
-         CvSeq *c = contours;
-         for (int i = 0; i < c->total; i++)
-         {
-             CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, c, i);
-         }
-         contours = contours->h_next;
+        cvDrawContours(grayImg, vecContours[i], CVX_WHITE, CVX_WHITE, 1, 2, 8);
+    }
 
-         //Scalar color = Scalar( 255,255,255);
-         //cvDrawContours(tmp, contours, color, color, 2, 1, 8, cvPoint(0, 0));
-     }
-     cvReleaseMemStorage(&storage);
+    for (int i = 0; i < vecContours.size(); i++)
+    {
+        CvSeq *c1 = vecContours[i];
+        for (int j = 0; j < vecContours.size(); j++)
+        {
+            CvSeq *c2 = vecContours[j];
+            if (c1 == c2)
+                continue;
+            CvPoint* cp1 = nullptr;
+            CvPoint* cp2 = nullptr;
+            double d1 = 9999.0;
+            bool find_if_close = false;
+            for (int k1 = 0; k1 < c1->total; k1++)
+            {
+                CvPoint* p1 = CV_GET_SEQ_ELEM(CvPoint, c1, k1);
+                for (int k2 = 0; k2 < c2->total; k2++)
+                {
+                    CvPoint* p2 = CV_GET_SEQ_ELEM(CvPoint, c2, k2);
+                    double d = GetDistance2D(*p1, *p2);
+                    if (d < 5) { // 5 pixel
+                        find_if_close = true;
+                        if (d < d1) {
+                            cp1 = p1;
+                            cp2 = p2;
+                            d1 = d;
+                        }
+                    }
+                }
+            }
+            if (find_if_close) {
+                 cvLine(grayImg, *cp1, *cp2, CV_RGB(255,255,255), 2, 8, 0);
+            }
+        }
+    }
 
-#if 0
-
-     vector<Point> ConvexHullPoints =  contoursConvexHull(contours);
-
-     polylines( drawing, ConvexHullPoints, true, Scalar(0,0,255), 2 );
-     imshow("Contours", drawing);
-
-     polylines( src, ConvexHullPoints, true, Scalar(0,0,255), 2 );
-#endif
-
+    cvReleaseMemStorage(&storage);
 }
 
 int CImgProcEngine::MeasureBySubpixelEdge(RoiObject *pData, IplImage* grayImg, CvPoint2D32f &pt1, CvPoint2D32f &pt2)
 {
-    //x : 50 ~ 60
-    //y : 40 ~ 150
-
     IplImage* croppedImage;
 
     cvSetImageROI(grayImg, cvRect(0, 40, 12, 100));
@@ -1562,7 +1586,27 @@ int CImgProcEngine::MeasureBySubpixelEdge(RoiObject *pData, IplImage* grayImg, C
     return 0;
 }
 
-int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
+int CImgProcEngine::ColorCheck(IplImage *tmp, IplImage *colorImg, QString &str)
+{
+    IplImage *tmp1 = cvCreateImage(cvSize(colorImg->width, colorImg->height), colorImg->depth, colorImg->nChannels);
+    cvConvertImage(tmp, tmp1,  CV_GRAY2RGB);
+    cvAnd(colorImg, tmp1, colorImg);
+    if (tmp1) cvReleaseImage(&tmp1);
+
+    Mat img_hsv;
+    Mat m1 = cvarrToMat(colorImg);
+    cvtColor(m1, img_hsv, COLOR_RGB2HSV);
+
+    Mat channels[3];
+    split(img_hsv, channels);
+    Scalar average = mean(channels[0], cvarrToMat(tmp));
+
+    str.sprintf("H:%.1f", average.val[0]);
+
+    return 0;
+}
+
+int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg, IplImage *colorImg)
 {    
     QString str;
     IplImage* croppedImage;
@@ -1616,7 +1660,6 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
         cvSetImageROI(croppedImage, cvRect(r.x, r.y, r.width, r.height));
         tmp = cvCreateImage(cvSize(r.width, r.height), croppedImage->depth, croppedImage->nChannels);
         cvCopy(croppedImage, tmp);
-        cvResetImageROI(croppedImage);
 
 
         if (m_bSaveEngineImg){
@@ -1624,6 +1667,9 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
             SaveOutImage(tmp, pData, str, false);
         }
 
+        //
+        // MeasureBySubpixelEdge
+        //
         CvPoint2D32f pt1;
         CvPoint2D32f pt2;
         MeasureBySubpixelEdge(pData, tmp, pt1, pt2);
@@ -1646,134 +1692,70 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg)
         if (dx > 0 && dx < 20) {
             CvPoint2D32f pt3 = CvPoint2D32f(oldpt2.x, pt1.y+35);
             CvPoint2D32f pt4 = CvPoint2D32f(pt1.x, pt1.y+35);
-            cv::arrowedLine(m, pt3, pt4, CV_RGB(0, 255, 0), 1, 8, 0, 0.01);
-            cv::arrowedLine(m, pt4, pt3, CV_RGB(0, 255, 0), 1, 8, 0, 0.01);
+            cv::line(m, pt3, pt4, CV_RGB(0, 255, 0), 1, 8);
 
             text.sprintf("%.2f", dx);
             cvPutText(iplImg, text.toLatin1(), cvPoint(pt1.x-20, pt1.y+30), &font, cvScalar(0, 0, 0, 0));
         }
+        oldpt2 = pt2;
+        //
+        // MeasureByCannyEdge
+        //
+        cvCopy(croppedImage, tmp);
+        MeasureByCannyEdge(pData, tmp, i);
+        cvResetImageROI(croppedImage);
 
+        CBlobResult blobs1;
+        blobs1 = CBlobResult(tmp, nullptr);
+        int nBlobs = blobs1.GetNumBlobs();
+        cvZero(tmp);
+        for (int i = 0; i < nBlobs; i++) {
+            CBlob *p = blobs1.GetBlob(i);
+            if (p->Perimeter() < 100)
+                continue;
+            p->FillBlob(tmp, CV_RGB(255, 255, 255));
+        }
 
-        MeasureByCannyEdge(pData, tmp);
+        int filterSize = 20;
+        IplConvKernel *element = nullptr;
+        element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
+        cvMorphologyEx(tmp, tmp, nullptr, element, CV_MOP_OPEN, 1);
+        cvReleaseStructuringElement(&element);
+
+        cvErode(tmp, tmp, nullptr, 1);
+
         if (m_bSaveEngineImg){
-            str.sprintf(("%03d_PixelCanny.jpg"), 400+i);
+            str.sprintf(("%03d_Blob.jpg"), 600+i);
             SaveOutImage(tmp, pData, str, false);
         }
 
-        if (tmp) cvReleaseImage(&tmp);
-        oldpt2 = pt2;
-    }
+        //
+        // Measure Color
+        //
+        cvSetImageROI(colorImg, cvRect(left_top.x+r.x, left_top.y+r.y, r.width, r.height));
+        IplImage *croppedImage1 = cvCreateImage(cvSize(r.width, r.height), colorImg->depth, colorImg->nChannels);
+        cvCopy(colorImg, croppedImage1);
+        cvResetImageROI(colorImg);
 
+
+        ColorCheck(tmp, croppedImage1, str);
+        cvPutText(iplImg, str.toLatin1(), cvPoint(pt1.x, pt2.y-30), &font, cvScalar(0, 0, 0, 0));
+
+        if (m_bSaveEngineImg){
+            str.sprintf(("%03d_Color.jpg"), 700+i);
+            SaveOutImage(croppedImage1, pData, str, false);
+        }
+
+        if (croppedImage1) cvReleaseImage(&croppedImage1);
+
+        if (tmp) cvReleaseImage(&tmp);
+
+    } // for (int i = 0; i < nBlobs; i++)
     if (mask) cvReleaseImage(&mask);
+
 
     //cvShowImage("iplImg", iplImg);
     theMainWindow->outWidget("result", iplImg);
 
      return 0;
 }
-
-/*
-
-import cv2
-import numpy as np
-
-def find_if_close(cnt1,cnt2):
-    row1,row2 = cnt1.shape[0],cnt2.shape[0]
-    for i in xrange(row1):
-        for j in xrange(row2):
-            dist = np.linalg.norm(cnt1[i]-cnt2[j])
-            if abs(dist) < 50 :
-                return True
-            elif i==row1-1 and j==row2-1:
-                return False
-
-img = cv2.imread('dspcnt.jpg')
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-ret,thresh = cv2.threshold(gray,127,255,0)
-contours,hier = cv2.findContours(thresh,cv2.RETR_EXTERNAL,2)
-
-LENGTH = len(contours)
-status = np.zeros((LENGTH,1))
-
-for i,cnt1 in enumerate(contours):
-    x = i
-    if i != LENGTH-1:
-        for j,cnt2 in enumerate(contours[i+1:]):
-            x = x+1
-            dist = find_if_close(cnt1,cnt2)
-            if dist == True:
-                val = min(status[i],status[x])
-                status[x] = status[i] = val
-            else:
-                if status[x]==status[i]:
-                    status[x] = i+1
-
-unified = []
-maximum = int(status.max())+1
-for i in xrange(maximum):
-    pos = np.where(status==i)[0]
-    if pos.size != 0:
-        cont = np.vstack(contours[i] for i in pos)
-        hull = cv2.convexHull(cont)
-        unified.append(hull)
-
-cv2.drawContours(img,unified,-1,(0,255,0),2)
-cv2.drawContours(thresh,unified,-1,255,-1)
-
- */
-
-/*
-
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include <stdlib.h>
-#include <stdio.h>
-
-using namespace cv;
-using namespace std;
-
-vector<Point> contoursConvexHull( vector<vector<Point> > contours )
-{
-    vector<Point> result;
-    vector<Point> pts;
-    for ( size_t i = 0; i< contours.size(); i++)
-        for ( size_t j = 0; j< contours[i].size(); j++)
-            pts.push_back(contours[i][j]);
-    convexHull( pts, result );
-    return result;
-}
-
-int main( int, char** argv )
-{
-    Mat src, srcGray,srcBlur,srcCanny;
-
-    src = imread( argv[1], 1 );
-    cvtColor(src, srcGray, CV_BGR2GRAY);
-    blur(srcGray, srcBlur, Size(3, 3));
-
-    Canny(srcBlur, srcCanny, 0, 100, 3, true);
-
-    vector<vector<Point> > contours;
-
-    findContours( srcCanny, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
-
-    Mat drawing = Mat::zeros(srcCanny.size(), CV_8UC3);
-
-    for (int i = 0; i< contours.size(); i++)
-    {
-        Scalar color = Scalar( 255,255,255);
-        drawContours( drawing, contours, i, color, 2 );
-    }
-
-    vector<Point> ConvexHullPoints =  contoursConvexHull(contours);
-
-    polylines( drawing, ConvexHullPoints, true, Scalar(0,0,255), 2 );
-    imshow("Contours", drawing);
-
-    polylines( src, ConvexHullPoints, true, Scalar(0,0,255), 2 );
-    imshow("contoursConvexHull", src);
-    waitKey();
-    return 0;
-}
-
- */
