@@ -20,7 +20,7 @@ LIBS += -L"..\qroilib\pthread"
 CONFIG(debug, debug|release) {
 #LIBS += -lopencv_core320d -lopencv_imgproc320d -lopencv_highgui320d -lopencv_videoio320d -lopencv_imgcodecs320d -lopencv_shape320d
 LIBS += -lopencv_world340d
-#LIBS += "..\winlib\Debug\qroilib.lib"
+LIBS += "..\winlib\Debug\qroilib.lib"
 LIBS += "..\winlib\Debug\jpeg.lib"
 LIBS += "..\winlib\Debug\png.lib"
 LIBS += "..\winlib\Debug\zlib.lib"

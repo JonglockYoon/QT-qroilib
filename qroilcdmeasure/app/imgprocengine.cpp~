@@ -1699,6 +1699,7 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg, IplI
         }
         oldpt2 = pt2;
         //
+<<<<<<< HEAD
         // Make Mask using CannyEdge
         //
         cvCopy(croppedImage, tmp);
@@ -1725,6 +1726,33 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg, IplI
 
         cvErode(tmp, tmp, nullptr, 1);
 
+=======
+        // MeasureByCannyEdge
+        //
+        cvCopy(croppedImage, tmp);
+        MeasureByCannyEdge(pData, tmp, i);
+        cvResetImageROI(croppedImage);
+
+        CBlobResult blobs1;
+        blobs1 = CBlobResult(tmp, nullptr);
+        int nBlobs = blobs1.GetNumBlobs();
+        cvZero(tmp);
+        for (int i = 0; i < nBlobs; i++) {
+            CBlob *p = blobs1.GetBlob(i);
+            if (p->Perimeter() < 100)
+                continue;
+            p->FillBlob(tmp, CV_RGB(255, 255, 255));
+        }
+
+        int filterSize = 20;
+        IplConvKernel *element = nullptr;
+        element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
+        cvMorphologyEx(tmp, tmp, nullptr, element, CV_MOP_OPEN, 1);
+        cvReleaseStructuringElement(&element);
+
+        cvErode(tmp, tmp, nullptr, 1);
+
+>>>>>>> f91fbee8c90a33d2766ceeb3b2cfc006119dc51e
         if (m_bSaveEngineImg){
             str.sprintf(("%03d_Blob.jpg"), 600+i);
             SaveOutImage(tmp, pData, str, false);
