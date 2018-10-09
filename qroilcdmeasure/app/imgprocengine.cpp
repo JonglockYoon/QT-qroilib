@@ -1760,7 +1760,3 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg, IplI
 
      return 0;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f91fbee8c90a33d2766ceeb3b2cfc006119dc51e
