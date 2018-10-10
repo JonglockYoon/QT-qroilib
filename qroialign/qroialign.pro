@@ -40,6 +40,7 @@ LIBS += "..\winlib\Release\QZXing2.lib"
 LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
+INCLUDEPATH += "..\qroilib\pthread"
 #INCLUDEPATH += "c:\opencv340\build\include"
 TARGET = ../../bin/qroialign
 }

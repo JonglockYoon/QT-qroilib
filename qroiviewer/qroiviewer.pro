@@ -33,6 +33,7 @@ LIBS += "..\winlib\Release\lcms2.lib"
 LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include"
+INCLUDEPATH += "..\qroilib\pthread"
 TARGET = ../../bin/qroiviewer
 }
 
