@@ -982,8 +982,7 @@ void DialogApplication::ColorDetect(IplImage* iplImg, IplImage* iplImg2)
 
 
         //HSV로 변환
-//        cvtColor(img_frame, img_hsv, COLOR_BGR2HSV);
-        cvtColor(img_frame, img_hsv, COLOR_RGB2HSV);
+        cvtColor(img_frame, img_hsv, COLOR_BGR2HSV);
 
 
         //지정한 HSV 범위를 이용하여 영상을 이진화
