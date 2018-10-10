@@ -57,7 +57,7 @@ public  Q_SLOTS:
     void finishNewRoiObject();
 
     void setThreshold();
-    void setMopology();
+    void setmorphology();
     void setEdge();
     void setBlob();
     void setContour();

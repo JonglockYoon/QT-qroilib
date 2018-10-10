@@ -63,7 +63,7 @@ struct MainWindow::Private
     QAction *exitAct;
 
     QAction *thresholdImage;
-    QAction *mopologyImage;
+    QAction *morphologyImage;
     QAction *edgeImage;
     QAction *blobImage;
     QAction *contourImage;
@@ -103,8 +103,8 @@ struct MainWindow::Private
 
         thresholdImage = new QAction(QIcon(), tr("&Threshold Image ..."), q);
         connect(thresholdImage, SIGNAL(triggered(bool)), q, SLOT(setThreshold()));
-        mopologyImage = new QAction(QIcon(), tr("&Mopology Image ..."), q);
-        connect(mopologyImage, SIGNAL(triggered(bool)), q, SLOT(setMopology()));
+        morphologyImage = new QAction(QIcon(), tr("&morphology Image ..."), q);
+        connect(morphologyImage, SIGNAL(triggered(bool)), q, SLOT(setmorphology()));
         edgeImage = new QAction(QIcon(), tr("&Edge Image ..."), q);
         connect(edgeImage, SIGNAL(triggered(bool)), q, SLOT(setEdge()));
         blobImage = new QAction(QIcon(), tr("&Blob Image ..."), q);
@@ -130,7 +130,7 @@ struct MainWindow::Private
 
         simulatorMenu = new QMenu(tr("&Simulator"), q);
         simulatorMenu->addAction(thresholdImage);
-        simulatorMenu->addAction(mopologyImage);
+        simulatorMenu->addAction(morphologyImage);
         simulatorMenu->addAction(edgeImage);
         simulatorMenu->addAction(blobImage);
         simulatorMenu->addAction(contourImage);
@@ -392,7 +392,7 @@ void MainWindow::setThreshold()
     //dlgthreshold->raise();
 }
 
-void MainWindow::setMopology()
+void MainWindow::setmorphology()
 {
     DialogMorphology *dlgmorphology;
     dlgmorphology = new DialogMorphology(this);
