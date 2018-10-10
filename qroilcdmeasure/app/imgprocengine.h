@@ -75,7 +75,7 @@ public:
     int AdaptiveThreshold(IplImage* grayImg, IplImage* outImg);
     int MakeMask(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg);
 
-    int ColorCheck(IplImage *tmp, IplImage *colorImg, QString &str);
+    int ColorCheck(IplImage *mask, IplImage *colorImg, QString &str);
     int MeasureBySubpixelEdge(Qroilib::RoiObject *pData, IplImage* grayImg, CvPoint2D32f &pt1, CvPoint2D32f &pt2);
     int MakeMaskUsingCannyEdge(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg);
     int MeasureLCDPixelSize(Qroilib::RoiObject *pData, IplImage* iplImg, IplImage *colorImg);

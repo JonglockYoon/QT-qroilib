@@ -137,13 +137,13 @@ void qimage_to_mat(const QImage* image, cv::OutputArray out)
         case QImage::Format_RGB888:
         {
             cv::Mat view(image->height(),image->width(),CV_8UC3,(void *)image->constBits(),image->bytesPerLine());
-            cv::cvtColor(view, out, cv::COLOR_RGB2BGR);
+            view.copyTo(out);
             break;
         }
         default:
         {
-            QImage conv = image->convertToFormat(QImage::Format_ARGB32);
-            cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(),conv.bytesPerLine());
+            //QImage conv = image->convertToFormat(QImage::Format_ARGB32);
+            cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)image->constBits(),image->bytesPerLine());
             view.copyTo(out);
             break;
         }

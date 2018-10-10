@@ -1426,7 +1426,7 @@ int CImgProcEngine::MakeMask(RoiObject *pData, IplImage* grayImg, int nDbg)
     int filterSize = 3;
     IplConvKernel *element = nullptr;
     element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
-    cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_CLOSE, 1);
+    cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_OPEN, 1);
     cvReleaseStructuringElement(&element);
 
     if (m_bSaveEngineImg){
@@ -1586,20 +1586,20 @@ int CImgProcEngine::MeasureBySubpixelEdge(RoiObject *pData, IplImage* grayImg, C
     return 0;
 }
 
-int CImgProcEngine::ColorCheck(IplImage *tmp, IplImage *colorImg, QString &str)
+int CImgProcEngine::ColorCheck(IplImage *mask, IplImage *colorImg, QString &str)
 {
     IplImage *tmp1 = cvCreateImage(cvSize(colorImg->width, colorImg->height), colorImg->depth, colorImg->nChannels);
-    cvConvertImage(tmp, tmp1,  CV_GRAY2RGB);
+    cvConvertImage(mask, tmp1,  CV_GRAY2RGB);
     cvAnd(colorImg, tmp1, colorImg);
     if (tmp1) cvReleaseImage(&tmp1);
 
     Mat img_hsv;
     Mat m1 = cvarrToMat(colorImg);
-    cvtColor(m1, img_hsv, COLOR_RGB2HSV);
+    cvtColor(m1, img_hsv, COLOR_BGR2HSV);
 
     Mat channels[3];
     split(img_hsv, channels);
-    Scalar average = mean(channels[0], cvarrToMat(tmp));
+    Scalar average = mean(channels[0], cvarrToMat(mask));
 
     str.sprintf("H:%.1f", average.val[0]);
 
@@ -1739,11 +1739,13 @@ int CImgProcEngine::MeasureLCDPixelSize(RoiObject *pData, IplImage* iplImg, IplI
         cvResetImageROI(colorImg);
 
 
+
+
         ColorCheck(tmp, croppedImage1, str);
         cvPutText(iplImg, str.toLatin1(), cvPoint(pt1.x, pt2.y-30), &font, cvScalar(0, 0, 0, 0));
 
         if (m_bSaveEngineImg){
-            str.sprintf(("%03d_Color.jpg"), 700+i);
+            str.sprintf(("%03d_Color2.jpg"), 700+i);
             SaveOutImage(croppedImage1, pData, str, false);
         }
 

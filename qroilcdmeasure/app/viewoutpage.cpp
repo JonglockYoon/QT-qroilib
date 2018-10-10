@@ -383,6 +383,18 @@ IplImage* ViewOutPage::getIplcolor()
             cvCvtColor(iplImg, colorImg, CV_BGRA2RGB);
         else
             cvCvtColor(iplImg, colorImg, CV_RGBA2RGB);
+
+        int step = colorImg->widthStep;
+        int width = colorImg->width;
+        int height = colorImg->height;
+        char *u = colorImg->imageData;
+        for (int y=0; y<height; y++) {
+            for (int x=0; x<width; x++) {
+                char tmp = u[y*step + x*3+2];
+                u[y*step + x*3+2] = u[y*step + x*3+0];
+                u[y*step + x*3+0] = tmp;
+            }
+        }
     }
     return colorImg;
 }
