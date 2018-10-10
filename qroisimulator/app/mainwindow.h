@@ -56,6 +56,7 @@ public  Q_SLOTS:
     void setDialogcamera();
     void finishNewRoiObject();
 
+    void setGrayImage();
     void setThreshold();
     void setmorphology();
     void setEdge();

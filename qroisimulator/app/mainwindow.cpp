@@ -62,6 +62,7 @@ struct MainWindow::Private
     QAction *dialogCamera;
     QAction *exitAct;
 
+    QAction *grayImage;
     QAction *thresholdImage;
     QAction *morphologyImage;
     QAction *edgeImage;
@@ -101,6 +102,8 @@ struct MainWindow::Private
         exitAct->setShortcuts(QKeySequence::Quit);
         connect(exitAct, SIGNAL(triggered()), q, SLOT(close()));
 
+        grayImage = new QAction(QIcon(), tr("&Gray Image ..."), q);
+        connect(grayImage, SIGNAL(triggered(bool)), q, SLOT(setGrayImage()));
         thresholdImage = new QAction(QIcon(), tr("&Threshold Image ..."), q);
         connect(thresholdImage, SIGNAL(triggered(bool)), q, SLOT(setThreshold()));
         morphologyImage = new QAction(QIcon(), tr("&morphology Image ..."), q);
@@ -129,6 +132,7 @@ struct MainWindow::Private
         fileMenu->addAction(exitAct);
 
         simulatorMenu = new QMenu(tr("&Simulator"), q);
+        simulatorMenu->addAction(grayImage);
         simulatorMenu->addAction(thresholdImage);
         simulatorMenu->addAction(morphologyImage);
         simulatorMenu->addAction(edgeImage);
@@ -382,6 +386,23 @@ void MainWindow::outWidget(QString title, IplImage* iplImg)
         pImgView->setScalerSmooth(true);
     }
     myWidget->show();
+}
+
+void MainWindow::setGrayImage()
+{
+    ViewMainPage* pView = viewMainPage();
+    if (!pView)
+        return;
+    Qroilib::DocumentView* v = currentView();
+    if (!v)
+        return;
+
+    QImage img;
+    IplImage* grayImage = pView->getIplgray();
+    mat_to_qimage(cv::cvarrToMat(grayImage), img);
+
+    v->document()->setImageInternal(img);
+    v->imageView()->updateBuffer();
 }
 
 void MainWindow::setThreshold()
