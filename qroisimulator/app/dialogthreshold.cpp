@@ -369,6 +369,7 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
 
     cv::calcHist(&greyImg, 1, channel_numbers, Mat(), histogram, 1, histSize, ranges);
 
+    // Histogram의 상하 25%를 구합니다.
     //Lower Cutoff Value
     double lowtotalcount=0;
     double uppertotalcount=0;
@@ -386,17 +387,8 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
     }
     uchar *imageData;
     int imgStep;
-//    imageData = (uchar*)iplImg->imageData;
-//    imgStep = iplImg->widthStep;
-//    for (int i = 0; i < iplImg->height; i++) {
-//        for (int j = 0; j < iplImg->width; j++)
-//        {
-//            if(imageData[imgStep * i + j] < lower_cut) {
-//                imageData[imgStep * i + j] = 0;
-//            }
-//        }
-//    }
 
+    //High Cutoff Value
     for(int iv=histSize[0]-1; iv > 0; iv--){
         uppertotalcount += histogram.at<float>(iv);
         if(uppertotalcount >= rangeArea * 0.25) //25% under off
@@ -405,16 +397,6 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
             break;
         }
     }
-//    imageData = (uchar*)iplImg->imageData;
-//    imgStep = iplImg->widthStep;
-//    for (int i = 0; i < iplImg->height; i++) {
-//        for (int j = 0; j < iplImg->width; j++)
-//        {
-//            if(imageData[imgStep * i + j]> upper_cut) {
-//                imageData[imgStep * i + j] = 0;
-//            }
-//        }
-//    }
 
 #if 0
     // Plot the histogram
@@ -433,6 +415,7 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
     }
 #endif
 
+    //다시 상하 25% 범위의 Histogram을 구합니다.. - 상하 잡음들 제거 목적.
     MatND histogram1;
     channel_range[0] = lower_cut;
     channel_range[1] = upper_cut;
@@ -445,11 +428,11 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
     double med = -1.0;
     for ( int i = 0; i < histSize[0] && med < 0.0; ++i )
     {
-        bin += cvRound( histogram1.at< float >( i ) );
+        bin += cvRound( histogram1.at< float >( i ) ); // 정수형으로 변환할때 반올림을 한다.
         if ( bin > m && med < 0.0 )
             med = i;
     }
-    med += lower_cut;
+    med += lower_cut; //
 
     // 평균값을 기준으로 범위를 설정.
     // 0 ~ 255 범위를 나타낼려다보니 아래와 같은 수식이 나옴.
@@ -462,7 +445,7 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
         dBinarizeMax = (double)med * high / 100;
     }
 
-    double areaTotal = 0; // area 계산..
+    //double areaTotal = 0; // area 계산..
     imageData = (uchar*)iplImg->imageData;
     imgStep = iplImg->widthStep;
     for (int i = 0; i < iplImg->height; i++) {
@@ -470,7 +453,7 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
         {
             if(imageData[imgStep * i + j] >= dBinarize && imageData[imgStep * i + j] <= dBinarizeMax) {
                 imageData[imgStep * i + j] = 255;
-                areaTotal++;
+                //areaTotal++;
             } else {
                 imageData[imgStep * i + j] = 0;
             }
