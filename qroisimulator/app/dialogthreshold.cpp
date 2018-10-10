@@ -432,7 +432,13 @@ void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg
         if ( bin > m && med < 0.0 )
             med = i;
     }
-    med += lower_cut; //
+    med += lower_cut; // 평균위치를 구함.
+
+    /*
+    ex) 평균값(med) 50 ( 0 ~ 255 )
+    10 ~ 20% : 5 ~ 10 값 추출
+    100 ~ 120% : 50 ~ 140 값 추출
+    */
 
     // 평균값을 기준으로 범위를 설정.
     // 0 ~ 255 범위를 나타낼려다보니 아래와 같은 수식이 나옴.
