@@ -42,7 +42,7 @@ DialogThreshold::DialogThreshold(QWidget *parent) :
     ui->slidera1->setRange(0, 300);
     ui->slidera1->setValue(WinSize);
     ui->slidera1->setSingleStep(1);
-    ui->slidera2->setRange(0, 50);
+    ui->slidera2->setRange(-255, +255);
     ui->slidera2->setValue(AreaSize);
     ui->slidera2->setSingleStep(1);
 

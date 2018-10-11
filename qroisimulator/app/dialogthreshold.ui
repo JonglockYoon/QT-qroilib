@@ -76,7 +76,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Window size</string>
+    <string>Block size</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -152,7 +152,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Area size</string>
+    <string>C</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
