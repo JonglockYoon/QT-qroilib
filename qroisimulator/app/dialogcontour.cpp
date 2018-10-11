@@ -306,7 +306,7 @@ void DialogContour::ExecContour(IplImage* iplImg, IplImage* iplImg2)
 
 void DialogContour::DrawContour(IplImage* iplImg)
 {
-    cvShowImage("iplImg", iplImg);
+    //cvShowImage("iplImg", iplImg);
 
     if (outImg) {
         if (outImg->width != iplImg->width || outImg->height != iplImg->height) {
