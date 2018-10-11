@@ -29,9 +29,14 @@ DialogMorphology::DialogMorphology(QWidget *parent) :
 
 
     // Half size
-    ui->slidera1->setRange(0, 20);
+    ui->slidera1->setRange(0, 100);
     ui->slidera1->setValue(HalfSize);
-    ui->slidera1->setSingleStep(1);;
+    ui->slidera1->setSingleStep(1);
+
+    // Filter size
+    ui->slidera2->setRange(0, 100);
+    ui->slidera2->setValue(filterSize);
+    ui->slidera2->setSingleStep(1);
 
     connect(ui->comboBoxSource, SIGNAL(activated(int)), this, SLOT(activatedComboBoxSource(int)));
     QObject::connect(ui->chkBoxRealtime, SIGNAL(clicked(bool)), this, SLOT(changeRealtime(bool)));
@@ -42,6 +47,11 @@ DialogMorphology::DialogMorphology(QWidget *parent) :
     str = QString("%1").arg(HalfSize);
     ui->edita1->setText(str);
 
+    // Filter size
+    QObject::connect(ui->slidera2, SIGNAL(valueChanged(int)), this, SLOT(setValuea2(int)));
+    QObject::connect(ui->edita2, SIGNAL(textChanged(const QString &)), this, SLOT(setEditValuea2(const QString &)));
+    str = QString("%1").arg(filterSize);
+    ui->edita2->setText(str);
 
     ui->radioButtonErode->setChecked(true);
     ui->radioButtonRect->setChecked(true);
@@ -83,6 +93,19 @@ void DialogMorphology::setEditValuea1(const QString &val)
 {
     int pos = val.toInt();
     ui->slidera1->setValue(pos);
+}
+
+void DialogMorphology::setValuea2(int val)
+{
+    filterSize = val;
+    QString str = QString("%1").arg(val);
+    ui->edita2->setText(str);
+}
+
+void DialogMorphology::setEditValuea2(const QString &val)
+{
+    int pos = val.toInt();
+    ui->slidera2->setValue(pos);
 }
 
 void DialogMorphology::activatedComboBoxSource(int act)
@@ -244,7 +267,7 @@ void DialogMorphology::on_pushButtonExec_clicked()
 void DialogMorphology::ExecMorphology(IplImage* iplImg)
 {
     IplConvKernel *element = nullptr;
-    int filterSize = 3;  // 필터의 크기를 3으로 설정 (Noise out area)
+    //int filterSize = 3;  // 필터의 크기를 3으로 설정 (Noise out area)
 
     if (tmp) {
         if (tmp->width != iplImg->width || tmp->height != iplImg->height) {
@@ -263,10 +286,14 @@ void DialogMorphology::ExecMorphology(IplImage* iplImg)
     switch(method)
     {
         case 0: // Erode
-            cvErode(iplImg, tmp, nullptr, HalfSize);
+            element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, shape, nullptr);
+            cvErode(iplImg, tmp, element, HalfSize);
+            cvReleaseStructuringElement(&element);
             break;
         case 1: // Dilate
-            cvDilate(iplImg, tmp, nullptr, HalfSize);
+            element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, shape, nullptr);
+            cvDilate(iplImg, tmp, element, HalfSize);
+            cvReleaseStructuringElement(&element);
             break;
         case 2: // Open
             element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, shape, nullptr);

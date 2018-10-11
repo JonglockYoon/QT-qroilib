@@ -24,6 +24,8 @@ public:
 private slots:
     void setValuea1(int val);
     void setEditValuea1(const QString &);
+    void setValuea2(int val);
+    void setEditValuea2(const QString &);
     void changeRealtime(bool);
     void activatedComboBoxSource(int act);
 
@@ -68,6 +70,7 @@ private:
 
     IplImage* tmp = nullptr;
     int HalfSize = 1;
+    int filterSize = 3;
 };
 
 #endif // DIALOGMORPHOLOGY_H

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>319</width>
-    <height>372</height>
+    <height>404</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -23,7 +23,7 @@
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>333</y>
+     <y>360</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -186,12 +186,12 @@
      <rect>
       <x>160</x>
       <y>115</y>
-      <width>90</width>
+      <width>111</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Median</string>
+     <string>Median Smooth</string>
     </property>
    </widget>
    <widget class="QRadioButton" name="radioButtonGradient">
@@ -212,7 +212,7 @@
    <property name="geometry">
     <rect>
      <x>96</x>
-     <y>333</y>
+     <y>360</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -233,7 +233,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>340</y>
+     <y>367</y>
      <width>71</width>
      <height>16</height>
     </rect>
@@ -274,7 +274,7 @@
      <x>25</x>
      <y>170</y>
      <width>271</width>
-     <height>141</height>
+     <height>181</height>
     </rect>
    </property>
    <property name="title">
@@ -317,6 +317,57 @@
     </property>
     <property name="text">
      <string>Ellipse</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>23</x>
+      <y>140</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Filter size</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QSlider" name="slidera2">
+    <property name="geometry">
+     <rect>
+      <x>103</x>
+      <y>143</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>true</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal</string>
+    </property>
+    <property name="minimum">
+     <number>-13</number>
+    </property>
+    <property name="maximum">
+     <number>-1</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="edita2">
+    <property name="geometry">
+     <rect>
+      <x>204</x>
+      <y>140</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
     </property>
    </widget>
   </widget>
