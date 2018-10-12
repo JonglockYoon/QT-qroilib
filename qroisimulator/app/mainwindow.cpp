@@ -118,7 +118,7 @@ struct MainWindow::Private
         connect(arithmeticlogicImage, SIGNAL(triggered(bool)), q, SLOT(setArithmeticlogic()));
         linefitImage = new QAction(QIcon(), tr("&LineFit Image ..."), q);
         connect(linefitImage, SIGNAL(triggered(bool)), q, SLOT(setLineFit()));
-        ransaccircleImage = new QAction(QIcon(), tr("&Circle Image ..."), q);
+        ransaccircleImage = new QAction(QIcon(), tr("&CircleFit Image ..."), q);
         connect(ransaccircleImage, SIGNAL(triggered(bool)), q, SLOT(setCircle()));
 
         applicationImage = new QAction(QIcon(), tr("&Application ..."), q);

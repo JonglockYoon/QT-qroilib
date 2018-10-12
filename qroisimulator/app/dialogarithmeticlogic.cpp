@@ -234,17 +234,22 @@ void DialogArithmeticlogic::ExecArithmeticlogic(IplImage* iplImg)
             return;
         cvSub(iplImg, iplImg1, tmp);
         break;
-    case 4: // And
+    case 4: // AbsDiff
+        if (iplImg1 == nullptr)
+            return;
+        cvAbsDiff(iplImg, iplImg1, tmp);
+        break;
+    case 5: // And
         if (iplImg1 == nullptr)
             return;
         cvAnd(iplImg, iplImg1, tmp);
         break;
-    case 5: // Or
+    case 6: // Or
         if (iplImg1 == nullptr)
             return;
         cvOr(iplImg, iplImg1, tmp);
         break;
-    case 6: // XOr
+    case 7: // XOr
         if (iplImg1 == nullptr)
             return;
         cvXor(iplImg, iplImg1, tmp);
@@ -277,17 +282,22 @@ void DialogArithmeticlogic::on_radioButtonSubtract_clicked()
     method = 3;
 }
 
-void DialogArithmeticlogic::on_radioButtonAnd_clicked()
+void DialogArithmeticlogic::on_radioButtonAbsDiff_clicked()
 {
     method = 4;
 }
 
-void DialogArithmeticlogic::on_radioButtonOr_clicked()
+void DialogArithmeticlogic::on_radioButtonAnd_clicked()
 {
     method = 5;
 }
 
-void DialogArithmeticlogic::on_radioButtonXor_clicked()
+void DialogArithmeticlogic::on_radioButtonOr_clicked()
 {
     method = 6;
+}
+
+void DialogArithmeticlogic::on_radioButtonXor_clicked()
+{
+    method = 7;
 }

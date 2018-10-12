@@ -37,10 +37,17 @@ private slots:
     void setValuep1(int val);
     void setEditValuep1(const QString &val);
 
+    void on_radioButton1_clicked();
+    void on_radioButton2_clicked();
+    void on_radioButton3_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:
     void ExecRansacCircle(IplImage* iplImg);
+    void ExecFitEllipse2(IplImage* iplImg);
+    void ExecLeastSquare(IplImage* iplImg);
+    void ExecCircleFit(IplImage* iplImg);
 public:
     vector<RANSACIRCLE> vecRansicCircle;
     float verifyCircle(cv::Mat dt, cv::Point2f center, float radius, std::vector<cv::Point2f> & inlierSet);
@@ -56,6 +63,7 @@ private:
 
     IplImage* tmp = nullptr;
     float bestCirclePercentage;
+    int method = 0;
 };
 
 #endif // DIALOGcircle_H

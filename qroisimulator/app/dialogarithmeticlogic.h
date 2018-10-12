@@ -43,6 +43,8 @@ private slots:
 
     void on_radioButtonXor_clicked();
 
+    void on_radioButtonAbsDiff_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:

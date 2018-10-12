@@ -39,6 +39,9 @@ DialogCircle::DialogCircle(QWidget *parent) :
 
     str = QString("%1").arg(bestCirclePercentage * 100.0);
     ui->editp1->setText(str);
+
+    method = 0;
+    ui->radioButton1->setChecked(true);
 }
 
 DialogCircle::~DialogCircle()
@@ -207,6 +210,14 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
         cvZero(grayImg);
         p->FillBlob(grayImg, CVX_WHITE);	// Draw the filtered blobs as white.
 
+        int nGaussian = 7;
+        try {
+            cvSmooth(grayImg, grayImg, CV_GAUSSIAN,nGaussian,nGaussian);
+        } catch (...) {
+            qDebug() << "Error cvSmooth()";
+            continue;
+        }
+
         //RANSAC
         cv::Mat canny;
         cv::Mat gray = cv::cvarrToMat(grayImg);
@@ -214,7 +225,7 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
         cv::Mat mask;
 
         float canny1 = 100;
-        float canny2 = 20;
+        float canny2 = 200;
 
         cv::Canny(gray, canny, canny1, canny2);
 
@@ -226,7 +237,11 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
         // create distance transform to efficiently evaluate distance to nearest edge
         cv::Mat dt;
         cv::distanceTransform(255 - mask, dt, CV_DIST_L1, 3);
-
+//cv::imshow("mask",mask);
+//cv::imshow("255-mask",255-mask);
+//cv::Mat dtc = dt.clone();
+//cv::normalize(dtc, dtc, 0, 1., cv::NORM_MINMAX);
+//cv::imshow("dt",dtc);
         int maxNrOfIterations = edgePositions.size();
 
         RANSACIRCLE rbest;
@@ -260,18 +275,21 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
             {
                 RANSACIRCLE rclc;
                 rclc.cPerc = cPerc;
+                rclc.center = center;
+                rclc.radius = radius;
                 if (rbest.cPerc < rclc.cPerc) {
-                    rbest.cPerc = rclc.cPerc;
-                    rbest.center = center;
-                    rbest.radius = radius;
+                    rbest = rclc;
+                }
+                if (rclc.cPerc > bestCirclePercentage) {
+                    vecRansicCircle.push_back(rclc);
                 }
             }
         }
-        if (rbest.center.x > 0) {
-            if (rbest.cPerc > bestCirclePercentage) {
-                vecRansicCircle.push_back(rbest);
-            }
-        }
+//        if (rbest.center.x > 0) {
+//            if (rbest.cPerc > bestCirclePercentage) {
+//                vecRansicCircle.push_back(rbest);
+//            }
+//        }
     }
     cvReleaseImage(&grayImg);
 
@@ -308,7 +326,7 @@ void DialogCircle::on_pushButtonExec_clicked()
                     }
                 }
                 if (pData == nullptr) {
-                    ExecRansacCircle(iplImg);
+                    ExecCircleFit(iplImg);
                     return;
                 }
 
@@ -328,12 +346,12 @@ void DialogCircle::on_pushButtonExec_clicked()
                 cvCopy(iplImg, croppedImage);
                 cvResetImageROI(iplImg);
 
-                ExecRansacCircle(croppedImage);
+                ExecCircleFit(croppedImage);
 
                 cvReleaseImage(&croppedImage);
             }
             else
-                ExecRansacCircle(iplImg);
+                ExecCircleFit(iplImg);
         }
     } else {
         OutWidget* pWidget = theMainWindow->vecOutWidget[source-1];
@@ -342,12 +360,215 @@ void DialogCircle::on_pushButtonExec_clicked()
             iplImg = pView->getIplgray();
             if (!iplImg)
                 return;
-            ExecRansacCircle(iplImg);
+            ExecCircleFit(iplImg);
         }
     }
 }
 
+void DialogCircle::on_radioButton1_clicked()
+{
+    method = 0;
+}
+void DialogCircle::on_radioButton2_clicked()
+{
+    method = 1;
+}
+void DialogCircle::on_radioButton3_clicked()
+{
+    method = 2;
+}
+
 void DialogCircle::ExecRansacCircle(IplImage* iplImg)
+{
+
+    vecRansicCircle.clear();
+
+    if (Find_RANSAC_Circle(iplImg) == 0)
+    {
+        int size = vecRansicCircle.size();
+
+        std::stable_sort(vecRansicCircle.begin(), vecRansicCircle.end(), [](const RANSACIRCLE lhs, const RANSACIRCLE rhs)->bool {
+            if (lhs.cPerc > rhs.cPerc) // descending
+                return true;
+            return false;
+        });
+
+
+        // First, Second Radius 차가 큰것은 재 시도하도록 변경할것.
+
+        char text[128];
+        sprintf(text, "%.2f %.2f / %d",  vecRansicCircle[0].cPerc, vecRansicCircle[1].cPerc, size);
+        CvFont font;
+        cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.3, 0.3, 0, 1, CV_AA);
+        cvPutText(tmp, text, cvPoint(10, 10), &font, cvScalar(128, 128, 128));
+
+        for (int i = 0; i < 2 && i < size; i++)
+        {
+            RANSACIRCLE *p = &vecRansicCircle[i];
+
+            cvCircle(tmp, cvPoint(p->center.x, p->center.y), p->radius, CV_RGB(126, 126, 126), 2);
+        }
+    }
+
+}
+
+void DialogCircle::ExecFitEllipse2(IplImage* iplImg)
+{
+    int dilation_type = 0;
+    int dilation_elem = 0;
+
+    if (dilation_elem == 0) { dilation_type = cv::MORPH_RECT; }
+    else if (dilation_elem == 1) { dilation_type = cv::MORPH_CROSS; }
+    else if (dilation_elem == 2) { dilation_type = cv::MORPH_ELLIPSE; }
+
+    int size = 1;
+
+    cv::Mat img = cv::cvarrToMat(iplImg);
+    cv::Mat element = cv::getStructuringElement(dilation_type, cv::Size(2 * size + 1, 2 * size + 1), cv::Point(size, size));
+    cv::morphologyEx(img, img, cv::MORPH_OPEN, element);
+
+    IplImage* grayImg = cvCreateImage(cvGetSize(iplImg), IPL_DEPTH_8U, 1);
+    CBlobResult blobs = CBlobResult(iplImg, nullptr);
+    int nBlobs = blobs.GetNumBlobs();
+    for (int i = 0; i < nBlobs; i++)	// 여러개의 Blob이 있을때 한개씩 뽑아서 RANSAC을 돌린다.
+    {
+        CBlob *p = blobs.GetBlob(i);
+        CvBox2D d = p->GetEllipse();
+        cvZero(grayImg);
+        p->FillBlob(grayImg, CVX_WHITE);	// Draw the filtered blobs as white.
+
+        cv::Mat img1 = cv::cvarrToMat(grayImg);
+        cv::Canny(img1, img1, 100, 300);
+
+        CvMemStorage* m_storage = cvCreateMemStorage(0); // 배열 자료(점의 좌표가 들어간다)
+        CvSeq* ptseq;
+        ptseq = cvCreateSeq((CV_SEQ_KIND_CURVE | CV_SEQ_ELTYPE_POINT | CV_SEQ_FLAG_CLOSED) | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), m_storage);
+        for (int x = 0; x < img1.cols; x++)
+        {
+            for (int y = 0; y < img1.rows; y++)
+            {
+                if (img1.at<uchar>(y, x) > 0)
+                {
+                    CvPoint temp;
+                    temp.x = x;
+                    temp.y = y;
+                    cvSeqPush(ptseq, &temp);
+                }
+            }
+        }
+
+        CvBox2D box2d = cvFitEllipse2(ptseq); // : 2D의 점들에서 가장 잘 맞는 타원을 찾는다.
+        cvEllipseBox(tmp,box2d,cv::Scalar(128,128,128),2,8,0);
+        cvClearSeq(ptseq);
+        if (m_storage) cvReleaseMemStorage(&m_storage);
+    }
+    cvReleaseImage(&grayImg);
+}
+
+void DialogCircle::ExecLeastSquare(IplImage* iplImg)
+{
+    int dilation_type = 0;
+    int dilation_elem = 0;
+
+    if (dilation_elem == 0) { dilation_type = cv::MORPH_RECT; }
+    else if (dilation_elem == 1) { dilation_type = cv::MORPH_CROSS; }
+    else if (dilation_elem == 2) { dilation_type = cv::MORPH_ELLIPSE; }
+
+    int size = 1;
+
+    cv::Mat img = cv::cvarrToMat(iplImg);
+    cv::Mat element = cv::getStructuringElement(dilation_type, cv::Size(2 * size + 1, 2 * size + 1), cv::Point(size, size));
+    cv::morphologyEx(img, img, cv::MORPH_OPEN, element);
+
+    IplImage* grayImg = cvCreateImage(cvGetSize(iplImg), IPL_DEPTH_8U, 1);
+    CBlobResult blobs = CBlobResult(iplImg, nullptr);
+    int nBlobs = blobs.GetNumBlobs();
+    for (int i = 0; i < nBlobs; i++)	// 여러개의 Blob이 있을때 한개씩 뽑아서 RANSAC을 돌린다.
+    {
+        CBlob *p = blobs.GetBlob(i);
+        CvBox2D d = p->GetEllipse();
+        cvZero(grayImg);
+        p->FillBlob(grayImg, CVX_WHITE);	// Draw the filtered blobs as white.
+
+        cv::Mat img1 = cv::cvarrToMat(grayImg);
+        cv::Canny(img1, img1, 100, 300);
+
+        vector<cv::Point2f> points;
+        for (int x = 0; x < img1.cols; x++)
+        {
+            for (int y = 0; y < img1.rows; y++)
+            {
+                if (img1.at<uchar>(y, x) > 0)
+                {
+                    points.push_back(cv::Point2f(x, y));
+                }
+            }
+        }
+
+        // Least Square Algorithm
+
+        float xn = 0, xsum = 0;
+        float yn = 0, ysum = 0;
+        float n = points.size();
+
+        for (int i = 0; i < n; i++)
+        {
+            xsum = xsum + points[i].x;
+            ysum = ysum + points[i].y;
+        }
+
+        xn = xsum / n;
+        yn = ysum / n;
+
+        float ui = 0;
+        float vi = 0;
+        float suu = 0, suuu = 0;
+        float svv = 0, svvv = 0;
+        float suv = 0;
+        float suvv = 0, svuu = 0;
+
+        for (int i = 0; i < n; i++)
+        {
+            ui = points[i].x - xn;
+            vi = points[i].y - yn;
+
+            suu = suu + (ui * ui);
+            suuu = suuu + (ui * ui * ui);
+
+            svv = svv + (vi * vi);
+            svvv = svvv + (vi * vi * vi);
+
+            suv = suv + (ui * vi);
+
+            suvv = suvv + (ui * vi * vi);
+            svuu = svuu + (vi * ui * ui);
+        }
+
+        cv::Mat A = (cv::Mat_<float>(2, 2) << suu, suv, suv, svv);
+
+        cv::Mat B = (cv::Mat_<float>(2, 1) << 0.5*(suuu + suvv), 0.5*(svvv + svuu));
+
+        cv::Mat abc;
+        cv::solve(A, B, abc);
+
+        float u = abc.at<float>(0);
+        float v = abc.at<float>(1);
+
+        float x = u + xn;
+        float y = v + yn;
+
+        float alpha = u * u + v * v + ((suu + svv) / n);
+        float r = sqrt(alpha);
+
+        // Draw circle
+        cv::circle(img, cv::Point(x, y), r, cv::Scalar(128, 128, 128), 2, 8, 0);
+
+    }
+    cvCopy(iplImg, tmp);
+    cvReleaseImage(&grayImg);
+}
+
+void DialogCircle::ExecCircleFit(IplImage* iplImg)
 {
     if (tmp) {
         if (tmp->width != iplImg->width || tmp->height != iplImg->height) {
@@ -361,17 +582,17 @@ void DialogCircle::ExecRansacCircle(IplImage* iplImg)
     cvCopy(iplImg, tmp);
     //cvZero(tmp);
 
-    vecRansicCircle.clear();
-
-    if (Find_RANSAC_Circle(iplImg) == 0)
+    switch (method)
     {
-        int size = vecRansicCircle.size();
-        for (int i = size - 1; i >= 0; i--)
-        {
-            RANSACIRCLE *p = &vecRansicCircle[i];
-
-            cvCircle(tmp, cvPoint(p->center.x, p->center.y), p->radius, CV_RGB(126, 126, 126), 2);
-        }
+    case 0:
+        ExecRansacCircle(iplImg);
+        break;
+    case 1:
+        ExecFitEllipse2(iplImg);
+        break;
+    case 2:
+        ExecLeastSquare(iplImg);
+        break;
     }
 
     theMainWindow->outWidget(mName, tmp);

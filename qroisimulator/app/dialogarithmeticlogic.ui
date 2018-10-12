@@ -13,7 +13,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>343</height>
+    <height>382</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -29,7 +29,7 @@
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>293</y>
+     <y>333</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -50,7 +50,7 @@
    <property name="geometry">
     <rect>
      <x>96</x>
-     <y>293</y>
+     <y>333</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -71,7 +71,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>300</y>
+     <y>340</y>
      <width>71</width>
      <height>16</height>
     </rect>
@@ -138,7 +138,7 @@
      <x>10</x>
      <y>80</y>
      <width>181</width>
-     <height>191</height>
+     <height>211</height>
     </rect>
    </property>
    <property name="title">
@@ -150,7 +150,7 @@
       <x>10</x>
       <y>90</y>
       <width>90</width>
-      <height>16</height>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
@@ -200,7 +200,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>111</y>
+      <y>137</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -213,7 +213,7 @@
     <property name="geometry">
      <rect>
       <x>11</x>
-      <y>131</y>
+      <y>160</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -226,13 +226,26 @@
     <property name="geometry">
      <rect>
       <x>12</x>
-      <y>151</y>
+      <y>184</y>
       <width>90</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
      <string>Xor</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonAbsDiff">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>112</y>
+      <width>90</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AbsDiff</string>
     </property>
    </widget>
   </widget>
