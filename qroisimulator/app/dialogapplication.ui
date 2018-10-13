@@ -13,11 +13,11 @@
   <property name="mouseTracking">
    <bool>false</bool>
   </property>
+  <property name="tabletTracking">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Application</string>
-  </property>
-  <property name="tabletTracking" stdset="0">
-   <bool>true</bool>
   </property>
   <widget class="QPushButton" name="pushButtonClose">
    <property name="geometry">
@@ -372,6 +372,19 @@
     </property>
     <property name="text">
      <string>FFT</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonImgSeg">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>295</y>
+      <width>201</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Image Segmentation</string>
     </property>
    </widget>
   </widget>

@@ -83,6 +83,8 @@ private slots:
 
     void on_radioButtonFFT_clicked();
 
+    void on_radioButtonImgSeg_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:
@@ -97,6 +99,8 @@ public:
     cv::Mat ftI;
     cv::Mat displayImage;
     void FFTTest();
+    void ImageSegmentationCard(IplImage* iplImg);
+    void ImageSegmentationCoin(IplImage* iplImg);
 
 public:
     void centerOfPlusmaek(IplImage* iplImg);
