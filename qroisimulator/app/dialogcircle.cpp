@@ -199,6 +199,7 @@ std::vector<cv::Point2f> DialogCircle::getPointPositions(cv::Mat binaryImage)
 // bestCirclePercentage : 0 ~ 1.0
 int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
 {
+    float iBestCP = bestCirclePercentage;
     //QString str;
     IplImage* grayImg = cvCreateImage(cvGetSize(grayImgIn), IPL_DEPTH_8U, 1);
     CBlobResult blobs = CBlobResult(grayImgIn, nullptr);
@@ -243,7 +244,7 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
 //cv::normalize(dtc, dtc, 0, 1., cv::NORM_MINMAX);
 //cv::imshow("dt",dtc);
         int maxNrOfIterations = edgePositions.size();
-
+again:
         RANSACIRCLE rbest;
         rbest.cPerc = 0.0;
         rbest.center.x = 0;
@@ -280,16 +281,16 @@ int DialogCircle::Find_RANSAC_Circle(IplImage* grayImgIn)
                 if (rbest.cPerc < rclc.cPerc) {
                     rbest = rclc;
                 }
-                if (rclc.cPerc > bestCirclePercentage) {
+                if (rclc.cPerc > iBestCP) {
                     vecRansicCircle.push_back(rclc);
                 }
             }
         }
-//        if (rbest.center.x > 0) {
-//            if (rbest.cPerc > bestCirclePercentage) {
-//                vecRansicCircle.push_back(rbest);
-//            }
-//        }
+        if (vecRansicCircle.size() == 0) {
+            iBestCP = iBestCP - 0.05;
+            if (iBestCP > 0.1)
+                goto again;
+        }
     }
     cvReleaseImage(&grayImg);
 
@@ -380,7 +381,7 @@ void DialogCircle::on_radioButton3_clicked()
 
 void DialogCircle::ExecRansacCircle(IplImage* iplImg)
 {
-
+again:
     vecRansicCircle.clear();
 
     if (Find_RANSAC_Circle(iplImg) == 0)
@@ -394,20 +395,24 @@ void DialogCircle::ExecRansacCircle(IplImage* iplImg)
         });
 
 
-        // First, Second Radius 차가 큰것은 재 시도하도록 변경할것.
+        if (size <= 1)
+            goto again;
 
-        char text[128];
-        sprintf(text, "%.2f %.2f / %d",  vecRansicCircle[0].cPerc, vecRansicCircle[1].cPerc, size);
+        if (size > 2) {
+            float r1 = vecRansicCircle[0].radius;
+            float r2 = vecRansicCircle[1].radius;
+            if (fabs(r1-r2) < 3.0) // First, Second Radius 차가 큰것은 재 시도.
+                goto again;
+        }
+
+        char text[128] = { 0 };
+        sprintf(text, "%.2f, %.2f / %d",  vecRansicCircle[0].cPerc, vecRansicCircle[0].radius, size);
         CvFont font;
         cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.3, 0.3, 0, 1, CV_AA);
         cvPutText(tmp, text, cvPoint(10, 10), &font, cvScalar(128, 128, 128));
 
-        for (int i = 0; i < 2 && i < size; i++)
-        {
-            RANSACIRCLE *p = &vecRansicCircle[i];
-
-            cvCircle(tmp, cvPoint(p->center.x, p->center.y), p->radius, CV_RGB(126, 126, 126), 2);
-        }
+        RANSACIRCLE *p = &vecRansicCircle[0];
+        cvCircle(tmp, cvPoint(p->center.x, p->center.y), p->radius, CV_RGB(126, 126, 126), 2);
     }
 
 }

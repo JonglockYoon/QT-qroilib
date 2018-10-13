@@ -220,9 +220,7 @@ void DialogLinefit::on_pushButtonExec_clicked()
 
 void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
 {
-
     cvCopy(iplImg, tmp);
-
 
     CBlobResult blobs;
     blobs = CBlobResult(iplImg, nullptr);
@@ -230,7 +228,7 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
     if (blobCount <= 0)
         return;
 
-    CvPoint* points = (CvPoint*)malloc(blobCount * sizeof(CvPoint));
+    CvPoint* points = new CvPoint[blobCount];
 
     for (int i = 0; i < blobCount; i++) // 각 점들의 중심점을 구합니다.
     {
@@ -240,11 +238,13 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
         double m10 = currentBlob->Moment(1,0);
 
         CvPoint p(m10/m00, m01/m00);
+        if (p.x < 0 || p.y < 0)
+            continue;
         points[i].x = p.x;
         points[i].y = p.y;
     }
 
-    //cvFitLine으로 최적의 직선을을 찾습니다.
+    //cvFitLine으로 최적의 직선을 찾습니다.
     CvMat pointMat = cvMat(1, blobCount, CV_32SC2, points);
     float line[4];
     cvFitLine(&pointMat, CV_DIST_L1, 1, 0.001, 0.001, line);
@@ -265,7 +265,7 @@ void DialogLinefit::ExecRansacLinefitPoints(IplImage* iplImg)
     int y2= y0 + t*line[1];
     cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
 
-    free(points);
+    delete points;
 }
 void DialogLinefit::ExecRansacLinefitBlob(IplImage* iplImg)
 {
