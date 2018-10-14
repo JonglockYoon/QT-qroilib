@@ -423,8 +423,8 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
             ImageSegmentationCard(iplImg);
         else if (ui->SegCB2->isChecked())
             ImageSegmentationCoin(iplImg);
-        else if (ui->SegCB3->isChecked())
-            ImageSegmentationLineWidth(iplImg);
+        //else if (ui->SegCB3->isChecked())
+        //    ImageSegmentationLineWidth(iplImg);
         break;
     }
     theMainWindow->outWidget(mName, outImg);
