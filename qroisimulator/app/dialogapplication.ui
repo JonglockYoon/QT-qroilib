@@ -13,11 +13,11 @@
   <property name="mouseTracking">
    <bool>false</bool>
   </property>
-  <property name="tabletTracking">
-   <bool>true</bool>
-  </property>
   <property name="windowTitle">
    <string>Application</string>
+  </property>
+  <property name="tabletTracking" stdset="0">
+   <bool>true</bool>
   </property>
   <widget class="QPushButton" name="pushButtonClose">
    <property name="geometry">
@@ -385,6 +385,32 @@
     </property>
     <property name="text">
      <string>Image Segmentation</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="SegCB1">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>320</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Card</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="SegCB2">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>320</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Coin</string>
     </property>
    </widget>
   </widget>

@@ -10,6 +10,7 @@
 #include <QStringListModel>
 #include "imgprocbase.h"
 #include <opencv2/xfeatures2d/nonfree.hpp>
+#include "voronoithinner.h"
 
 namespace Ui {
 class DialogApplication;
@@ -101,6 +102,7 @@ public:
     void FFTTest();
     void ImageSegmentationCard(IplImage* iplImg);
     void ImageSegmentationCoin(IplImage* iplImg);
+    void ImageSegmentationLineWidth(IplImage* iplImg);
 
 public:
     void centerOfPlusmaek(IplImage* iplImg);
@@ -120,6 +122,7 @@ public:
     void ColorDetect(IplImage* iplImg, IplImage* iplImg2);
 
 private:
+    VoronoiThinner thinner;
     Ui::DialogApplication *ui;
     QString mName;
     int method;

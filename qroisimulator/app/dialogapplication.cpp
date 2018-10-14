@@ -9,6 +9,7 @@
 #include <zxing/NotFoundException.h>
 #include <zxing/ReaderException.h>
 #include "geomatch.h"
+#include <opencv2/ximgproc.hpp>
 
 using namespace zxing;
 using namespace cv;
@@ -418,7 +419,12 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
         FFTTest();
         break;
     case 6:
-        ImageSegmentationCoin(iplImg);
+        if (ui->SegCB1->isChecked())
+            ImageSegmentationCard(iplImg);
+        else if (ui->SegCB2->isChecked())
+            ImageSegmentationCoin(iplImg);
+        else if (ui->SegCB3->isChecked())
+            ImageSegmentationLineWidth(iplImg);
         break;
     }
     theMainWindow->outWidget(mName, outImg);
@@ -1346,12 +1352,6 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     double minV, maxV;
     cv::minMaxLoc(dist_transform, &minV, &maxV, &min_loc, &max_loc);
 
-    //거리 변환 행렬에서 값(거리)이 가장 큰 픽셀의 좌표와, 값을 얻어온다.
-    int maxIdx[2];    //좌표 값을 얻어올 배열(행, 열 순으로 저장됨)
-    double radius;
-    Mat mask;
-    minMaxIdx(dist_transform, NULL, &radius, NULL, maxIdx, mask);   //최소값은 사용 X
-
     Mat sure_fg;
     threshold(dist_transform, sure_fg, 0.7*maxV, 255, 0);
 
@@ -1376,7 +1376,6 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
 //    bitwise_not(mark, mark);
 //    imshow("Markers_v2", mark);
 
-
     // Now, mark the region of unknown with zero
     for (int i = 0; i < unknown.rows; i++)
     {
@@ -1392,13 +1391,21 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     cvtColor(opening, color, COLOR_GRAY2BGR);
     watershed(color, markers);
 
+//    imshow("trans", trans);
+
+//    vector<vector<Point> > contours;
+//    findContours(trans, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+
+//    for (int i = 0; i < contours.size(); i++)
+//        drawContours(img, contours, i, CV_RGB(0,255,0), -1);
+
     for (int i = 0; i < markers.rows; i++)
     {
         for (int j = 0; j < markers.cols; j++)
         {
             int uval = markers.at<int>(i,j);
             if (uval == -1)
-                img.at<Vec3b>(i,j) = Vec3b(0,0,255);
+                img.at<Vec3b>(i,j) = Vec3b(0,0,255); // Red Line
         }
     }
 
@@ -1406,4 +1413,84 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     IplImage ipl = img;
     cvCopy(&ipl, outImg);
 
+}
+
+//
+// distanceTransform() 으로 라인 두께 측정 Test.
+// 곡선을 이루는 라인의 두께는 부정확하게 측정됨. ex) Bottle
+//
+void DialogApplication::ImageSegmentationLineWidth(IplImage* iplImg)
+{
+    if (outImg) {
+        if (outImg->width != iplImg->width || outImg->height != iplImg->height) {
+            cvReleaseImage(&outImg);
+            outImg = nullptr;
+        }
+    }
+
+    if (!outImg)
+        outImg = cvCreateImage(cvSize(iplImg->width, iplImg->height), IPL_DEPTH_8U, 3);
+
+    Mat img = cv::cvarrToMat(iplImg);
+
+    if(!img.data) {
+        return ;
+    }
+
+    Mat binary;
+    cvtColor(img, binary, COLOR_BGR2GRAY);
+
+    //Finding sure foreground area
+    Mat dist_transform;
+    distanceTransform(binary, dist_transform, DIST_L2, 5);
+
+//    Mat trans = Mat::zeros(dist_transform.size(), CV_8UC1);
+//    dist_transform.convertTo(trans, CV_8UC1);
+//    Mat color1;
+//    cvtColor(trans, color1, COLOR_GRAY2BGR);
+//    color1.copyTo(img);
+
+//    cv::Point min_loc, max_loc;
+//    double minV, maxV;
+//    cv::minMaxLoc(dist_transform, &minV, &maxV, &min_loc, &max_loc);
+    //거리 변환 행렬에서 값(거리)이 가장 큰 픽셀의 좌표와, 값을 얻어온다.
+    int maxIdx[2];    //좌표 값을 얻어올 배열(행, 열 순으로 저장됨)
+    double radius;
+
+    CvPoint2D32f pt1;
+    CvPoint2D32f pt2;
+    Mat mask = Mat::zeros(dist_transform.size(), CV_8UC1);
+    for (int i = 0; i < dist_transform.rows; i++)
+    {
+        for (int j = 0; j < mask.cols; j++)
+            mask.at<uchar>(i,j) = 255;
+        minMaxIdx(dist_transform, NULL, &radius, NULL, maxIdx, mask);   //최소값은 사용 X
+        for (int j = 0; j < mask.cols; j++)
+            mask.at<uchar>(i,j) = 0;
+        if (radius == 0)
+            continue;
+        qDebug() << radius << maxIdx[0] << maxIdx[1];
+
+        pt1.x = maxIdx[1] - radius;
+        pt1.y = maxIdx[0];
+        pt2.x = maxIdx[1] + radius;
+        pt2.y = maxIdx[0];
+        cv::arrowedLine(img, pt1, pt2, CV_RGB(0, 255, 0), 1, 8, 0, 0.05);
+
+        i += 10;
+    }
+
+//    cv::Mat1b m = cv::Mat1b(trans.clone());
+//    cv::Mat1b m1;
+//    bool ok = thinner.thin(m, IMPL_MORPH, false);
+//    if (ok) {
+//        m1 = thinner.get_skeleton();
+//    }
+//    Mat color;
+//    cvtColor(m1, color, COLOR_GRAY2BGR);
+    //bitwise_or(img, color1, img);
+
+
+    IplImage ipl = img;
+    cvCopy(&ipl, outImg);
 }
