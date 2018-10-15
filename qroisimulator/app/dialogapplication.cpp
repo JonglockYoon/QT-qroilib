@@ -1190,6 +1190,7 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
     // Show output image
     //imshow("Black Background Image", src);
 
+    // 카드의 경계를 확실히 구분하기 위해 필터 사용
     // Create a kernel that we will use for accuting/sharpening our image
     Mat kernel = (Mat_<float>(3,3) <<
             1,  1, 1,
@@ -1212,7 +1213,7 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
     imgResult.convertTo(imgResult, CV_8UC3);
     imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
 
-    // imshow( "Laplace Filtered Image", imgLaplacian );
+    //imshow( "Laplace Filtered Image", imgLaplacian );
     //imshow( "New Sharped Image", imgResult );
 
     src = imgResult; // copy back
@@ -1223,6 +1224,7 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
     threshold(bw, bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
     //imshow("Binary Image", bw);
 
+    //distanceTransform를 이용하여 전경을 구합니다.
     // Perform the distance transform algorithm
     Mat dist;
     distanceTransform(bw, dist, CV_DIST_L2, 3);
@@ -1258,18 +1260,20 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
         drawContours(markers, contours, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), -1);
 
     // Draw the background marker
-    circle(markers, Point(5,5), 3, CV_RGB(255,255,255), -1);
+    circle(markers, Point(5,5), 3, CV_RGB(255,255,255), -1); // 백그라운드색깔을 위해 처음 Blob생성.
     //imshow("Markers", markers*10000);
 
+    // 추출한 전경과 원본이미지를 이용하여 경계를 추출합니다.
     // Perform the watershed algorithm
     watershed(src, markers);
 
-    Mat mark = Mat::zeros(markers.size(), CV_8UC1);
-    markers.convertTo(mark, CV_8UC1);
-    bitwise_not(mark, mark);
+    //Mat mark = Mat::zeros(markers.size(), CV_8UC1);
+    //markers.convertTo(mark, CV_8UC1);
+    //bitwise_not(mark, mark);
     //imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
                                   // image looks like at that point
 
+    //각 영역에 색깔을 입히니다.
     // Generate random colors
     vector<Vec3b> colors;
     for (size_t i = 0; i < contours.size(); i++)
@@ -1325,8 +1329,9 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     if(!img.data) {
         return ;
     }
+
     //Display the image
-    //imshow("Original Image", img);
+    imshow("Original Image", img);
 
     //Get the binary map
     Mat gray,binary;
@@ -1371,11 +1376,6 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     //Add one to all labels so that sure background is not 0, but 1
     markers = markers + 1;
 
-//    Mat mark = Mat::zeros(markers.size(), CV_8UC1);
-//    markers.convertTo(mark, CV_8UC1);
-//    bitwise_not(mark, mark);
-//    imshow("Markers_v2", mark);
-
     // Now, mark the region of unknown with zero
     for (int i = 0; i < unknown.rows; i++)
     {
@@ -1387,9 +1387,18 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
         }
     }
 
-    Mat color;
-    cvtColor(opening, color, COLOR_GRAY2BGR);
-    watershed(color, markers);
+//    Mat mark = Mat::zeros(markers.size(), CV_8UC1);
+//    markers.convertTo(mark, CV_8UC1);
+//    bitwise_not(mark, mark);
+//    imshow("Markers_v2", mark);
+
+    //Mat color;
+    //cvtColor(opening, color, COLOR_GRAY2BGR);
+
+    //Mat imgGaussian;
+    //GaussianBlur(img, imgGaussian, Size(3,3), 0);
+
+    watershed(img, markers);
 
 //    imshow("trans", trans);
 
