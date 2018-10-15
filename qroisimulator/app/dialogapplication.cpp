@@ -1205,7 +1205,7 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
     // so the possible negative number will be truncated
     Mat imgLaplacian;
     Mat sharp = src; // copy source image to another temporary one
-    filter2D(sharp, imgLaplacian, CV_32F, kernel);
+    filter2D(sharp, imgLaplacian, CV_32F, kernel); // Laplacian filter
     src.convertTo(sharp, CV_32F);
     Mat imgResult = sharp - imgLaplacian;
 
