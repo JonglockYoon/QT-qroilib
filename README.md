@@ -1,12 +1,12 @@
 # qroilib
 QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.8)
 -----
+<pre>
 OpenCV : 3.4.0 
 Linux : QT-5.9.0
 Windows : QT-5.9.0
           Visial studio 2015
 -----
-<pre>
 0.0.2 : blobcontour.h update
 0.0.3 : update CBlob::JoinBlob()
 0.0.4 : update BlobLib
