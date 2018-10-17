@@ -1485,7 +1485,7 @@ Point2f CImgProcBase::FindCenterOfBlob(IplImage * pImage)
 // nDir = Left2Right,Right2Left,Top2Bottom,Bottom2Top
 double CImgProcBase::ROIPixEdge(IplImage* croppedImage, int nDir, double dRejectLow, double dRejectHigh)
 {
-    QString str;
+    //QString str;
     IplImage* grayImg;
 
     CvRect r = CvRect(0,0,croppedImage->width, croppedImage->height);
