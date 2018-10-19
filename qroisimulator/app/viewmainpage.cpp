@@ -577,7 +577,7 @@ bool ViewMainPage::eventFilter(QObject *obj, QEvent *event)
 
                 QString str, str1;
                 str.sprintf("x:%d y:%d  r:%d g:%d b:%d", x,y ,r,g,b);
-                //double gray = r * 0.2126f + g * 0.7152f + b * 0.0722f;
+                //double gray = r * 0.299f + g * 0.587f + b * 0.114f; // https://docs.opencv.org/3.3.0/de/d25/imgproc_color_conversions.html
                 //if (gray < 0.0) gray = 0;
                 //if (gray > 255.0) gray = 255;
                 str1.sprintf(" Hue:%d Gray: %d", H, gy.val[0]);

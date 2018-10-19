@@ -1309,6 +1309,53 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
 
 }
 
+void DialogApplication::FilterHueBoundary(Mat& input)
+{
+    //https://stackoverflow.com/questions/29156091/opencv-edge-border-detection-based-on-color
+    cv::Mat hsv;
+    cv::cvtColor(input,hsv,CV_BGR2HSV);
+
+    std::vector<cv::Mat> channels;
+    cv::split(hsv, channels);
+
+    cv::Mat H = channels[0];
+    cv::Mat S = channels[1];
+    cv::Mat V = channels[2];
+
+    cv::Mat shiftedH = H.clone();
+    //빨간 색깔이 0부터 시작되게 Shift.
+    int shift = 25; // in openCV hue values go from 0 to 180 (so have to be doubled to get to 0 .. 360) because of byte range from 0 to 255
+    for(int j=0; j<shiftedH.rows; ++j)
+        for(int i=0; i<shiftedH.cols; ++i)
+        {
+            shiftedH.at<unsigned char>(j,i) = (shiftedH.at<unsigned char>(j,i) + shift)%180;
+        }
+
+    cv::Mat cannyH;
+    cv::Canny(shiftedH, cannyH, 100, 50);
+
+    // extract contours of the canny image:
+    std::vector<std::vector<cv::Point> > contoursH;
+    std::vector<cv::Vec4i> hierarchyH;
+
+    cv::dilate(cannyH, cannyH, cv::Mat());
+    cv::dilate(cannyH, cannyH, cv::Mat());
+    cv::dilate(cannyH, cannyH, cv::Mat());
+
+    //Dilation before contour extraction will "close" the gaps between different objects but increase the object size too.
+    cv::findContours(cannyH,contoursH, hierarchyH, CV_RETR_TREE , CV_CHAIN_APPROX_SIMPLE);
+
+    // 안쪽 contour만 그림.
+    //cv::Mat outputH = input.clone();
+    for( int i = 0; i< contoursH.size(); i++ )
+     {
+        if(cv::contourArea(contoursH[i]) < 20) continue; // ignore contours that are too small to be a patty
+        if(hierarchyH[i][3] < 0) continue;  // ignore "outer" contours
+
+        cv::drawContours( input, contoursH, i, cv::Scalar(0,0,255), 1, 8, hierarchyH, 0);
+     }
+}
+
 void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
 {
     if (outImg) {
@@ -1321,7 +1368,6 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     if (!outImg)
         outImg = cvCreateImage(cvSize(iplImg->width, iplImg->height), IPL_DEPTH_8U, 3);
 
-
     //https://docs.opencv.org/3.1.0/d3/db4/tutorial_py_watershed.html
     // Load the image
     Mat img = cv::cvarrToMat(iplImg);
@@ -1331,7 +1377,7 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     }
 
     //Display the image
-    imshow("Original Image", img);
+    //imshow("Original Image", img);
 
     //Get the binary map
     Mat gray,binary;
@@ -1344,6 +1390,14 @@ void DialogApplication::ImageSegmentationCoin(IplImage* iplImg)
     cv::Mat kernel = cv::getStructuringElement(MORPH_RECT, cv::Size(3,3), cv::Point(1, 1));
     cv::Mat opening;
     morphologyEx(binary,opening,MORPH_OPEN,kernel,cv::Point(-1,-1),2);
+
+// Canny test
+//    cv::Mat canny,cannyColor;
+//    erode(opening,canny,Mat(),Point(-1,-1),1);
+//    cv::Canny(canny, canny, 100, 300);
+//    cvtColor(canny, cannyColor, COLOR_GRAY2BGR);
+//    img = img - cannyColor;
+//    imshow("canny Image",img);
 
     //sure background area
     Mat sure_bg;

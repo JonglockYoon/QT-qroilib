@@ -100,6 +100,7 @@ public:
     cv::Mat ftI;
     cv::Mat displayImage;
     void FFTTest();
+    void FilterHueBoundary(cv::Mat& input);
     void ImageSegmentationCard(IplImage* iplImg);
     void ImageSegmentationCoin(IplImage* iplImg);
     void ImageSegmentationLineWidth(IplImage* iplImg);
