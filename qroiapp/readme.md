@@ -1,5 +1,7 @@
 qroiapp compile step
 
+----
+<pre>
 1. make leptonica library
 git clone https://github.com/DanBloomberg/leptonica leptonica
 cd leptonica
@@ -16,3 +18,5 @@ make ..
 sudo make install
 3. qroiapp 
 open qroilib.pro using qtcreator
+</pre>
+
