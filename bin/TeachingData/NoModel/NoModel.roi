@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="640" height="480" roiwidth="1" roiheight="1" nextobjectid="1">
+ <objectgroup name="channel1" x="-1" y="-1">
+  <object id="1" name="noname1021194637" x="21.6399" y="301.828" width="703.654" height="95.0723">
+   <rectangle/>
+   <param InspectType="507">
+    <param00 steptype="1" name="Type" valuetype="1" value="0" detail=""/>
+   </param>
+  </object>
+ </objectgroup>
+</roimap>
