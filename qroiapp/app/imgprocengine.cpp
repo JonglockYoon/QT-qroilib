@@ -5,6 +5,9 @@
 // application개발시 필요한 함수들만 다시 구성해서 새로운 engine module을 만드는것이
 // 유지보수에 이롭다.
 //
+#include <tesseract/baseapi.h>  //  Includes Tesseract and Leptonica libraries
+#include <leptonica/allheaders.h>
+
 #include <stdio.h>
 #include <QDir>
 #include <QDebug>
@@ -17,8 +20,6 @@
 #include "config.h"
 #include "recipedata.h"
 #include "mainwindow.h"
-#include <tesseract/baseapi.h>  //  Includes Tesseract and Leptonica libraries
-#include <leptonica/allheaders.h>
 
 using namespace tesseract;
 //using namespace cv;
@@ -57,7 +58,7 @@ CImgProcEngine::CImgProcEngine()
 CImgProcEngine::~CImgProcEngine(void)
 {
     if (tessApi)
-        delete tessApi;
+        tessApi->End();
 }
 
 int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)

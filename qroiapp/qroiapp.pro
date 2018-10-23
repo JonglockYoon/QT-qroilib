@@ -25,6 +25,8 @@ LIBS += "..\winlib\Debug\jpeg.lib"
 LIBS += "..\winlib\Debug\png.lib"
 LIBS += "..\winlib\Debug\zlib.lib"
 LIBS += "..\winlib\Debug\lcms2.lib"
+LIBS += "..\winlib\tesseract40.lib"
+LIBS += "..\winlib\leptonica-1.76.0.lib"
 }
 CONFIG(release, debug|release) {
 #LIBS += -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320
@@ -35,6 +37,8 @@ LIBS += "..\winlib\Release\jpeg.lib"
 LIBS += "..\winlib\Release\png.lib"
 LIBS += "..\winlib\Release\zlib.lib"
 LIBS += "..\winlib\Release\lcms2.lib"
+LIBS += "..\winlib\tesseract40.lib"
+LIBS += "..\winlib\leptonica-1.76.0.lib"
 }
 LIBS += -lws2_32
 
