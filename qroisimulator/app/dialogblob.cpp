@@ -276,7 +276,7 @@ void DialogBlob::FilterArea(IplImage* grayImg)
     for (int i = 0; i < nBlobs; i++)
     {
         CBlob *currentBlob = blobs.GetBlob(i);
-        currentBlob->FillBlob(grayImg, CVX_WHITE);	// Draw the filtered blobs as white.
+        currentBlob->FillBlob(grayImg, CVX_WHITE, 0, 0, true);
     }
 }
 
@@ -298,7 +298,7 @@ void DialogBlob::FilterDiameter(IplImage* grayImg)
     for (int i = 0; i < nBlobs; i++)
     {
         CBlob *currentBlob = blobs.GetBlob(i);
-        currentBlob->FillBlob(grayImg, CVX_WHITE);	// Draw the filtered blobs as white.
+        currentBlob->FillBlob(grayImg, CVX_WHITE, 0, 0, true);
     }
 }
 
