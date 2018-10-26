@@ -24,17 +24,14 @@
 
 QString  StepTypeValue[] =
 {
-    ("BoundaryAreaMask"),
     ("MaskingValue"),
     ("ProcessValue1"),
     ("ProcessValue2"),
     ("ProcessValue3"),
-    ("InnerFilter"),
     ("FilterValue"),
+    ("PostProcessValue1"),
+    ("PostProcessValue2"),
     ("DecideValue"),
-    ("SmoothValue"),
-    ("ContoursValue"),
-    ("PostProcessValue"),
     ("PriorityValue(0-High)"),
     ("LightValue"),
 };

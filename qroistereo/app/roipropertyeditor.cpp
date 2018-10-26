@@ -33,9 +33,9 @@ QString  StepTypeValue[] =
     ("ProcessValue2"),
     ("ProcessValue3"),
     ("FilterValue"),
-    ("DecideValue"),
     ("PostProcessValue1"),
     ("PostProcessValue2"),
+    ("DecideValue"),
     ("PriorityValue(0-High)"),
     ("LightValue"),
 };
