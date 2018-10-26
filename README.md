@@ -1,5 +1,5 @@
 # qroilib
-QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.8)
+QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.9)
 -----
 <pre>
 OpenCV : 3.4.0 
@@ -13,6 +13,7 @@ Windows : QT-5.9.0
 0.0.6 : update CImgProcBase::FilterLargeDiameter()
 0.0.7 : update CImgProcBase::AffineTransform()
 0.0.8 : update OrthogonalRenderer::drawRoiObject()
+0.0.9 : update FillBlob parameter
 </pre>
 -----
 
@@ -34,6 +35,10 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 다음 블로그에 각 Program의 설명들이 있습니다.
 </pre>
+https://blog.naver.com/jerry1455/221382069339 - qroiapp tesseract with OpenCV
+https://blog.naver.com/jerry1455/221377504552 - qroilib simulator ImageSegmentation (distanceTransform,watershed)
+https://blog.naver.com/jerry1455/221376401327 - qroilib simulator user’s manual
+https://blog.naver.com/jerry1455/221372070859 - qroilib Simulator (OpenCV edge application)
 https://blog.naver.com/jerry1455/221371946121 - qroilib compile and run on Raspberry pi
 https://blog.naver.com/jerry1455/221370404281 - qroilib ImgProcBase class APIs
 https://blog.naver.com/jerry1455/221370304964 - qroilib compile and run on ubuntu 18.04
@@ -79,3 +84,4 @@ qroistereo : OpenCV cv::StereoBM, cv::StereoSGBM test program using qroilib
 qgecam : Giga Ethernet Camera Control & Display Program
          I am trying to integrate the jiguiviou project with qroilib.
 </pre>
+
