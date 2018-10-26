@@ -125,7 +125,25 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Roi_Corner,  CParam(_PostProcessValue1,  ("Expansion 2"), _IntValue, ("0")),	// 1 : Dilate - 팽창연산
     //_Inspect_Roi_Corner,  CParam(_LightValue, ("Light"), _IntValue, ("0")),
 
-    _Inspect_Teseract, CParam(_ProcessValue1, ("Type"), _IntValue, ("Multiformat")),
+    //_Inspect_Teseract, CParam(_ProcessValue1, ("Type"), _ComboValue, ("Multiformat")),
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Low Threshold"), _IntValue, ("100")),
+    _Inspect_Teseract, CParam(_ProcessValue1, ("High Threshold"), _IntValue, ("255")),
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Min Size Y"), _IntValue, ("100")),
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Max Size Y"), _IntValue, ("10000")),
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("-2")),	// -1 : Open - 작은 White blob 들을 없앤다.
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("2")),	// 1 : Close - White blob 들을 묶는다.
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Expansion 1"), _IntValue, ("-2")),	// -1 : Erode -
+    _Inspect_Teseract, CParam(_ProcessValue1, ("Expansion 2"), _IntValue, ("0")),	// 1 : Dilate - 팽창연산
+    _Inspect_Teseract, CParam(_ProcessValue2, ("Noise out 1"), _IntValue, ("0")),	// -1 : Open - 작은 White blob 들을 없앤다.
+    _Inspect_Teseract, CParam(_ProcessValue2, ("Noise out 2"), _IntValue, ("0")),	// 1 : Close - White blob 들을 묶는다.
+    _Inspect_Teseract, CParam(_ProcessValue2, ("Expansion 1"), _IntValue, ("0")),	// -1 : Erode -
+    _Inspect_Teseract, CParam(_ProcessValue2, ("Expansion 2"), _IntValue, ("0")),	// 1 : Dilate - 팽창연산
+    _Inspect_Teseract, CParam(_ProcessValue3, ("Size X(%)"), _IntValue, ("100")),
+    _Inspect_Teseract, CParam(_ProcessValue3, ("Size Y(%)"), _IntValue, ("100")),
+    _Inspect_Teseract, CParam(_ProcessValue3, ("Invert?"), _ComboValue, ("0"), ("No,Yes")),
+    _Inspect_Teseract, CParam(_ProcessValue3, ("Smooth Use"), _ComboValue, ("0"), ("No,Yes")),
+    _Inspect_Teseract, CParam(_ProcessValue3, ("Smooth method"), _ComboValue, ("2"), ("BLUR_NO_SCALE,BLUR,GAUSSIAN,CV_MEDIAN,BILATERAL ")),
+    _Inspect_Teseract, CParam(_ProcessValue3, ("Smooth size"), _IntValue, ("7")),
 
 
     _Inspect_Point_Start,   CParam(_ProcessValue1, (""), _IntValue, ("0")), // do not delete.

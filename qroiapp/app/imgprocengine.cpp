@@ -1822,8 +1822,8 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
         SaveOutImage(grayImg, pData, str);
     }
 
-    NoiseOut(pData, grayImg, -1, 212);
-    Expansion(pData, grayImg, -1, 213);
+    NoiseOut(pData, grayImg, _ProcessValue1, 212);
+    Expansion(pData, grayImg, _ProcessValue1, 213);
     //IplImage *grayImg1 = cvCloneImage(grayImg);
 
     ///////////////////////////////////////////////////////////
@@ -1849,8 +1849,8 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
         ThresholdOTSU(pData, g2, 255);
     else
         ThresholdRange(pData, g2, 255);
-    NoiseOut(pData, g2, -1, 260);
-    Expansion(pData, g2, -1, 261);
+    NoiseOut(pData, g2, _ProcessValue1, 260);
+    Expansion(pData, g2, _ProcessValue1, 261);
     cvCanny(g2, g2, 100, 300, 3);
     if (m_bSaveEngineImg){
         SaveOutImage(g2, pData, ("265_TemplateImageCany.jpg"));
@@ -2045,8 +2045,8 @@ int CImgProcEngine::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData,
         SaveOutImage(grayImg, pData, str);
     }
 
-    NoiseOut(pData, grayImg, -1, 212);
-    Expansion(pData, grayImg, -1, 213);
+    NoiseOut(pData, grayImg, _ProcessValue1, 212);
+    Expansion(pData, grayImg, _ProcessValue1, 213);
 
     CvMemStorage *storage = cvCreateMemStorage(0); //storage area for all contours 모든 형상들을 위한 저장공간.
     CvSeq* contours = 0;         // 경계 계수를 저장할 변수
@@ -2307,8 +2307,8 @@ int CImgProcEngine::EdgeCorner(Qroilib::RoiObject *pData, IplImage* graySearchIm
     else
         ThresholdRange(pData, graySearchImg, 311);
 
-    NoiseOut(pData, graySearchImg, -1, 312);
-    Expansion(pData, graySearchImg, -1, 313);
+    NoiseOut(pData, graySearchImg, _ProcessValue1, 312);
+    Expansion(pData, graySearchImg, _ProcessValue1, 313);
 
     CBlobResult blobs;
     blobs = CBlobResult(graySearchImg, nullptr);
@@ -2438,7 +2438,7 @@ int CImgProcEngine::EdgeCorner(Qroilib::RoiObject *pData, IplImage* graySearchIm
 
 
     // 후처리
-    PostExpansion(pData, graySearchImg, -1, 319);
+    Expansion(pData, graySearchImg, _PostProcessValue1, 319);
 
     // 2. 윤곽선 표시 및 윤곽선 영상 생성
 
@@ -2548,8 +2548,8 @@ int CImgProcEngine::EdgeCornerByLine(Qroilib::RoiObject *pData, IplImage* grayCr
     else
         ThresholdRange(pData, grayCroppedImg, 211);
 
-    NoiseOut(pData, grayCroppedImg, -1, 212);
-    Expansion(pData, grayCroppedImg, -1, 213);
+    NoiseOut(pData, grayCroppedImg, _ProcessValue1, 212);
+    Expansion(pData, grayCroppedImg, _ProcessValue1, 213);
 
     IplImage* croppedImageVerify = cvCloneImage(grayCroppedImg);
 
@@ -3095,8 +3095,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
     else
         ThresholdRange(pData, g2, 211);
 
-    NoiseOut(pData, g2, -1, 212);
-    Expansion(pData, g2, -1, 213);
+    NoiseOut(pData, g2, _ProcessValue1, 212);
+    Expansion(pData, g2, _ProcessValue1, 213);
 
     int nFilterBlob = 0;
     pParam = pData->getParam(("Filter blob"));
@@ -3111,8 +3111,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         SaveOutImage(g2, pData, ("226_FilterBlob.jpg"));
     }
 
-    PostNoiseOut(pData, g2, -1, 231);
-    PostExpansion(pData, g2, -1, 232);
+    NoiseOut(pData, g2, _ProcessValue1, 231);
+    Expansion(pData, g2, _ProcessValue1, 232);
     cvCanny(g2, g2, 100, 300, 3);
     if (m_bSaveEngineImg){
         SaveOutImage(g2, pData, ("227_TemplateImageCany.jpg"));
@@ -3179,8 +3179,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                     SaveOutImage(g1, pData, ("248_FilterBlob.jpg"));
                 }
 
-                PostNoiseOut(pData, g1, 251);
-                PostExpansion(pData, g1, 252);
+                NoiseOut(pData, g1, _ProcessValue1, 251);
+                Expansion(pData, g1, _ProcessValue1, 252);
                 cvCanny(g1, g1, 100, 300, 3);
                 if (m_bSaveEngineImg){
                     str.sprintf(("255_TemplateImageCany%d.jpg"), nLoop);
@@ -3277,7 +3277,7 @@ int CImgProcEngine::Threshold(RoiObject *pData, IplImage* grayImg, int nDbg)
 
     int nThresholdValue = 70;
     int nThresholdMaxVal = 255;
-    int bInvert = 0;
+
     if (pData != nullptr) {
         CParam *pParam = pData->getParam(("Brightness Threshold"));
         if (pParam)
@@ -3285,14 +3285,9 @@ int CImgProcEngine::Threshold(RoiObject *pData, IplImage* grayImg, int nDbg)
         pParam = pData->getParam(("Brightness Max"));
         if (pParam)
             nThresholdMaxVal = pParam->Value.toDouble();
-        pParam = pData->getParam(("Invert?"));
-        if (pParam)
-            bInvert = (int)pParam->Value.toDouble();
     }
 
     int nInvert = CV_THRESH_BINARY;
-    if (bInvert == 1)
-        nInvert = CV_THRESH_BINARY_INV;
     cvThreshold(grayImg, grayImg, nThresholdValue, nThresholdMaxVal, nInvert);
     if (m_bSaveEngineImg){
         str.sprintf(("%03d_cvThreshold.jpg"), nDbg);
@@ -3311,8 +3306,6 @@ int CImgProcEngine::ThresholdRange(RoiObject *pData, IplImage* grayImg, int nDbg
 
     int nThresholdLowValue = 70;
     int nThresholdHighValue = 255;
-    int bInvert = 0;
-    //int bLargeBlob = 0;
 
     //if (m_bSaveEngineImg){
     //	str.sprintf(("%03d_cvThresholdRange.jpg"), nDbg);
@@ -3326,12 +3319,6 @@ int CImgProcEngine::ThresholdRange(RoiObject *pData, IplImage* grayImg, int nDbg
         pParam = pData->getParam(("High Threshold"));
         if (pParam)
             nThresholdHighValue = pParam->Value.toDouble();
-        pParam = pData->getParam(("Invert?"));
-        if (pParam)
-            bInvert = (int)pParam->Value.toDouble();
-        //pParam = pData->getParam(("Large Blob?"));
-        //if (pParam)
-        //	bLargeBlob = (int)pParam->Value.toDouble();
     }
     if (nThresholdHighValue == 0 && nThresholdLowValue == 0)
         return -1;
@@ -3343,8 +3330,6 @@ int CImgProcEngine::ThresholdRange(RoiObject *pData, IplImage* grayImg, int nDbg
     //	SaveOutImage(grayImg, pData, str, false);
     //}
 
-    if (bInvert == 1)
-        cvNot(grayImg, grayImg);
     if (m_bSaveEngineImg){
         str.sprintf(("%03d_cvThresholdRange.jpg"), nDbg);
         SaveOutImage(grayImg, pData, str, false);
@@ -3510,73 +3495,6 @@ int CImgProcEngine::NoiseOut(RoiObject *pData, IplImage* grayImg, int t, int nDb
     return 0;
 }
 
-
-int CImgProcEngine::PostNoiseOut(RoiObject *pData, IplImage* grayImg, int t, int nDbg, int h)
-{
-    QString str;
-
-    if (t < 0)
-        t = _PostProcessValue1;
-    //IplImage* tmp = cvCreateImage(cvGetSize(grayImg), 8, 1);
-
-    // 노이즈 제거 필터
-    int filterSize = 3;  // 필터의 크기를 3으로 설정 (Noise out area)
-    //if (pData != nullptr) {
-    //	CParam *pParam = pData->getParam(("Noise out area"));
-    //	if (pParam)
-    //		filterSize = pParam->Value.toDouble();
-    //}
-    IplConvKernel *element = nullptr;
-    if (filterSize <= 0)
-        filterSize = 1;
-    if (filterSize % 2 == 0)
-        filterSize++;
-    //element = cvCreateStructuringElementEx(filterSize, filterSize, (filterSize - 1) / 2, (filterSize - 1) / 2, CV_SHAPE_RECT, nullptr);
-    element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
-
-    int nNoiseout = 0;
-    if (pData != nullptr) {
-        CParam *pParam = pData->getParam(("Noise out 1"),t);
-        if (pParam)
-            nNoiseout = pParam->Value.toDouble();
-    }
-    if (nNoiseout != 0)
-    {
-        if (nNoiseout < 0)
-            cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_OPEN, -nNoiseout);
-        else //if (nNoiseout > 0)
-            cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_CLOSE, nNoiseout);
-
-        FilterLargeArea(grayImg);
-    }
-    nNoiseout = 0;
-    if (pData != nullptr) {
-        CParam *pParam = pData->getParam(("Noise out 2"),t);
-        if (pParam)
-            nNoiseout = pParam->Value.toDouble();
-    }
-    if (nNoiseout != 0)
-    {
-        if (nNoiseout < 0)
-            cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_OPEN, -nNoiseout);
-        else //if (nNoiseout > 0)
-            cvMorphologyEx(grayImg, grayImg, nullptr, element, CV_MOP_CLOSE, nNoiseout);
-
-        FilterLargeArea(grayImg);
-    }
-    if (m_bSaveEngineImg){
-        if (h >= 0)
-            str.sprintf(("%d_%03d_cvClose.jpg"), h, nDbg);
-        else str.sprintf(("%03d_cvClose.jpg"), nDbg);
-        SaveOutImage(grayImg, pData, str, false);
-    }
-    //cvReleaseImage(&tmp);
-
-    cvReleaseStructuringElement(&element);
-    return 0;
-}
-
-
 //
 // Dialate / Erode
 //
@@ -3617,52 +3535,6 @@ int CImgProcEngine::Expansion(RoiObject *pData, IplImage* grayImg, int t, int nD
         str.sprintf(("%03d_cvExpansion.jpg"), nDbg);
         SaveOutImage(grayImg, pData, str, false);
     }
-    //cvReleaseImage(&tmp);
-    return 0;
-}
-
-int CImgProcEngine::PostExpansion(RoiObject *pData, IplImage* grayImg, int t, int nDbg, int h)
-{
-    Q_UNUSED(h);
-    QString str;
-
-    if (t < 0)
-        t = _PostProcessValue1;
-    int nExpansion1 = 0;
-    if (pData != nullptr) {
-        CParam *pParam = pData->getParam(("Expansion 1"),t);
-        if (pParam)
-            nExpansion1 = pParam->Value.toDouble();
-    }
-    int nExpansion2 = 0;
-    if (pData != nullptr) {
-        CParam *pParam = pData->getParam(("Expansion 2"),t);
-        if (pParam)
-            nExpansion2 = pParam->Value.toDouble();
-    }
-    if (nExpansion1 == 0 && nExpansion2 == 0)
-        return 0;
-
-    //IplImage* tmp = cvCreateImage(cvGetSize(grayImg), 8, 1);
-    if (nExpansion1 < 0)
-        cvErode(grayImg, grayImg, nullptr, -nExpansion1);
-    else  //if (nExpansion > 0)
-        cvDilate(grayImg, grayImg, nullptr, nExpansion1);
-
-    FilterLargeArea(grayImg);
-
-    if (nExpansion2 < 0)
-        cvErode(grayImg, grayImg, nullptr, -nExpansion2);
-    else //if (nExpansion > 0)
-        cvDilate(grayImg, grayImg, nullptr, nExpansion2);
-
-    if (m_bSaveEngineImg){
-        str.sprintf(("%03d_cvExpansion.jpg"), nDbg);
-        SaveOutImage(grayImg, pData, str, false);
-    }
-
-    FilterLargeArea(grayImg);
-
     //cvReleaseImage(&tmp);
     return 0;
 }
@@ -3758,16 +3630,7 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 {
     QString str;
 
-//    cvInRangeS(croppedImage, cv::Scalar(0), cv::Scalar(150), croppedImage);
-//    IplConvKernel *element = nullptr;
-//    int filterSize = 3;
-//    int HalfSize = 1;
-//    int shape = CV_SHAPE_RECT;
-//    element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, shape, nullptr);
-//    cvMorphologyEx(croppedImage, croppedImage, nullptr, element, CV_MOP_CLOSE, HalfSize);
-//    cvMorphologyEx(croppedImage, croppedImage, nullptr, element, CV_MOP_OPEN, HalfSize);
-//    cvReleaseStructuringElement(&element);
-//    //cvShowImage("input", croppedImage);
+
 
     tessApi->SetVariable("tessedit_char_whitelist",
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -3776,6 +3639,68 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 
     // Set Page segmentation mode to PSM_AUTO (3)
     tessApi->SetPageSegMode(tesseract::PSM_AUTO);
+
+
+    ThresholdRange(pData, croppedImage, 200);
+
+    int iMinY = 0, iMaxY = 100000;
+    if (pData != NULL) {
+        CParam *pParam = pData->getParam(("Min Size Y"));
+        if (pParam)
+            iMinY = (int)(pParam->Value.toDouble());
+        pParam = pData->getParam(("Max Size Y"));
+        if (pParam)
+            iMaxY = (int)(pParam->Value.toDouble());
+    }
+    FilterBlobBoundingBoxYLength(croppedImage, iMinY, iMaxY);
+    if (gCfg.m_bSaveEngineImg) {
+        str.sprintf(("%03d_Filter.BMP"), 201);
+        SaveOutImage(croppedImage, pData, str, false);
+    }
+
+    NoiseOut(pData, croppedImage, _ProcessValue1, 202);
+    Expansion(pData, croppedImage, _ProcessValue1, 204);
+
+    NoiseOut(pData, croppedImage, _ProcessValue2, 206);
+    Expansion(pData, croppedImage, _ProcessValue2, 208);
+
+    if (gCfg.m_bSaveEngineImg) {
+        str.sprintf(("%03d_cvClose.BMP"), 210);
+        SaveOutImage(croppedImage, pData, str, false);
+    }
+
+    int bInvert = 0;
+    if (pData != NULL) {
+        CParam *pParam = pData->getParam(("Invert?"));
+        if (pParam)
+            bInvert = (int)pParam->Value.toDouble();
+        if (bInvert == 1)
+            cvNot(croppedImage, croppedImage);
+        if (m_bSaveEngineImg){
+            str.sprintf(("%03d_Invert.jpg"), 211);
+            SaveOutImage(croppedImage, pData, str, false);
+        }
+    }
+    double dSizeX = 1.0, dSizeY = 1.0;
+    if (pData != NULL) {
+        CParam *pParam = pData->getParam(("Size X(%)"));
+        if (pParam)
+            dSizeX = (pParam->Value.toDouble()) / 100.0;
+        pParam = pData->getParam(("Size Y(%)"));
+        if (pParam)
+            dSizeY = (pParam->Value.toDouble()) / 100.0;
+    }
+
+    CvSize sz = CvSize(croppedImage->width * dSizeX, croppedImage->height * dSizeY);
+    IplImage* tmp = cvCreateImage(sz, 8, 1);
+    cvResize(croppedImage, tmp, CV_INTER_CUBIC);
+
+    Smooth(pData, tmp, 220);
+
+    if (gCfg.m_bSaveEngineImg) {
+        str.sprintf(("%03d_cvTmp.BMP"), 300);
+        SaveOutImage(croppedImage, pData, str, false);
+    }
 
     // Open input image using OpenCV
     cv::Mat im = cv::cvarrToMat(croppedImage);

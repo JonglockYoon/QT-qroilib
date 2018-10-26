@@ -75,9 +75,7 @@ public:
 
     int AdaptiveThreshold(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg);
     int NoiseOut(Qroilib::RoiObject *pData, IplImage* grayImg, int t = -1, int nDbg = 100, int h = -1);
-    int PostNoiseOut(Qroilib::RoiObject *pData, IplImage* grayImg, int t = -1, int nDbg = 100, int h = -1);
     int Expansion(Qroilib::RoiObject *pData, IplImage* grayImg, int t = -1, int nDbg = 150, int h = -1);
-    int PostExpansion(Qroilib::RoiObject *pData, IplImage* grayImg, int t = -1, int nDbg = 150, int h = -1);
 
     void DrawResultCrossMark(IplImage *iplImage, Qroilib::RoiObject *pData);
 
