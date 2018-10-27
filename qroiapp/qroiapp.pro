@@ -102,7 +102,6 @@ HEADERS +=  \
         app/dialogconfig.h \
         app/logviewdock.h \
         app/mlogthread.h \
-        app/mticktimer.h \
 
 
 FORMS += \
@@ -122,7 +121,6 @@ SOURCES +=  \
         app/dialogconfig.cpp \
         app/logviewdock.cpp \
         app/mlogthread.cpp \
-        app/mticktimer.cpp \
 
 RESOURCES += \
     resources.qrc

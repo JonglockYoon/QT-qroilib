@@ -600,10 +600,10 @@ void MainWindow::setInspectAll()
             const ObjectGroup &objectGroup = *static_cast<const ObjectGroup*>(layer);
             for (const Qroilib::RoiObject *roiObject : objectGroup) {
                 Qroilib::RoiObject *mObject = (Qroilib::RoiObject *)roiObject;
-                mObject->m_vecDetectResult.clear();
 
                 pImgProcEngine->InspectOneItem(grayImg, mObject);
                 pImgProcEngine->DrawResultCrossMark(grayImg, mObject);
+                mObject->m_vecDetectResult.clear();
 
 //                const QRectF bounds = v->boundingRect().intersected(mObject->bounds());
 //                mObject->setBounds(bounds);
