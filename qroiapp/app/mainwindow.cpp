@@ -63,6 +63,7 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 #include "roireader.h"
 #include "dialogconfig.h"
 #include "logviewdock.h"
+#include "Controller.h"
 
 using namespace Qroilib;
 using namespace cv;
@@ -436,20 +437,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
-void MainWindow::SetCameraPause(int ch, int bPause)
+void MainWindow::SetCameraPause(int viewNumber, int bPause)
 {
-    if (ch < 0) return;
-    if (ch > 1) return;
-    qDebug() << "SetCameraPause" << ch << bPause;
-    bCamPause[ch] = bPause;
-//    ViewMainPage* pView = viewMainPage();
-//    CamCapture* pCam = pView->myCamCapture[ch];
-//    if (pCam)
-//        pCam->bCamPause = bPause;
+    if (viewNumber < 0) return;
+    if (viewNumber >= gCfg.m_nCamNumber) return;
+    qDebug() << "SetCameraPause" << viewNumber << bPause;
+
+    ViewMainPage* pView = viewMainPage();
+    Controller* pController = pView->myCamController[viewNumber];
+    pController->captureThread->bCamPause = bPause;
 
     if (bPause == 0)
     {
-        Qroilib::DocumentView* v = d->mViewMainPage->view(ch);
+        Qroilib::DocumentView* v = d->mViewMainPage->view(viewNumber);
         if (v) {
             v->mRoi->setWidth(640);
             v->mRoi->setHeight(480);
@@ -567,7 +567,7 @@ void MainWindow::setInspectAll()
     IplImage riplImg;
     IplImage *iplImg;
     QImage img;
-    ViewMainPage* pView = viewMainPage();
+    //ViewMainPage* pView = viewMainPage();
 
     int seq = 0;
     while (true) {

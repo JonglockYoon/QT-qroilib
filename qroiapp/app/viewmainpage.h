@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QWidget>
 #include <QLabel>
 
-#include "camcapture.h"
+#include "CaptureThread.h"
 
 class QGraphicsWidget;
 
@@ -47,14 +47,12 @@ class QGraphicsWidget;
 #include "roiscene.h"
 //#include "roipropertyeditor.h"
 
-//class RasterImageView;
-//class RoiScene;
-//class RoiPropertyEditor;
-//class DocumentView;
 class RoiPropertyEditor;
+class Controller;
 
 struct ViewMainPagePrivate;
 
+class ImageBuffer;
 /**
  * Holds the active document view and associated widgetry.
  */
@@ -105,9 +103,6 @@ public:
 
     Qroilib::DocumentView* view(int n) const;
 
-    void OpenCam(int nv, int nCam);
-    void CloseCam(int seq);
-
 Q_SIGNALS:
 
     /**
@@ -122,8 +117,6 @@ Q_SIGNALS:
 
     void goToBrowseModeRequested();
 
-    //void captionUpdateRequested(const QString&);
-
 public Q_SLOTS:
     //void slotViewFocused(Qroilib::DocumentView*);
     void setCurrentView(Qroilib::DocumentView* view);
@@ -134,12 +127,8 @@ private Q_SLOTS:
 
     void showContextMenu();
 
-//    void trashView(DocumentView*);
-//    void deselectView(DocumentView*);
-
-//    void timerTick();
-
     void updatePlayerUI(const QImage& img, int seq);
+    void updateFrame(const QImage &frame, int windowNumber);
 
 private:
     friend struct ViewMainPagePrivate;
@@ -149,10 +138,15 @@ protected:
 
 public:
     QLabel* mStatusLabel;
-    CamCapture* myCamCapture[2]; // DocumentView 와 갯수동일하게 유지 필요.
+    Controller* myCamController[2]; // DocumentView 와 갯수동일하게 유지 필요.
     QObject* objContainer;
     RoiPropertyEditor *roipropertyeditor;
+    ImageBuffer *imageBuffer;
 
+    void connectToCamera(int windowNumber,int deviceNumber);
+    void disconnectCamera(int windowNumber);
+
+    int imageBufferSize = 1;
 };
 
 #endif /* VIEWMAINPAGE_H */

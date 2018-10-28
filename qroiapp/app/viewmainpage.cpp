@@ -8,7 +8,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QStatusBar>
-
+#include <QMessageBox>
 #include <QMediaMetaData>
 #include <QCamera>
 #include <QCameraInfo>
@@ -34,6 +34,9 @@
 #include "roipropertyeditor.h"
 #include "mainwindow.h"
 #include "config.h"
+
+#include "Controller.h"
+#include "ImageBuffer.h"
 
 #undef ENABLE_LOG
 #undef LOG
@@ -149,8 +152,8 @@ ViewMainPage::ViewMainPage(QWidget* parent)
 : QWidget(parent)
 , d(new ViewMainPagePrivate)
 {
-    myCamCapture[0] = nullptr;
-    myCamCapture[1] = nullptr;
+    myCamController[0] = new Controller(0);
+    myCamController[1] = new Controller(1);
     roipropertyeditor = nullptr;
 
     d->q = this;
@@ -186,20 +189,52 @@ ViewMainPage::~ViewMainPage()
     if (roipropertyeditor)
         delete roipropertyeditor;
 
-    for (int i=0; i<2; i++) {
-        if ( myCamCapture[i]) {
-            myCamCapture[i]->Stop();
+    for (int i=0; i<gCfg.m_nCamNumber; i++) {
+        if ( myCamController[i]) {
+            myCamController[i]->disconnectCamera();
             QThread::msleep(200);
-            delete myCamCapture[i];
-            myCamCapture[i] = nullptr;
+            delete myCamController[i];
+            myCamController[i] = nullptr;
         }
     }
 
     delete d;
 }
 
+
+void ViewMainPage::connectToCamera(int windowNumber, int deviceNumber)
+{
+
+    // Connect to camera
+    myCamController[windowNumber]->connectToCamera(deviceNumber,imageBufferSize,
+                                                      true,
+                                                      DEFAULT_CAP_THREAD_PRIO,
+                                                      DEFAULT_PROC_THREAD_PRIO);
+
+    // Create connection between processing thread (emitter) and GUI thread (receiver/listener)
+    connect(myCamController[windowNumber]->processingThread,SIGNAL(newFrame(QImage,int)),
+            this,SLOT(updateFrame(QImage,int)));
+
+} // connectToCamera()
+
+void ViewMainPage::disconnectCamera(int windowNumber)
+{
+    // Check if camera is connected
+    if(myCamController[windowNumber]->captureThread->isCameraConnected())
+    {
+        disconnect(myCamController[windowNumber]->processingThread,SIGNAL(newFrame(QImage)),0,0);
+        // Disconnect camera
+        myCamController[windowNumber]->disconnectCamera();
+    }
+    // Display error dialog
+    else
+        QMessageBox::warning(this,"ERROR:","Camera already disconnected.");
+} // disconnectCamera()
+
 void ViewMainPage::updatePlayerUI(const QImage& img, int seq)
 {
+    qDebug() << "updatePlayerUI";
+
     Qroilib::DocumentView* v = view(seq);
     if (v == nullptr)
         return;
@@ -274,40 +309,18 @@ void ViewMainPage::completed(int seq)
             QStringList l = gCfg.m_sCamera1.split(":");
             if (l.count() > 0) {
                 int nCam = l[0].toInt() - 1;
-                OpenCam(seq, nCam);
+                connectToCamera(seq, nCam);
             }
         }
         else if (seq == 1 && List[i] == gCfg.m_sCamera2) {
             QStringList l = gCfg.m_sCamera2.split(":");
             if (l.count() > 0) {
                 int nCam = l[0].toInt() - 1;
-                OpenCam(seq, nCam);
+                connectToCamera(seq, nCam);
             }
         }
     }
 #endif
-}
-
-void ViewMainPage::OpenCam(int seq, int nCam)
-{
-    myCamCapture[seq] = new CamCapture(d->mDocumentViews[seq], seq, nCam);
-    //qDebug() << "myCamCapture seq: " << seq;
-    QObject::connect(myCamCapture[seq], SIGNAL(processedImage(const QImage&, int)), this, SLOT(updatePlayerUI(const QImage&, int)));
-
-    if (myCamCapture[seq]->OpenCam() == true)
-        myCamCapture[seq]->Play();
-}
-void ViewMainPage::CloseCam(int seq)
-{
-    if (myCamCapture[seq])
-    {
-        QObject::disconnect(myCamCapture[seq], SIGNAL(processedImage(const QImage&, int)), this, SLOT(updatePlayerUI(const QImage&, int)));
-        myCamCapture[seq]->Stop();
-        myCamCapture[seq]->exit();
-        myCamCapture[seq]->CloseCam();
-        delete myCamCapture[seq];
-        myCamCapture[seq] = nullptr;
-    }
 }
 
 void ViewMainPage::showContextMenu()
@@ -461,12 +474,12 @@ bool ViewMainPage::eventFilter(QObject *obj, QEvent *event)
                 int b = src.blue();
 
                 cv::Mat HSV;
-                cv::Mat RGB(1,1,CV_8UC3,cv::Scalar(b,g,r));
-                cv::cvtColor(RGB, HSV,CV_BGR2HSV);
+                cv::Mat RGBv(1,1,CV_8UC3,cv::Scalar(b,g,r));
+                cv::cvtColor(RGBv, HSV,CV_BGR2HSV);
                 cv::Vec3b hsv=HSV.at<cv::Vec3b>(0,0);
                 int H=(int)hsv.val[0]; // 0 ~ 179
                 cv::Mat GRAY;
-                cv::cvtColor(RGB, GRAY,CV_BGR2GRAY);
+                cv::cvtColor(RGBv, GRAY,CV_BGR2GRAY);
                 cv::Vec3b gy=GRAY.at<cv::Vec3b>(0,0);
 
                 QString str, str1;
@@ -511,3 +524,30 @@ Qroilib::DocumentView* ViewMainPage::view(int n) const
         return nullptr;
     return d->mDocumentViews[n];
 }
+
+void ViewMainPage::updateFrame(const QImage &frame, int windowNumber)
+{
+    // Show [number of images in buffer / image buffer size] in imageBufferLabel in main window
+    QString str1 = QString("[")+QString::number(myCamController[windowNumber]->processingThread->getCurrentSizeOfBuffer())+
+                       QString("/")+QString::number(imageBufferSize)+QString("]");
+    // Show percentage of image bufffer full in imageBufferBar in main window
+    int size = myCamController[windowNumber]->processingThread->getCurrentSizeOfBuffer();
+    // Show processing rate in captureRateLabel in main window
+    int fps = myCamController[windowNumber]->captureThread->getAvgFPS();
+    // Show processing rate in processingRateLabel in main window
+    //frameLabel->setPixmap(QPixmap::fromImage(frame));
+
+    Qroilib::DocumentView* v = view(windowNumber);
+    if (v == nullptr)
+        return;
+
+    if (!v->isVisible())
+        return;
+
+    if (!v->document())
+        return;
+
+    v->document()->setImageInternal(frame);
+    v->imageView()->updateBuffer();
+} // updateFrame()
+

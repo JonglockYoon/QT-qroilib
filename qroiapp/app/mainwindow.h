@@ -44,8 +44,6 @@ public:
     ~MainWindow();
 
 public:
-    bool bCamPause[2];
-
     /**
      * Defines the url to display when the window is shown for the first time.
      */
@@ -55,7 +53,7 @@ public:
     DocumentView* currentView() const;
 
     Qroilib::RoiObject *FindScrewHole(int ch);
-    void SetCameraPause(int ch, int bPause);
+    void SetCameraPause(int viewNumber, int bPause);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -98,8 +96,6 @@ public  Q_SLOTS:
 
     void finishNewRoiObject();
 
-public:
-    bool bWorking[2];
 };
 
 extern MainWindow* theMainWindow;

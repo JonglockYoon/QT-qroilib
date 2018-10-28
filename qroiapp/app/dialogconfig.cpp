@@ -30,6 +30,8 @@
 #include "qextserialenumerator.h"
 #include "mainwindow.h"
 #include "config.h"
+#include "Controller.h"
+#include "CaptureThread.h"
 
 DialogConfig::DialogConfig(QWidget *parent) :
     QDialog(parent),
@@ -80,27 +82,22 @@ void DialogConfig::enableAutoExposure(bool on)
     ViewMainPage* pView = theMainWindow->viewMainPage();
     int seq = 0;
     while (true) {
-        if (seq > 1)
+        if (seq >= gCfg.m_nCamNumber)
             break;
-//        Qroilib::DocumentView* v = pView->view(seq);
-//        if (v == nullptr)
-//            break;
-        if (!pView->myCamCapture[seq]) {
+
+        if (!pView->myCamController[seq]) {
             seq++;
             continue;
         }
-//        if (pView->myCamCapture[seq]->bOpen == false) {
-//            seq++;
-//            continue;
-//        }
 
-       theMainWindow->SetCameraPause(seq, true);
+        theMainWindow->SetCameraPause(seq, true);
 
 #ifdef Q_OS_WIN
+        Controller* pController = pView->myCamController[seq];
         if (on)
-            pView->myCamCapture[seq]->capture.set(CV_CAP_PROP_AUTO_EXPOSURE, 3); // 1-manual, 3-auto
+            pController->captureThread->cap.set(CV_CAP_PROP_AUTO_EXPOSURE, 3); // 1-manual, 3-auto
         else
-            pView->myCamCapture[seq]->capture.set(CV_CAP_PROP_AUTO_EXPOSURE, 1); // 1-manual, 3-auto
+            pController->captureThread->cap.set(CV_CAP_PROP_AUTO_EXPOSURE, 1); // 1-manual, 3-auto
 #else
 		char video[64];
         struct v4l2_control ctrl;
@@ -146,30 +143,21 @@ void DialogConfig::setExposureValue(int val)
     int seq = 0;
     qDebug() << "setExposureValue" << val;
     while (true) {
-        if (seq > 1)
+        if (seq >= gCfg.m_nCamNumber)
             break;
-//        Qroilib::DocumentView* v = pView->view(seq);
-//        if (v == nullptr)
-//            break;
-        if (!pView->myCamCapture[seq]) {
+
+        if (!pView->myCamController[seq]) {
             seq++;
             continue;
         }
-//        if (pView->myCamCapture[seq]->bOpen == false) {
-//            seq++;
-//            continue;
-//        }
+
 
         theMainWindow->SetCameraPause(seq, true);
 #ifdef Q_OS_WIN
         gCfg.m_nCamExposure = val;
-        if (pView->myCamCapture[seq])
-            pView->myCamCapture[seq]->capture.set(CV_CAP_PROP_EXPOSURE, val-10);
+        Controller* pController = pView->myCamController[seq];
+        pController->captureThread->cap.set(CV_CAP_PROP_EXPOSURE, val-10);
 #else
-        //char cmd[512];
-        //sprintf(cmd, "uvcdynctrl -s 'Exposure (Absolute) %d", val);
-	//system(cmd);
-
         char video[64];
 		struct v4l2_control ctrl;
 		sprintf(video, "/dev/video%d", seq);
@@ -212,19 +200,15 @@ int DialogConfig::getExposureValue(int seq)
 {
     int val = 0;
     ViewMainPage* pView = theMainWindow->viewMainPage();
-//    Qroilib::DocumentView* v = pView->view(seq);
-//    if (v == nullptr)
-//        return -1;
-    if (!pView->myCamCapture[seq])
-        return -1;
-    if (pView->myCamCapture[seq]->bOpen == false)
-        return -1;
 
+    if (!pView->myCamController[seq])
+        return -1;
 
     theMainWindow->SetCameraPause(seq, true);
 
 #ifdef Q_OS_WIN
-    val = pView->myCamCapture[seq]->capture.get(CV_CAP_PROP_EXPOSURE) + 13;
+    Controller* pController = pView->myCamController[seq];
+    val = pController->captureThread->cap.get(CV_CAP_PROP_EXPOSURE) + 13;
 #else
     char video[64];
     struct v4l2_queryctrl qctrl;
@@ -352,24 +336,26 @@ void DialogConfig::on_pushButtonSave_clicked()
     int ncam2 = ui->comboBoxCam2Port->currentIndex();
 
     QString str;
-    pView->CloseCam(0);
+    pView->disconnectCamera(0);
     str = ui->comboBoxCam1Port->currentText();
     if (str == "None" || str == "")
         gCfg.m_sCamera1 = "";
     else {
         gCfg.m_sCamera1 = str;
-        pView->OpenCam(0, ncam1-1);
+        pView->connectToCamera(0, ncam1-1);
     }
 
-    pView->CloseCam(1);
-    str = ui->comboBoxCam2Port->currentText();
-    if (str == "None" || str == "")
-        gCfg.m_sCamera2 = "";
-    else {
-        gCfg.m_sCamera2 = str;
-        pView->OpenCam(1, ncam2-1);
+    if (gCfg.m_nCamNumber > 1)
+    {
+        pView->disconnectCamera(1);
+        str = ui->comboBoxCam2Port->currentText();
+        if (str == "None" || str == "")
+            gCfg.m_sCamera2 = "";
+        else {
+            gCfg.m_sCamera2 = str;
+            pView->connectToCamera(1, ncam2-1);
+        }
     }
-
 
     gCfg.m_pCamInfo[0].dResX = ui->lineEditResX->text().toDouble();
     gCfg.m_pCamInfo[0].dResY = ui->lineEditResY->text().toDouble();

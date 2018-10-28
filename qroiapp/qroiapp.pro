@@ -93,7 +93,6 @@ INCLUDEPATH += . \
 HEADERS +=  \
         app/mainwindow.h \
         app/viewmainpage.h \
-        app/camcapture.h \
         app/recipedata.h \
         app/common.h \
         app/config.h \
@@ -102,6 +101,11 @@ HEADERS +=  \
         app/dialogconfig.h \
         app/logviewdock.h \
         app/mlogthread.h \
+        app/CaptureThread.h \
+        app/Controller.h \
+        app/ProcessingThread.h \
+        app/ImageBuffer.h \
+        app/MatToQImage.h \
 
 
 FORMS += \
@@ -112,7 +116,6 @@ SOURCES +=  \
         app/main.cpp \
         app/mainwindow.cpp \
         app/viewmainpage.cpp \
-        app/camcapture.cpp \
         app/recipedata.cpp \
         app/common.cpp \
         app/config.cpp \
@@ -121,6 +124,11 @@ SOURCES +=  \
         app/dialogconfig.cpp \
         app/logviewdock.cpp \
         app/mlogthread.cpp \
+        app/CaptureThread.cpp \
+        app/Controller.cpp \
+        app/ProcessingThread.cpp \
+        app/ImageBuffer.cpp \
+        app/MatToQImage.cpp \
 
 RESOURCES += \
     resources.qrc
