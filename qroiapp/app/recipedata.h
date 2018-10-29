@@ -38,6 +38,7 @@ typedef enum _tagInspectType
     _Inspect_Roi_Find_Shape,
     _Inspect_Roi_Corner,
     _Inspect_Teseract,
+    _Inspect_BarCode,
     _Inspect_Roi_End,			// 영역 마지막
 
     ///////////////////////////////////////////////////////////

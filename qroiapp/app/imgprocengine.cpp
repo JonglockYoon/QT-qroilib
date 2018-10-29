@@ -20,7 +20,13 @@
 #include "config.h"
 #include "recipedata.h"
 #include "mainwindow.h"
+#include "MatToQImage.h"
 
+#include "QZXing.h"
+#include <zxing/NotFoundException.h>
+#include <zxing/ReaderException.h>
+
+using namespace zxing;
 using namespace tesseract;
 //using namespace cv;
 
@@ -157,6 +163,9 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
         break;
     case _Inspect_Teseract:
         SingleROIOCR(croppedImage, pData, rect);
+        break;
+    case _Inspect_BarCode:
+        SingleROIBarCode(croppedImage, pData, rect);
         break;
     }
 	cvReleaseImage(&croppedImage);
@@ -3717,8 +3726,8 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 
 
     qDebug() << "OCR Text:" << rst;
-    //m_DetectResult.strResult = rst;// outText.c_str();
-    //pData->m_vecDetectResult.push_back(m_DetectResult);
+    m_DetectResult.str = std::string(rst);
+    pData->m_vecDetectResult.push_back(m_DetectResult);
 
 //    CvFont font;
 //    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.3, 0.3, 0, 1, CV_AA);
@@ -3732,3 +3741,32 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 
     return -1;
 }
+
+int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
+{
+    QZXing qz;
+
+    cv::Mat m = cv::cvarrToMat(croppedImage);
+    QImage img;
+    img = MatToQImage(m);
+
+
+    QString decode;
+    try {
+        decode = qz.decodeImage(img);
+    }
+    catch(zxing::NotFoundException  &e){}
+    catch(zxing::ReaderException  &e){}
+
+    qDebug() << "Barcode :" << decode;
+
+    QString str;
+    str = "Barcode : " + decode;
+    theMainWindow->DevLogSave(str.toLatin1().data());
+    m_DetectResult.str = str.toLatin1().data();
+    pData->m_vecDetectResult.push_back(m_DetectResult);
+
+    return 0;
+}
+
+

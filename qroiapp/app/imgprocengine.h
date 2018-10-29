@@ -51,6 +51,7 @@ public:
     int SingleROISubPixEdge(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROICorner(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
+    int SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
 
     int EdgeCorner(Qroilib::RoiObject *pData, IplImage* graySearchImgIn, int CornerType, CvPoint2D32f &outCorner);
     int EdgeCornerByLine(Qroilib::RoiObject *pData, IplImage* graySearchImgIn, int CornerType, CvPoint2D32f &corner);

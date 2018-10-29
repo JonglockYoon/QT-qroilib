@@ -125,7 +125,7 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Roi_Corner,  CParam(_PostProcessValue1,  ("Expansion 2"), _IntValue, ("0")),	// 1 : Dilate - 팽창연산
     //_Inspect_Roi_Corner,  CParam(_LightValue, ("Light"), _IntValue, ("0")),
 
-    //_Inspect_Teseract, CParam(_ProcessValue1, ("Type"), _ComboValue, ("Multiformat")),
+    //_Inspect_Teseract, CParam(_ProcessValue1, _T("Type"), _ComboValue, _T("English")),
     _Inspect_Teseract, CParam(_ProcessValue1, ("Low Threshold"), _IntValue, ("100")),
     _Inspect_Teseract, CParam(_ProcessValue1, ("High Threshold"), _IntValue, ("255")),
     _Inspect_Teseract, CParam(_ProcessValue1, ("Min Size Y"), _IntValue, ("100")),
@@ -145,6 +145,7 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Teseract, CParam(_ProcessValue3, ("Smooth method"), _ComboValue, ("2"), ("BLUR_NO_SCALE,BLUR,GAUSSIAN,CV_MEDIAN,BILATERAL ")),
     _Inspect_Teseract, CParam(_ProcessValue3, ("Smooth size"), _IntValue, ("7")),
 
+    _Inspect_BarCode, CParam(_ProcessValue1, ("Type"), _ComboValue, ("Multiformat")),
 
     _Inspect_Point_Start,   CParam(_ProcessValue1, (""), _IntValue, ("0")), // do not delete.
     _Inspect_Point_Coordnation,  CParam(_ProcessValue1, ("Mark color"), _IntValue, ("128")), // not yet implement.
@@ -188,6 +189,7 @@ void CRecipeData::InitParamData()
 
     m_sInspList[_Inspect_Roi_Corner].sprintf(("Corner"));
     m_sInspList[_Inspect_Teseract].sprintf(("OCR"));
+    m_sInspList[_Inspect_BarCode].sprintf(("BarCode"));
 
     m_sInspList[_Inspect_Point_Coordnation].sprintf(("Point"));
 
