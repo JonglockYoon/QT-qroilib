@@ -820,7 +820,8 @@ int DialogApplication::xfeatureTest(IplImage* iplImg, IplImage* iplImg2)
     }
 
     std::vector<cv::Point2f> corner;
-    cv::Mat img_matches = drawGoodMatches(img_object, img_scene, keypoints_object, keypoints_scene, good_matches, corner);
+    cv::Mat img_matches = drawGoodMatches(img_object, img_scene,
+                                keypoints_object, keypoints_scene, good_matches, corner);
 
     //-- Show detected matches
     if (img_matches.rows > 0)

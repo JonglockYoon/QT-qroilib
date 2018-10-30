@@ -1716,10 +1716,19 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
         double rate = LimitMatchRate / 100.0;
         std::vector<std::pair<double, double>> pairs;
         IplImage *clone = cvCloneImage(grayTemplateImg);
+        int cnt = 0;
         for (double a = -dAngle; a < dAngle; a=a+dAngleStep) // 패턴을 -30 에서 30도까지 돌려가면서 매칭율이 가장좋은 이미지를 찾는다.
         {
             cvCopy(grayTemplateImg, clone);
             RotateImage(clone, a);
+
+            if (m_bSaveEngineImg)
+            {
+                cnt++;
+                QString str; str.sprintf(("%d_Template%d.jpg"), 149, cnt);
+                SaveOutImage(clone, pData, str);
+            }
+
             cvMatchTemplate(graySearchImg, clone, C, CV_TM_CCOEFF_NORMED); // 제곱차 매칭
             cvMinMaxLoc(C, &min, &max, nullptr, &left_top); // 상관계수가 최대값을 값는 위치 찾기
             if (max > rate) {
@@ -3207,14 +3216,14 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                 }
 
                 // g1이 전부 0로 채워져있으면 cvMatchShapes()에서 0로 리턴되어서 zero image filtering
-                IplImage* c1 = cvCloneImage(g1);
-                CvSeq* contours = 0;
-                cvFindContours(c1, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL);
-                cvReleaseImage(&c1);
+                //IplImage* c1 = cvCloneImage(g1);
+                //CvSeq* contours = 0;
+                //cvFindContours(c1, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL);
+                //cvReleaseImage(&c1);
 
                 double matching = 1.0;
-                if (contours && contours->total > 0)
-                    matching = cvMatchShapes(g1, g2, CV_CONTOURS_MATCH_I2); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
+                //if (contours && contours->total > 0)
+                    matching = cvMatchShapes(g1, g2, CV_CONTOURS_MATCH_I1); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
                 cvReleaseImage(&g1);
 
                 str.sprintf(("MatchTemplate cvMatchShapes : %.3f"), matching);
