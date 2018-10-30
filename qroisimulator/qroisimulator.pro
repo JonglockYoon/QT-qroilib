@@ -27,6 +27,7 @@ LIBS += "..\winlib\Debug\png.lib"
 LIBS += "..\winlib\Debug\zlib.lib"
 LIBS += "..\winlib\Debug\lcms2.lib"
 LIBS += "..\winlib\Debug\QZXing2.lib"
+TARGET = ../../bin/qroisimulator
 }
 CONFIG(release, debug|release) {
 #LIBS += -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320 -lopencv_shape320
@@ -37,6 +38,7 @@ LIBS += "..\winlib\Release\png.lib"
 LIBS += "..\winlib\Release\zlib.lib"
 LIBS += "..\winlib\Release\lcms2.lib"
 LIBS += "..\winlib\Release\QZXing2.lib"
+TARGET = ../../bin/release/qroisimulator
 }
 LIBS += -lws2_32
 LIBS += -lpthreadVC1
@@ -44,7 +46,6 @@ LIBS += -lpthreadVC1
 INCLUDEPATH += "..\winlib\include"
 INCLUDEPATH += "..\qroilib\pthread"
 #INCLUDEPATH += "c:\opencv340\build\include"
-TARGET = ../../bin/qroisimulator
 }
 
 linux {

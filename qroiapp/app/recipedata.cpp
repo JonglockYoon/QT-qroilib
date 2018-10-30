@@ -34,17 +34,14 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Patt_HorizontalAlign,  CParam(_PriorityValue, ("Priority"), _IntValue, ("5")),
 
     _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Pattern matching rate"), _DoubleValue, ("60")),
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Low Threshold"), _IntValue, ("0")),
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("High Threshold"), _IntValue, ("100")),
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("5")),	// -1 : Open - 작은 White blob 들을 없앤다.
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("-5")),	// 1 : Close - White blob 들을 묶는다..
-    //_Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Expansion 1"), _IntValue, ("0")),	// -1 : Erode -
-    //_Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Expansion 2"), _IntValue, ("0")),	// 1 : Dilate - 팽창연산.
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Noise out 3"), _IntValue, ("0")),	// -1 : Open - 작은 White blob 들을 없앤다.
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Shape matching rate"), _DoubleValue, ("70")),
-    //_Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Matching after Binarized"), _ComboValue, ("0"), ("No, Yes")),
-    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Filter blob"), _ComboValue, ("2"), ("None,LargeArea,LargeDiameter")),
-    //_Inspect_Patt_Identify,  CParam(_LightValue, ("Light"), _IntValue, ("50")),
+    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Rotate angle"), _IntValue, ("0")),
+    _Inspect_Patt_Identify,  CParam(_ProcessValue1, ("Angle step"), _IntValue, ("2")),
+    _Inspect_Patt_Identify,  CParam(_ProcessValue2, ("Shape matching rate"), _DoubleValue, ("70")),
+    _Inspect_Patt_Identify,  CParam(_ProcessValue2, ("Low Threshold"), _IntValue, ("0")),
+    _Inspect_Patt_Identify,  CParam(_ProcessValue2, ("High Threshold"), _IntValue, ("100")),
+    _Inspect_Patt_Identify,  CParam(_ProcessValue2, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다.
+    _Inspect_Patt_Identify,  CParam(_ProcessValue2, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다..
+    _Inspect_Patt_Identify,  CParam(_ProcessValue2, ("Filter blob"), _ComboValue, ("2"), ("None,LargeArea,LargeDiameter")),
 
     _Inspect_Patt_MatchShapes,  CParam(_ProcessValue1, ("Low Threshold"), _IntValue, ("0")),
     _Inspect_Patt_MatchShapes,  CParam(_ProcessValue1, ("High Threshold"), _IntValue, ("100")),

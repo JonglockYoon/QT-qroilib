@@ -69,6 +69,11 @@ CImgProcEngine::~CImgProcEngine(void)
 
 int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
 {
+    if (pData->mParent != nullptr) {
+        if (pData->mParent->mInspectType < _INSPACT_ROI_START)
+            return -1;
+    }
+
     QString str;
     str.sprintf("InspectOneItem type=%d", pData->mInspectType);
     theMainWindow->DevLogSave(str.toLatin1().data());
@@ -108,11 +113,11 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
     } else
 		cvCopy(img, graySearchImg);
 
-    if (m_bSaveEngineImg)
-	{
-        str.sprintf(("0_%d_grayImage.jpg"), 110);
-        SaveOutImage(graySearchImg, pData, str, false);
-	}
+//    if (m_bSaveEngineImg)
+//	{
+//        str.sprintf(("0_%d_grayImage.jpg"), 110);
+//        SaveOutImage(graySearchImg, pData, str, false);
+//	}
 
 	IplImage* croppedImage;
     QRectF rect = pData->bounds();	// Area로 등록된 ROI
@@ -1660,6 +1665,8 @@ int CImgProcEngine::SingleROICircleWithEdge(IplImage* croppedImage, RoiObject *p
 int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QRectF rect)
 {
     Q_UNUSED(rect);
+    if (pData == nullptr)
+        return -1;
     if (pData->iplTemplate == nullptr)
         return -1;
     QString str;
@@ -1684,11 +1691,8 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
     double dMatchShapes = 0;
     double MatchRate = 0, LimitMatchRate = 40;
 
-    if (pData != nullptr)
-    {
-        CParam *pParam = pData->getParam(("Pattern matching rate"));
-        if (pParam) LimitMatchRate = pParam->Value.toDouble();
-    }
+    CParam *pParam = pData->getParam(("Pattern matching rate"));
+    if (pParam) LimitMatchRate = pParam->Value.toDouble();
 
     if (m_bSaveEngineImg)
     {
@@ -1696,9 +1700,15 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
         SaveOutImage(pData->iplTemplate, pData, str);
     }
 
+    double dAngle = 0.0;
+    double dAngleStep = 0.0;
     CvPoint left_top = { 0, 0 };
+    pParam = pData->getParam(("Rotate angle"));
+    if (pParam) dAngle = pParam->Value.toDouble();
+    pParam = pData->getParam(("Angle step"));
+    if (pParam) dAngleStep = pParam->Value.toDouble();
 
-    if (0) // computing power가 낮은 시스템은 사용하지말자.
+    if (dAngle > 0.0) // computing power가 낮은 시스템은 사용하지말자.
     {
         CvSize size = cvSize(pData->bounds().width() - grayTemplateImg->width + 1, pData->bounds().height() - grayTemplateImg->height + 1);
         IplImage* C = cvCreateImage(size, IPL_DEPTH_32F, 1); // 상관계수를 구할 이미지(C)
@@ -1706,7 +1716,7 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
         double rate = LimitMatchRate / 100.0;
         std::vector<std::pair<double, double>> pairs;
         IplImage *clone = cvCloneImage(grayTemplateImg);
-        for (double a = -30.0; a < 30.0; a=a+1.0) // 패턴을 -30 에서 30도까지 돌려가면서 매칭율이 가장좋은 이미지를 찾는다.
+        for (double a = -dAngle; a < dAngle; a=a+dAngleStep) // 패턴을 -30 에서 30도까지 돌려가면서 매칭율이 가장좋은 이미지를 찾는다.
         {
             cvCopy(grayTemplateImg, clone);
             RotateImage(clone, a);
@@ -1757,8 +1767,8 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
             m_DetectResult.pt.y = left_top.y;
             m_DetectResult.rect.setLeft(left_top.x);
             m_DetectResult.rect.setTop(left_top.y);
-            m_DetectResult.rect.setRight(m_DetectResult.rect.left() + pData->iplTemplate->width);
-            m_DetectResult.rect.setBottom(m_DetectResult.rect.top() + pData->iplTemplate->height);
+            m_DetectResult.rect.setRight(left_top.x + pData->iplTemplate->width);
+            m_DetectResult.rect.setBottom(left_top.y + pData->iplTemplate->height);
             m_DetectResult.dRadius = 0;
             m_DetectResult.dAngle = 0;
             pData->m_vecDetectResult.push_back(m_DetectResult);
@@ -3080,8 +3090,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
 
     if (m_bSaveEngineImg)
     {
-        str.sprintf(("%d_graySearchImg.jpg"), 200);
-        SaveOutImage(graySearchImg, pData, str);
+        //str.sprintf(("%d_graySearchImg.jpg"), 200);
+        //SaveOutImage(graySearchImg, pData, str);
 
         str.sprintf(("%d_grayTemplateImg.jpg"), 201);
         SaveOutImage(grayTemplateImg, pData, str);
@@ -3104,8 +3114,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
     else
         ThresholdRange(pData, g2, 211);
 
-    NoiseOut(pData, g2, _ProcessValue1, 212);
-    Expansion(pData, g2, _ProcessValue1, 213);
+    NoiseOut(pData, g2, _ProcessValue2, 212);
+    Expansion(pData, g2, _ProcessValue2, 213);
 
     int nFilterBlob = 0;
     pParam = pData->getParam(("Filter blob"));
@@ -3120,8 +3130,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         SaveOutImage(g2, pData, ("226_FilterBlob.jpg"));
     }
 
-    NoiseOut(pData, g2, _ProcessValue1, 231);
-    Expansion(pData, g2, _ProcessValue1, 232);
+    NoiseOut(pData, g2, _ProcessValue2, 231);
+    Expansion(pData, g2, _ProcessValue2, 232);
     cvCanny(g2, g2, 100, 300, 3);
     if (m_bSaveEngineImg){
         SaveOutImage(g2, pData, ("227_TemplateImageCany.jpg"));
@@ -3176,8 +3186,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                 else
                     ThresholdRange(pData, g1, 243);
 
-                NoiseOut(pData, g1, _ProcessValue1, 244); // 노이즈 제거
-                Expansion(pData, g1, _ProcessValue1, 245);
+                NoiseOut(pData, g1, _ProcessValue2, 244); // 노이즈 제거
+                Expansion(pData, g1, _ProcessValue2, 245);
 
                 // 가장큼 or 긴 blob만 남긴다.
                 if (nFilterBlob == 1)
@@ -3188,8 +3198,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                     SaveOutImage(g1, pData, ("248_FilterBlob.jpg"));
                 }
 
-                NoiseOut(pData, g1, _ProcessValue1, 251);
-                Expansion(pData, g1, _ProcessValue1, 252);
+                NoiseOut(pData, g1, _ProcessValue2, 251);
+                Expansion(pData, g1, _ProcessValue2, 252);
                 cvCanny(g1, g1, 100, 300, 3);
                 if (m_bSaveEngineImg){
                     str.sprintf(("255_TemplateImageCany%d.jpg"), nLoop);
@@ -3593,6 +3603,17 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
 
         double x = prst->pt.x + rect.x();// / gCfg.m_pCamInfo[0].dResX;
         double y = prst->pt.y + rect.y();// / gCfg.m_pCamInfo[0].dResY;
+
+        if (prst->rect.width() + prst->rect.height() > 0)
+        {
+            Point2f pt2 = Point2f((float)x+prst->rect.width(), (float)y+prst->rect.height());
+            cvRectangle(iplImage, cvPoint(x, y), pt2, CV_RGB(255, 0, 0), 2);
+
+            x += prst->rect.width()/2;
+            y += prst->rect.height()/2;
+
+        }
+
 
         //double x = prst->pt.x;
         //double y = prst->pt.y;
