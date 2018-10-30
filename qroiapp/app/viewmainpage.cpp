@@ -182,6 +182,7 @@ ViewMainPage::ViewMainPage(QWidget* parent)
         urls.append(ch2);
     openUrls(urls, ch1);
     qApp->installEventFilter(this);
+
 }
 
 ViewMainPage::~ViewMainPage()
@@ -231,23 +232,23 @@ void ViewMainPage::disconnectCamera(int windowNumber)
         QMessageBox::warning(this,"ERROR:","Camera already disconnected.");
 } // disconnectCamera()
 
-void ViewMainPage::updatePlayerUI(const QImage& img, int seq)
-{
-    qDebug() << "updatePlayerUI";
+//void ViewMainPage::updatePlayerUI(const QImage& img, int seq)
+//{
+//    qDebug() << "updatePlayerUI";
 
-    Qroilib::DocumentView* v = view(seq);
-    if (v == nullptr)
-        return;
+//    Qroilib::DocumentView* v = view(seq);
+//    if (v == nullptr)
+//        return;
 
-    if (!v->isVisible())
-        return;
+//    if (!v->isVisible())
+//        return;
 
-    if (!v->document())
-        return;
+//    if (!v->document())
+//        return;
 
-    v->document()->setImageInternal(img);
-    v->imageView()->updateBuffer();
-}
+//    v->document()->setImageInternal(img);
+//    v->imageView()->updateBuffer();
+//}
 
 void ViewMainPage::loadConfig()
 {

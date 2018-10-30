@@ -127,7 +127,7 @@ private Q_SLOTS:
 
     void showContextMenu();
 
-    void updatePlayerUI(const QImage& img, int seq);
+    //void updatePlayerUI(const QImage& img, int seq);
     void updateFrame(const QImage &frame, int windowNumber);
 
 private:

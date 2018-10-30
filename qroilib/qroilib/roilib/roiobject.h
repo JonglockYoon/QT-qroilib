@@ -76,6 +76,7 @@ typedef struct  _tagDetectResult
     double dMatchRate;
     QRectF rect;
     IplImage* ngBlobImg;
+    std::string str;
 
 } DetectResult;
 

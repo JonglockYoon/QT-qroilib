@@ -1753,10 +1753,10 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
 
         if (m_DetectResult.nResult == 1)
         {
-            m_DetectResult.pt.x = 0;
-            m_DetectResult.pt.y = 0;
-            m_DetectResult.rect.setLeft(pData->bounds().x());// + left_top.x);
-            m_DetectResult.rect.setTop(pData->bounds().y());// + left_top.y);
+            m_DetectResult.pt.x = left_top.x;
+            m_DetectResult.pt.y = left_top.y;
+            m_DetectResult.rect.setLeft(left_top.x);
+            m_DetectResult.rect.setTop(left_top.y);
             m_DetectResult.rect.setRight(m_DetectResult.rect.left() + pData->iplTemplate->width);
             m_DetectResult.rect.setBottom(m_DetectResult.rect.top() + pData->iplTemplate->height);
             m_DetectResult.dRadius = 0;

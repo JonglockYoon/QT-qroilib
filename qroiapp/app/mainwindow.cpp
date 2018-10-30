@@ -293,7 +293,7 @@ d(new MainWindow::Private)
     setWindowTitle(gCfg.m_sLastRecipeName);
 
     extern Qroilib::ParamTable ROIDSHARED_EXPORT paramTable[];
-    for (int i=0; i<2; i++)
+    for (int i=0; i<gCfg.m_nCamNumber; i++)
     {
         DocumentView* view = d->mViewMainPage->view(i);
         if (view)
@@ -320,7 +320,7 @@ d(new MainWindow::Private)
     timer->start(2000); // 프로그램 시작 2초후 setLoadRoi() 실행.
 
     int n = 0;
-    for (int i=0; i<2; i++)
+    for (int i=0; i<gCfg.m_nCamNumber; i++)
     {
         DocumentView* view = d->mViewMainPage->view(i);
         if (view) {
@@ -422,6 +422,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
         case QMessageBox::Ok:
             //여기에 OK 눌렀을 시 할 내용 추가.
             event->accept();
+
+            int seq = 0;
+            while (true) {
+                Qroilib::DocumentView* v = d->mViewMainPage->view(seq);
+                if (v == nullptr)
+                    break;
+                SetCameraPause(seq, false);
+                seq++;
+            }
 
             if (pLogViewDock) {
                 pLogViewDock->close();
@@ -832,7 +841,7 @@ void MainWindow::DevLogSave(string strMsg, ...)
             time.toString("yyyyMMdd").toLatin1().data());
 
         //string ts = QTime::currentTime().toString().toLatin1().data();
-        string ts = QTime::currentTime().toString("hh:mm:ss.zzz").toLatin1().data();
+        string ts = QTime::currentTime().toString(" hh:mm:ss.zzz").toLatin1().data();
         m_LogThread.Add(m_strFileName, ts, strMsg.toLatin1().data());
         //lastLogTime = time;
 

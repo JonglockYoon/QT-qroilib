@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="3456" height="4608" roiwidth="1" roiheight="1" nextobjectid="3">
+ <objectgroup name="channel1" x="-1" y="-1">
+  <object id="1" name="noname1029220617" x="59.7616" y="-71.2053" width="3274.17" height="4272.32">
+   <pattern child="2"/>
+   <param InspectType="13">
+    <param00 steptype="1" name="Pattern matching rate" valuetype="2" value="60.00" detail=""/>
+    <param01 steptype="1" name="Low Threshold" valuetype="1" value="0" detail=""/>
+    <param02 steptype="1" name="High Threshold" valuetype="1" value="100" detail=""/>
+    <param03 steptype="1" name="Noise out 1" valuetype="1" value="5" detail=""/>
+    <param04 steptype="1" name="Noise out 2" valuetype="1" value="-5" detail=""/>
+    <param05 steptype="1" name="Noise out 3" valuetype="1" value="0" detail=""/>
+    <param06 steptype="1" name="Shape matching rate" valuetype="2" value="0.00" detail=""/>
+    <param07 steptype="1" name="Filter blob" valuetype="4" value="2" detail="None,LargeArea,LargeDiameter"/>
+   </param>
+  </object>
+  <object id="2" x="1143.61" y="1234.9" width="597.87" height="449.611">
+   <rectangle parent="1"/>
+   <param InspectType="500">
+    <param00 steptype="1" name="" valuetype="1" value="0" detail=""/>
+   </param>
+  </object>
+ </objectgroup>
+</roimap>

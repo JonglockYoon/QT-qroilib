@@ -28,6 +28,7 @@ LIBS += "..\winlib\Debug\lcms2.lib"
 LIBS += "..\winlib\tesseract40.lib"
 LIBS += "..\winlib\leptonica-1.76.0.lib"
 LIBS += "..\winlib\Debug\QZXing2.lib"
+TARGET = ../../bin/qroiapp
 }
 CONFIG(release, debug|release) {
 #LIBS += -lopencv_core320 -lopencv_imgproc320 -lopencv_highgui320 -lopencv_videoio320  -lopencv_imgcodecs320
@@ -41,13 +42,13 @@ LIBS += "..\winlib\Release\lcms2.lib"
 LIBS += "..\winlib\tesseract40.lib"
 LIBS += "..\winlib\leptonica-1.76.0.lib"
 LIBS += "..\winlib\Release\QZXing2.lib"
+TARGET = ../../bin/release/qroiapp
 }
 LIBS += -lws2_32
 
 INCLUDEPATH += "..\winlib\include" \
    ../qroilib/pthread
 
-TARGET = ../../bin/qroiapp
 }
 
 linux {
