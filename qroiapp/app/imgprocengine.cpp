@@ -148,6 +148,9 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
         theMainWindow->DevLogSave(strLog.toLatin1().data());
         SinglePattMatchShapes(croppedImage, pData, rect);
         break;
+    case _Inspect_Patt_FeatureMatch:
+        SinglePattFeatureMatch(croppedImage, pData, rect);
+        break;
 
     case _Inspect_Roi_CenterOfPlusMark:
         SingleROICenterOfPlusMark(croppedImage, pData, rect);
@@ -2015,6 +2018,179 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
 
 
     return 0;
+}
+
+int CImgProcEngine::SinglePattFeatureMatch(IplImage* croppedImage, RoiObject *pData, QRectF rectIn)
+{
+    Q_UNUSED(rectIn);
+    //if (pData->iplTemplate == nullptr)
+    //    return -1;
+
+    CParam *pParam;
+    int nMethod = 0;
+    pParam = pData->getParam("Method");
+    if (pParam)
+        nMethod = (int)pParam->Value.toDouble();
+    double dParam1 = 0;
+    pParam = pData->getParam("Param1");
+    if (pParam)
+        dParam1 = pParam->Value.toDouble();
+
+    double kDistanceCoef = 0;
+    pParam = pData->getParam("kDistanceCoef");
+    if (pParam)
+        kDistanceCoef = pParam->Value.toDouble();
+    double kMaxMatchingSize = 0;
+    pParam = pData->getParam("kMaxMatchingSize");
+    if (pParam)
+        kMaxMatchingSize = pParam->Value.toDouble();
+
+
+    //std::string detectorName;
+    //detectorName = ui->comboBoxDetector->currentText().toLatin1().data(); // "SURF";
+    std::vector<cv::KeyPoint> keypoints_object, keypoints_scene;
+    cv::Mat descriptors_object, descriptors_scene;
+    vector<vector<cv::DMatch>> m_knnMatches;
+    std::vector< cv::DMatch > good_matches;
+
+    cv::Mat img_object = cv::cvarrToMat(pData->iplTemplate);
+    cv::Mat img_scene =  cv::cvarrToMat(croppedImage);
+
+    if (nMethod == 1) { // SIFT distance:10, MaxSize:200
+        SIFTDetector sift(dParam1); //  nParam1=0
+        sift(img_object, cv::Mat(), keypoints_object, descriptors_object);
+        sift(img_scene, cv::Mat(), keypoints_scene, descriptors_scene);
+
+        cv::BFMatcher matcher;
+        matcher.knnMatch(descriptors_object, descriptors_scene, m_knnMatches, 2);
+    }
+    else if (nMethod == 0) { // SURF distance:5, MaxSize:200
+        SURFDetector surf(dParam1); //  nParam1=800
+        surf(img_object, cv::Mat(), keypoints_object, descriptors_object);
+        surf(img_scene, cv::Mat(), keypoints_scene, descriptors_scene);
+
+        cv::BFMatcher matcher;
+        matcher.knnMatch(descriptors_object, descriptors_scene, m_knnMatches, 2);
+    }
+    else if (nMethod == 2) { // ORB distance:5, MaxSize:200
+        ORBDetector orb(dParam1); // nParam1=2000
+        orb(img_object, cv::Mat(), keypoints_object, descriptors_object);
+        orb(img_scene, cv::Mat(), keypoints_scene, descriptors_scene);
+
+        cv::BFMatcher matcher(cv::NORM_HAMMING); // use cv::NORM_HAMMING2 for ORB descriptor with WTA_K == 3 or 4 (see ORB constructor)
+        matcher.knnMatch(descriptors_object, descriptors_scene, m_knnMatches, 2);
+    }
+    else return -1;
+
+    for(int i = 0; i < min(img_scene.rows-1,(int) m_knnMatches.size()); i++) //THIS LOOP IS SENSITIVE TO SEGFAULTS
+    {
+        const cv::DMatch& bestMatch = m_knnMatches[i][0];
+        if((int)m_knnMatches[i].size()<=2 && (int)m_knnMatches[i].size()>0)
+        {
+            good_matches.push_back(bestMatch);
+        }
+    }
+
+    if (good_matches.size() == 0)
+        return -1;
+
+    std::sort(good_matches.begin(), good_matches.end());
+    while (good_matches.front().distance * kDistanceCoef < good_matches.back().distance) {
+        good_matches.pop_back();
+    }
+    while (good_matches.size() > kMaxMatchingSize) {
+        good_matches.pop_back();
+    }
+
+    std::vector<cv::Point2f> corner;
+    cv::Mat img_matches = drawGoodMatches(img_object, img_scene,
+                                keypoints_object, keypoints_scene, good_matches, corner);
+
+    //-- Show detected matches
+    if (img_matches.rows > 0)
+    {
+        cv::namedWindow("knnMatch", 0);
+        cv::imshow("knnMatch", img_matches);
+    }
+
+    if (corner.size() > 0)
+    {
+        cv::Point pt1 = corner[0];
+        cv::Point pt2 = corner[1];
+        cv::Point pt3 = corner[2];
+        cv::Point pt4 = corner[3];
+//        cvLine(outImg, pt1, pt2, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//        cvLine(outImg, pt2, pt3, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//        cvLine(outImg, pt3, pt4, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//        cvLine(outImg, pt4, pt1, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//        m_DetectResult.rect = QRectF(QPointF(0,0),QPointF(0,0));
+//        pData->m_vecDetectResult.push_back(m_DetectResult);
+
+//        cvRectangle(iplImg2, pt1, pt3, cvScalar(255, 255, 255), CV_FILLED); // test
+//        theMainWindow->outWidget("test1", iplImg2);
+
+    }
+
+    return 0;
+}
+
+cv::Mat CImgProcEngine::drawGoodMatches(
+    const cv::Mat& img1,
+    const cv::Mat& img2,
+    const std::vector<cv::KeyPoint>& keypoints1,
+    const std::vector<cv::KeyPoint>& keypoints2,
+    std::vector<cv::DMatch>& good_matches,
+    std::vector<cv::Point2f>& scene_corners_
+)
+{
+    cv::Mat img_matches;
+    if (good_matches.size() == 0)
+        return img_matches;
+
+    cv::drawMatches(img1, keypoints1, img2, keypoints2,
+        good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+        std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+
+    //-- Localize the object
+    std::vector<cv::Point2f> obj;
+    std::vector<cv::Point2f> scene;
+
+    for (size_t i = 0; i < good_matches.size(); i++)
+    {
+        //-- Get the keypoints from the good matches
+        obj.push_back(keypoints1[good_matches[i].queryIdx].pt);
+        scene.push_back(keypoints2[good_matches[i].trainIdx].pt);
+    }
+    //-- Get the corners from the image_1 ( the object to be "detected" )
+    std::vector<cv::Point2f> obj_corners(4);
+    obj_corners[0] = cv::Point(0, 0);
+    obj_corners[1] = cv::Point(img1.cols, 0);
+    obj_corners[2] = cv::Point(img1.cols, img1.rows);
+    obj_corners[3] = cv::Point(0, img1.rows);
+    std::vector<cv::Point2f> scene_corners(4);
+
+    cv::Mat H;
+    try {
+        H = cv::findHomography(obj, scene, cv::RANSAC);
+        perspectiveTransform(obj_corners, scene_corners, H);
+    } catch (...) {
+        qDebug() << ("Error <unknown> findHomography()");
+        return img_matches;
+    }
+
+    scene_corners_ = scene_corners;
+
+    //-- Draw lines between the corners (the mapped object in the scene - image_2 )
+//    cv::Point pt1 = scene_corners[0] + cv::Point2f((float)img1.cols, 0);
+//    cv::Point pt2 = scene_corners[1] + cv::Point2f((float)img1.cols, 0);
+//    cv::Point pt3 = scene_corners[2] + cv::Point2f((float)img1.cols, 0);
+//    cv::Point pt4 = scene_corners[3] + cv::Point2f((float)img1.cols, 0);
+//    line(img_matches, pt1, pt2, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//    line(img_matches, pt2, pt3, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//    line(img_matches, pt3, pt4, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+//    line(img_matches, pt4, pt1, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+
+    return img_matches;
 }
 
 int CImgProcEngine::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData, QRectF rectIn)

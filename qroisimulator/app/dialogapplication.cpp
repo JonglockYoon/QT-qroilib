@@ -757,8 +757,8 @@ int DialogApplication::xfeatureTest(IplImage* iplImg, IplImage* iplImg2)
 
     int nParam1 = ui->editParam1->text().toInt();
 
-    QString detectorName;
-    detectorName = ui->comboBoxDetector->currentText(); // "SURF";
+    std::string detectorName;
+    detectorName = ui->comboBoxDetector->currentText().toLatin1().data(); // "SURF";
     std::vector<cv::KeyPoint> keypoints_object, keypoints_scene;
     cv::Mat descriptors_object, descriptors_scene;
     vector<vector<cv::DMatch>> m_knnMatches;

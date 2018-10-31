@@ -27,6 +27,7 @@ typedef enum _tagInspectType
     _Inspect_Patt_HorizontalAlign,
     _Inspect_Patt_Identify,
     _Inspect_Patt_MatchShapes,
+    _Inspect_Patt_FeatureMatch,
     _Inspect_Patt_End,
 
     ///////////////////////////////////////////////////////////

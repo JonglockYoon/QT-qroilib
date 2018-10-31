@@ -10,6 +10,7 @@
 #include "imgprocbase.h"
 #include "recipedata.h"
 #include "voronoithinner.h"
+#include <opencv2/xfeatures2d/nonfree.hpp>
 
 namespace tesseract {
 class TessBaseAPI;
@@ -21,6 +22,46 @@ typedef struct {
     double cPerc;
 } RANSACIRCLE;
 
+
+struct SURFDetector
+{
+    cv::Ptr<cv::Feature2D> surf;
+    SURFDetector(double hessian = 800.0)
+    {
+        surf = cv::xfeatures2d::SURF::create(hessian);
+    }
+    template<class T>
+    void operator()(const T& in, const T& mask, std::vector<cv::KeyPoint>& pts, T& descriptors, bool useProvided = false)
+    {
+        surf->detectAndCompute(in, mask, pts, descriptors, useProvided);
+    }
+};
+struct SIFTDetector
+{
+    cv::Ptr<cv::Feature2D> sift;
+    SIFTDetector(int nFeatures = 0)
+    {
+        sift = cv::xfeatures2d::SIFT::create(nFeatures);
+    }
+    template<class T>
+    void operator()(const T& in, const T& mask, std::vector<cv::KeyPoint>& pts, T& descriptors, bool useProvided = false)
+    {
+        sift->detectAndCompute(in, mask, pts, descriptors, useProvided);
+    }
+};
+struct ORBDetector
+{
+    cv::Ptr<cv::Feature2D> orb;
+    ORBDetector(int nFeatures = 500)
+    {
+        orb = cv::ORB::create(nFeatures);
+    }
+    template<class T>
+    void operator()(const T& in, const T& mask, std::vector<cv::KeyPoint>& pts, T& descriptors, bool useProvided = false)
+    {
+        orb->detectAndCompute(in, mask, pts, descriptors, useProvided);
+    }
+};
 
 using namespace std;
 using namespace cv;
@@ -47,11 +88,21 @@ public:
     int SingleROICircleWithEdge(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SinglePattIdentify(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SinglePattMatchShapes(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
+    int SinglePattFeatureMatch(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROIFindShape(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROISubPixEdge(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROICorner(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
+
+    cv::Mat drawGoodMatches(
+        const cv::Mat& img1,
+        const cv::Mat& img2,
+        const std::vector<cv::KeyPoint>& keypoints1,
+        const std::vector<cv::KeyPoint>& keypoints2,
+        std::vector<cv::DMatch>& matches,
+        std::vector<cv::Point2f>& scene_corners_
+    );
 
     int EdgeCorner(Qroilib::RoiObject *pData, IplImage* graySearchImgIn, int CornerType, CvPoint2D32f &outCorner);
     int EdgeCornerByLine(Qroilib::RoiObject *pData, IplImage* graySearchImgIn, int CornerType, CvPoint2D32f &corner);

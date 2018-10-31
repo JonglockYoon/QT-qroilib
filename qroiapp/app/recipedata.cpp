@@ -50,6 +50,11 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Patt_MatchShapes,  CParam(_ProcessValue1, ("Shape matching rate"), _DoubleValue, ("85")),
     //_Inspect_Patt_MatchShapes,  CParam(_PriorityValue, ("Priority"), _IntValue, ("5")),
 
+    _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("Method"), _ComboValue, ("2"), ("SURF,SIFT,ORB")),
+    _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("Param1"), _IntValue, ("2000")),
+    _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("kDistanceCoef"), _IntValue, ("5")),
+    _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("kMaxMatchingSize"), _IntValue, ("200")),
+
     _Inspect_Roi_Start,   CParam(_ProcessValue1, (""), _IntValue, ("0")), // do not delete.
 
     //_Inspect_Roi_MeasureAlign,  CParam(_ProcessValue1, ("Measurement type"), _ComboValue, ("0"), ("SubpixelEdge,SubpixelEdgeWithThreshold,PeakEdge")),
@@ -177,6 +182,7 @@ void CRecipeData::InitParamData()
     m_sInspList[_Inspect_Roi_MeasureAlign].sprintf(("MeasureAlign"));
     m_sInspList[_Inspect_Patt_Identify].sprintf(("Pattern Identify"));
     m_sInspList[_Inspect_Patt_MatchShapes].sprintf(("Pattern Shape Match"));
+    m_sInspList[_Inspect_Patt_FeatureMatch].sprintf(("Feature Match"));
 
     m_sInspList[_Inspect_Roi_CenterOfPlusMark].sprintf(("Center of plusmark"));
     m_sInspList[_Inspect_Roi_SubpixelEdgeWithThreshold].sprintf(("Subpixel Edge with Threshold"));

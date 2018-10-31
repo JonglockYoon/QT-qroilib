@@ -3,16 +3,11 @@
  <objectgroup name="channel1" x="-1" y="-1">
   <object id="1" name="noname1029220617" x="7.7616" y="0" width="3326.17" height="4201.11">
    <pattern child="2"/>
-   <param InspectType="13">
-    <param00 steptype="1" name="Pattern matching rate" valuetype="2" value="60.00" detail=""/>
-    <param01 steptype="1" name="Rotate angle" valuetype="1" value="0" detail=""/>
-    <param02 steptype="1" name="Angle step" valuetype="1" value="5" detail=""/>
-    <param03 steptype="2" name="Shape matching rate" valuetype="2" value="70.00" detail=""/>
-    <param04 steptype="2" name="Low Threshold" valuetype="1" value="0" detail=""/>
-    <param05 steptype="2" name="High Threshold" valuetype="1" value="200" detail=""/>
-    <param06 steptype="2" name="Noise out 1" valuetype="1" value="1" detail=""/>
-    <param07 steptype="2" name="Noise out 2" valuetype="1" value="-1" detail=""/>
-    <param08 steptype="2" name="Filter blob" valuetype="4" value="2" detail="None,LargeArea,LargeDiameter"/>
+   <param InspectType="15">
+    <param00 steptype="1" name="Method" valuetype="4" value="2" detail="SURF,SIFT,ORB"/>
+    <param01 steptype="1" name="Param1" valuetype="1" value="9000" detail=""/>
+    <param02 steptype="1" name="kDistanceCoef" valuetype="1" value="5" detail=""/>
+    <param03 steptype="1" name="kMaxMatchingSize" valuetype="1" value="200" detail=""/>
    </param>
   </object>
   <object id="2" x="1697.36" y="2305.83" width="714.188" height="677.773">
