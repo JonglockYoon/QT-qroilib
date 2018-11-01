@@ -52,7 +52,7 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
     str.sprintf("InspectOneItem type=%d", pData->mInspectType);
     theMainWindow->DevLogSave(str.toLatin1().data());
 	m_DetectResult.dRadius = 0;
-    m_DetectResult.ngBlobImg = nullptr;
+    m_DetectResult.img = nullptr;
 
     if (pData == nullptr)
 		return -1;
@@ -68,8 +68,8 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
 	int size = pData->m_vecDetectResult.size();
 	for (int i = 0; i < size; i++) {
 		DetectResult *prst = &pData->m_vecDetectResult[i];
-		if (prst->ngBlobImg)
-			cvReleaseImage(&prst->ngBlobImg);
+        if (prst->img)
+            cvReleaseImage(&prst->img);
 	}
 	pData->m_vecDetectResult.clear();
 

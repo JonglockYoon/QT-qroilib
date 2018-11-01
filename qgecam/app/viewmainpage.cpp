@@ -172,10 +172,10 @@ void ViewMainPage::showContextMenu()
 {
 }
 
-QSize ViewMainPage::sizeHint() const
-{
-    return QSize(MAX_CAMERA_WIDTH, MAX_CAMERA_HEIGHT);
-}
+//QSize ViewMainPage::sizeHint() const
+//{
+//    return QSize(640, 480);
+//}
 
 QUrl ViewMainPage::url() const
 {

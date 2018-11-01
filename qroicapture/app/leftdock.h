@@ -29,6 +29,7 @@ public:
 
 public:
     int getExposureValue();
+    void updateValue();
 
 private slots:
     void setExposureValue(int val);

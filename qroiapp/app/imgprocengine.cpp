@@ -78,7 +78,7 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
     str.sprintf("InspectOneItem type=%d", pData->mInspectType);
     theMainWindow->DevLogSave(str.toLatin1().data());
 	m_DetectResult.dRadius = 0;
-    m_DetectResult.ngBlobImg = nullptr;
+    m_DetectResult.img = nullptr;
 
     if (pData == nullptr)
 		return -1;
@@ -94,8 +94,8 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
 	int size = pData->m_vecDetectResult.size();
 	for (int i = 0; i < size; i++) {
 		DetectResult *prst = &pData->m_vecDetectResult[i];
-		if (prst->ngBlobImg)
-			cvReleaseImage(&prst->ngBlobImg);
+        if (prst->img)
+            cvReleaseImage(&prst->img);
 	}
 	pData->m_vecDetectResult.clear();
 
@@ -883,7 +883,8 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 	if (m_DetectResult.pt.x == 0 || m_DetectResult.pt.y == 0) return -1;
 	if (iContoursSize <= 0) return -1;
 
-    m_DetectResult.rect = rectIn;// pData->m_RoiArea;
+    m_DetectResult.tl = CvPoint2D32f(rectIn.topLeft().x(), rectIn.topLeft().y());
+    m_DetectResult.br = CvPoint2D32f(rectIn.bottomRight().x(), rectIn.bottomRight().y());
     pData->m_vecDetectResult.push_back(m_DetectResult);
 
 
@@ -1773,14 +1774,11 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
         //strMsg.Format(("TemplateMatch Result Success ===> : %.2f%%"), MatchRate);
         //MSystem.DevLogSave(("%s"), strMsg);
 
-        if (m_DetectResult.nResult == 1)
+        if (m_DetectResult.result == true)
         {
-            m_DetectResult.pt.x = left_top.x;
-            m_DetectResult.pt.y = left_top.y;
-            m_DetectResult.rect.setLeft(left_top.x);
-            m_DetectResult.rect.setTop(left_top.y);
-            m_DetectResult.rect.setRight(left_top.x + pData->iplTemplate->width);
-            m_DetectResult.rect.setBottom(left_top.y + pData->iplTemplate->height);
+            m_DetectResult.pt = CvPoint2D32f(left_top.x, left_top.y);
+            m_DetectResult.tl = CvPoint2D32f(left_top.x, left_top.y);
+            m_DetectResult.br = CvPoint2D32f(left_top.x + pData->iplTemplate->width, left_top.y + pData->iplTemplate->height);
             m_DetectResult.dRadius = 0;
             m_DetectResult.dAngle = 0;
             pData->m_vecDetectResult.push_back(m_DetectResult);
@@ -1791,7 +1789,7 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
     }
 
     str.sprintf(("SinglePattIdentify MatchRate:%.1f MatchShapes:%.1f (%s)"),
-                MatchRate, dMatchShapes, m_DetectResult.nResult == 1 ? ("OK") : ("NG"));
+                MatchRate, dMatchShapes, m_DetectResult.result == true ? ("OK") : ("NG"));
     qDebug() << str;
     //MSystem.m_pFormBottom->SetBottomMessage(str);
     theMainWindow->DevLogSave(str.toLatin1().data());
@@ -3423,7 +3421,7 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
 //                    cvReleaseImage(&g2);
 //                    cvReleaseMemStorage(&storage);
 
-                    m_DetectResult.nResult = 1; // OK
+                    m_DetectResult.result = true; // OK
 
                     //left_top.x += srect.left;
                     //left_top.y += srect.top;
@@ -3445,7 +3443,7 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
             } else {
                 str.sprintf(("TemplateMatch Match(succ) ===> : %.2f%%"), maxRate * 100);
                 theMainWindow->DevLogSave(str.toLatin1().data());
-                m_DetectResult.nResult = 1; // OK
+                m_DetectResult.result = true; // OK
                 break;
             }
         }
@@ -3457,7 +3455,7 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                 str.sprintf(("TemplateMatch Result Fail ===> : %.2f%%"), maxRate * 100);
                 theMainWindow->DevLogSave(str.toLatin1().data());
                 max = maxRate;
-                m_DetectResult.nResult = 2; // NG
+                m_DetectResult.result = false; // NG
                 break;
             }
         }
@@ -3789,19 +3787,17 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
         double x = prst->pt.x + rect.x();// / gCfg.m_pCamInfo[0].dResX;
         double y = prst->pt.y + rect.y();// / gCfg.m_pCamInfo[0].dResY;
 
-        if (prst->rect.width() + prst->rect.height() > 0)
+        double w = fabs(prst->br.x - prst->tl.x);
+        double h = fabs(prst->br.y - prst->tl.y);
+        if (w + h > 0)
         {
-            Point2f pt2 = Point2f((float)x+prst->rect.width(), (float)y+prst->rect.height());
+            Point2f pt2 = Point2f((float)x+w, (float)y+h);
             cvRectangle(iplImage, cvPoint(x, y), pt2, CV_RGB(255, 0, 0), 2);
 
-            x += prst->rect.width()/2;
-            y += prst->rect.height()/2;
+            x += w/2;
+            y += h/2;
 
         }
-
-
-        //double x = prst->pt.x;
-        //double y = prst->pt.y;
 
         CvPoint pt1, pt2;
         pt1.x = x - 40;

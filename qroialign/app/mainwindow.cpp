@@ -185,8 +185,8 @@ int MainWindow::InspectOneItem(IplImage* img, RoiObject *pData)
     int size = pData->m_vecDetectResult.size();
     for (int i = 0; i < size; i++) {
         DetectResult *prst = &pData->m_vecDetectResult[i];
-        if (prst->ngBlobImg)
-            cvReleaseImage(&prst->ngBlobImg);
+        if (prst->img)
+            cvReleaseImage(&prst->img);
     }
     pData->m_vecDetectResult.clear();
 
@@ -272,10 +272,8 @@ double MainWindow::SinglePattFind(IplImage* grayImage, RoiObject *pData, QRectF 
 
     cvReleaseImage(&coeff);
     DetectResult detectResult;
-    detectResult.rect.setLeft(pData->bounds().x() + left_top.x);
-    detectResult.rect.setTop(pData->bounds().y() + left_top.y);
-    detectResult.rect.setRight(detectResult.rect.left() + pData->iplTemplate->width);
-    detectResult.rect.setBottom(detectResult.rect.top() + pData->iplTemplate->height);
+    detectResult.tl = CvPoint2D32f(pData->bounds().x() + left_top.x, pData->bounds().y() + left_top.y);
+    detectResult.br = CvPoint2D32f(detectResult.tl.x + pData->iplTemplate->width, detectResult.tl.y + pData->iplTemplate->height);
     pData->m_vecDetectResult.push_back(detectResult);
 
     return max;

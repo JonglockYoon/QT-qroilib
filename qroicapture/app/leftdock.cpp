@@ -61,9 +61,9 @@ LeftDock::LeftDock(QString name, QWidget *parent)
     setThresholdLowValue(thresholdLow);
     setThresholdHighValue(thresholdHigh);
 
-    ui->sliderFPS->setRange(0, 50);
-    ui->sliderFPS->setSingleStep(1);
-    ui->sliderFPS->setValue(theMainWindow->nCamFPS);
+    //ui->sliderFPS->setRange(0, 50);
+    //ui->sliderFPS->setSingleStep(1);
+    //ui->sliderFPS->setValue(theMainWindow->nCamFPS);
 
 #ifdef Q_OS_WIN
     ui->sliderExposure->setRange(0, 20);
@@ -76,7 +76,7 @@ LeftDock::LeftDock(QString name, QWidget *parent)
     setExposureValue(theMainWindow->nCamExposure);
 
     connect(ui->sliderExposure, SIGNAL(valueChanged(int)), this, SLOT(setExposureValue(int)));
-    connect(ui->sliderFPS, SIGNAL(valueChanged(int)), this, SLOT(setFPSValue(int)));
+    //connect(ui->sliderFPS, SIGNAL(valueChanged(int)), this, SLOT(setFPSValue(int)));
 
     ui->sliderThresholdLow->setRange(0, 255);
     ui->sliderThresholdHigh->setRange(0, 255);
@@ -120,35 +120,35 @@ void LeftDock::updateValue()
 {
     QString str;
 
-    str = QString("%1").arg(theMainWindow->nCamFPS);
-    ui->lineEditFPS->setText(str);
+    //str = QString("%1").arg(theMainWindow->nCamFPS);
+    //ui->lineEditFPS->setText(str);
 
 
 #ifdef Q_OS_WIN
-    str = QString("%1").arg(theMainWindow->nCamExposure-10);
-    ui->lineEditExposure->setText(str);
+    //str = QString("%1").arg(theMainWindow->nCamExposure-10);
+    //ui->lineEditExposure->setText(str);
 #else
-    str = QString("%1").arg(theMainWindow->nCamExposure);
-    ui->lineEditExposure->setText(str);
+    //str = QString("%1").arg(theMainWindow->nCamExposure);
+    //ui->lineEditExposure->setText(str);
 #endif
 }
 
-void LeftDock::setFPSValue(int val)
-{
-    ViewMainPage* pView = theMainWindow->viewMainPage();
-    if (!pView->myCamCapture)
-        return;
+//void LeftDock::setFPSValue(int val)
+//{
+//    ViewMainPage* pView = theMainWindow->viewMainPage();
+//    if (!pView->myCamCapture)
+//        return;
 
-    theMainWindow->nCamFPS = val;
+//    theMainWindow->nCamFPS = val;
 
-    pView->myCamCapture->mutex.lock();
-    pView->myCamCapture->capture.set(CV_CAP_PROP_FPS, val);
-    pView->myCamCapture->mutex.unlock();
+//    pView->myCamCapture->mutex.lock();
+//    pView->myCamCapture->capture.set(CV_CAP_PROP_FPS, val);
+//    pView->myCamCapture->mutex.unlock();
 
-    theMainWindow->nCamExposure = getExposureValue();
+//    theMainWindow->nCamExposure = getExposureValue();
 
-    updateValue();
-}
+//    updateValue();
+//}
 
 void LeftDock::setExposureValue(int val)
 {
@@ -156,7 +156,7 @@ void LeftDock::setExposureValue(int val)
     if (!pView->myCamCapture)
         return;
 
-    pView->myCamCapture->mutex.lock();
+    //pView->myCamCapture->mutex.lock();
 
 #ifdef Q_OS_WIN
     theMainWindow->nCamExposure = val;
@@ -203,22 +203,22 @@ void LeftDock::setExposureValue(int val)
     theMainWindow->nCamExposure = val;
 #endif
 
-    pView->myCamCapture->mutex.unlock();
+    //pView->myCamCapture->mutex.unlock();
 
-    theMainWindow->nCamFPS = getFPSValue();
+    //theMainWindow->nCamFPS = getFPSValue();
     updateValue();
 }
 
-int LeftDock::getFPSValue()
-{
-    int val = 0;
-    ViewMainPage* pView = theMainWindow->viewMainPage();
-    if (!pView->myCamCapture)
-        return -1;
+//int LeftDock::getFPSValue()
+//{
+//    int val = 0;
+//    ViewMainPage* pView = theMainWindow->viewMainPage();
+//    if (!pView->myCamCapture)
+//        return -1;
 
-    val = pView->myCamCapture->capture.get(CV_CAP_PROP_FPS);
-    return val;
-}
+//    val = pView->myCamCapture->capture.get(CV_CAP_PROP_FPS);
+//    return val;
+//}
 
 int LeftDock::getExposureValue()
 {
@@ -271,7 +271,7 @@ void LeftDock::on_buttonOpenCamera_clicked()
         pView->OpenCam(0, ncam1-1);
     }
 
-    theMainWindow->nCamFPS = getFPSValue();
+    //theMainWindow->nCamFPS = getFPSValue();
     theMainWindow->nCamExposure = getExposureValue();
     updateValue();
 

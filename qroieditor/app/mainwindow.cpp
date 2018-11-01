@@ -183,8 +183,8 @@ int MainWindow::InspectOneItem(IplImage* img, RoiObject *pData)
     int size = pData->m_vecDetectResult.size();
     for (int i = 0; i < size; i++) {
         DetectResult *prst = &pData->m_vecDetectResult[i];
-        if (prst->ngBlobImg)
-            cvReleaseImage(&prst->ngBlobImg);
+        if (prst->img)
+            cvReleaseImage(&prst->img);
     }
     pData->m_vecDetectResult.clear();
 
@@ -232,9 +232,9 @@ int MainWindow::InspectOneItem(IplImage* img, RoiObject *pData)
         if ((max*100.0) > LimitMatchRate)
         {
             DetectResult *prst = &pData->m_vecDetectResult[0];
-            // 찾은 물체에 사격형 박스를 그린다.
-            cvRectangle(img, CvPoint(prst->rect.x(),prst->rect.y()), CvPoint(prst->rect.x()+prst->rect.width(),
-                              prst->rect.y()+prst->rect.height()), CV_RGB(255,0,0), 3);
+            // 찾은 물체에 사각형 박스를 그린다.
+            cvRectangle(img, CvPoint(prst->tl.x,prst->tl.y),
+                        CvPoint(prst->br.x,prst->br.y), CV_RGB(255,0,0), 3);
         }
         }
         break;
@@ -247,9 +247,9 @@ int MainWindow::InspectOneItem(IplImage* img, RoiObject *pData)
         if (size > 0) {
             DetectResult *prst = &pData->m_vecDetectResult[0];
             const QString stype[] = { "triangle", "Parallelogram", "rectangle", "Rhombus","Square","pentagon","hexagon","circle","unknown" };
-            int t = prst->nResult;
+            int t = (int)prst->dValue;
             if (t < 0) t = 8;
-            str = QString("type : %1(%2)").arg(prst->nResult).arg(stype[t]);
+            str = QString("type : %1(%2)").arg(t).arg(stype[t]);
             CvFont font;
             cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 3, CV_AA);
             cvPutText(img, str.toLatin1().data(), cvPoint(40, 40), &font, cvScalar(255, 255, 126, 0));
@@ -504,7 +504,7 @@ int MainWindow::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData, QRe
                 cv::Point2f centerPoint = base.CenterOfMoment(ptseq);
                 cvClearSeq(ptseq);
 
-                detectResult.nResult = type; // shape type
+                detectResult.dValue = (double)type; // shape type
                 detectResult.pt = centerPoint;
                 pData->m_vecDetectResult.push_back(detectResult);
                 break;
@@ -563,10 +563,10 @@ double MainWindow::SinglePattFind(IplImage* grayImage, RoiObject *pData, QRectF 
 
     cvReleaseImage(&coeff);
     DetectResult detectResult;
-    detectResult.rect.setLeft(pData->bounds().x() + left_top.x);
-    detectResult.rect.setTop(pData->bounds().y() + left_top.y);
-    detectResult.rect.setRight(detectResult.rect.left() + pData->iplTemplate->width);
-    detectResult.rect.setBottom(detectResult.rect.top() + pData->iplTemplate->height);
+    detectResult.tl = CvPoint2D32f(pData->bounds().x() + left_top.x,
+                                   pData->bounds().y() + left_top.y);
+    detectResult.br = CvPoint2D32f(detectResult.tl.x + pData->iplTemplate->width,
+                                   detectResult.tl.y + pData->iplTemplate->height);
     pData->m_vecDetectResult.push_back(detectResult);
 
     return max;

@@ -226,10 +226,10 @@ void ViewMainPage::showContextMenu()
    contextMenu.exec(QCursor::pos());
 }
 
-QSize ViewMainPage::sizeHint() const
-{
-    return QSize(MAX_CAMERA_WIDTH, MAX_CAMERA_HEIGHT);
-}
+//QSize ViewMainPage::sizeHint() const
+//{
+//    return QSize(MAX_CAMERA_WIDTH, MAX_CAMERA_HEIGHT);
+//}
 
 QUrl ViewMainPage::url() const
 {
