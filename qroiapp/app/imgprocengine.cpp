@@ -1812,10 +1812,6 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     //int nThresholdLowValue;
     int nThresholdHighValue;
 
-    pData->m_vecDetectResult.clear();
-    if (grayImg != nullptr)
-        cvReleaseImage(&grayImg);
-    grayImg = cvCloneImage(croppedImage);
 
     //nThresholdLowValue = 0;
     //pParam = pData->getParam(("Low Threshold"), _ProcessValue1+retry);
@@ -1827,12 +1823,17 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     if (pParam)
         nThresholdHighValue = pParam->Value.toDouble();
 
-    float dMatchShapesingRate = 0.7f;
+    float dMatchShapesingRate = 0;
     if (pData != nullptr) {
         CParam *pParam = pData->getParam(("Shape matching rate"));
         if (pParam)
             dMatchShapesingRate = (float)pParam->Value.toDouble() / 100.0f;
     }
+
+    pData->m_vecDetectResult.clear();
+    if (grayImg != nullptr)
+        cvReleaseImage(&grayImg);
+    grayImg = cvCloneImage(croppedImage);
 
     if (m_bSaveEngineImg)
     {
@@ -2117,6 +2118,14 @@ int CImgProcEngine::SinglePattFeatureMatch(IplImage* croppedImage, RoiObject *pD
         cv::Point pt2 = corner[1];
         cv::Point pt3 = corner[2];
         cv::Point pt4 = corner[3];
+
+        m_DetectResult.resultType = RESULTTYPE_RECT4P;
+        m_DetectResult.tl = CvPoint2D32f(pt1);
+        m_DetectResult.tr = CvPoint2D32f(pt2);
+        m_DetectResult.br = CvPoint2D32f(pt3);
+        m_DetectResult.bl = CvPoint2D32f(pt4);
+        pData->m_vecDetectResult.push_back(m_DetectResult);
+
 //        cvLine(outImg, pt1, pt2, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
 //        cvLine(outImg, pt2, pt3, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
 //        cvLine(outImg, pt3, pt4, cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
@@ -3450,14 +3459,14 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         else
         {
             nLoop++;
-            if (nLoop > 10) {
+            //if (nLoop > 10) {
                 //dMatchShapes = maxRate * 100;
                 str.sprintf(("TemplateMatch Result Fail ===> : %.2f%%"), maxRate * 100);
                 theMainWindow->DevLogSave(str.toLatin1().data());
                 max = maxRate;
                 m_DetectResult.result = false; // NG
                 break;
-            }
+            //}
         }
     }
 
@@ -3791,25 +3800,37 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
         double h = fabs(prst->br.y - prst->tl.y);
         if (w + h > 0)
         {
-            Point2f pt2 = Point2f((float)x+w, (float)y+h);
-            cvRectangle(iplImage, cvPoint(x, y), pt2, CV_RGB(255, 0, 0), 2);
-
-            x += w/2;
-            y += h/2;
-
+            if (prst->resultType == RESULTTYPE_RECT4P)
+            {
+                x = y = 0;
+                cvLine(iplImage, CvPoint(prst->tl.x,prst->tl.y), CvPoint(prst->tr.x,prst->tr.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+                cvLine(iplImage, CvPoint(prst->tr.x,prst->tr.y), CvPoint(prst->br.x,prst->br.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+                cvLine(iplImage, CvPoint(prst->br.x,prst->br.y), CvPoint(prst->bl.x,prst->bl.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+                cvLine(iplImage, CvPoint(prst->bl.x,prst->bl.y), CvPoint(prst->tl.x,prst->tl.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
+            }
+            else
+            {
+                Point2f pt2 = Point2f((float)x+w, (float)y+h);
+                cvRectangle(iplImage, cvPoint(x, y), pt2, CV_RGB(255, 0, 0), 2);
+                x += w/2;
+                y += h/2;
+            }
         }
 
-        CvPoint pt1, pt2;
-        pt1.x = x - 40;
-        pt1.y = y;
-        pt2.x = x + 40;
-        pt2.y = y;
-        cvLine(iplImage, pt1, pt2, CV_RGB(192, 192, 192), 2, 8, 0);
-        pt1.x = x;
-        pt1.y = y - 40;
-        pt2.x = x;
-        pt2.y = y + 40;
-        cvLine(iplImage, pt1, pt2, CV_RGB(192, 192, 192), 2, 8, 0);
+        if (x > 0 && y > 0)
+        {
+            CvPoint pt1, pt2;
+            pt1.x = x - 40;
+            pt1.y = y;
+            pt2.x = x + 40;
+            pt2.y = y;
+            cvLine(iplImage, pt1, pt2, CV_RGB(192, 192, 192), 2, 8, 0);
+            pt1.x = x;
+            pt1.y = y - 40;
+            pt2.x = x;
+            pt2.y = y + 40;
+            cvLine(iplImage, pt1, pt2, CV_RGB(192, 192, 192), 2, 8, 0);
+            }
     }
 }
 

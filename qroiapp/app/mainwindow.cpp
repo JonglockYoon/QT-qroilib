@@ -351,7 +351,7 @@ MainWindow::~MainWindow()
 {
 }
 
-Qroilib::RoiObject * MainWindow::FindScrewHole(int ch)
+Qroilib::RoiObject * MainWindow::ManualInspection(int ch)
 {
     cv::Mat frame;
     IplImage riplImg;

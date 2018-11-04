@@ -336,10 +336,10 @@ void ViewMainPage::showContextMenu()
 //    menu.exec(QCursor::pos());
 }
 
-QSize ViewMainPage::sizeHint() const
-{
-    return QSize(640, 480);
-}
+//QSize ViewMainPage::sizeHint() const
+//{
+//    return QSize(640, 480);
+//}
 
 QUrl ViewMainPage::url() const
 {

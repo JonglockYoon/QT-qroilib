@@ -76,7 +76,7 @@ public:
 
     int statusBarHeight() const;
 
-    virtual QSize sizeHint() const;
+    //virtual QSize sizeHint() const;
 
     /**
      * Returns the url of the current document, or an invalid url if unknown

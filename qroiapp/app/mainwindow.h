@@ -52,7 +52,7 @@ public:
     ViewMainPage* viewMainPage() const;
     DocumentView* currentView() const;
 
-    Qroilib::RoiObject *FindScrewHole(int ch);
+    Qroilib::RoiObject *ManualInspection(int ch);
     void SetCameraPause(int viewNumber, int bPause);
 
 protected:
