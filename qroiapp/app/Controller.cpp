@@ -55,6 +55,8 @@ bool Controller::connectToCamera(int deviceNr, int imageBufferSize, bool dropFra
 
 void Controller::disconnectCamera()
 {
+    if (processingThread == nullptr)
+        return;
     // Stop processing thread
     if(processingThread->isRunning())
         stopProcessingThread();

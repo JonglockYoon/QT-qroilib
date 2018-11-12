@@ -454,6 +454,8 @@ void MainWindow::SetCameraPause(int viewNumber, int bPause)
 
     ViewMainPage* pView = viewMainPage();
     Controller* pController = pView->myCamController[viewNumber];
+    if (pController->captureThread == nullptr)
+        return;
     pController->captureThread->bCamPause = bPause;
 
     if (bPause == 0)
@@ -587,6 +589,8 @@ void MainWindow::setInspectAll()
         SetCameraPause(seq, true);
 
         const QImage *camimg = v->image();
+        if (camimg->isNull())
+            return;
         qimage_to_mat(camimg, frame);
         riplImg = frame;
         iplImg = &riplImg;

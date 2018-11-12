@@ -458,6 +458,15 @@ void RoiPropertyEditor::slotComboActivated()
             mObject->m_vecParams.push_back(paramTable[n]);
     }
 
+#if 1
+    QString name = mObject->name();
+    QString strTemp;
+    if (name.isEmpty())
+        name = "noname";
+    strTemp = QString("%1/TeachingData/%2/%3.bmp").arg(gCfg.RootPath).arg(gCfg.m_sLastRecipeName).arg(name);
+    mObject->iplTemplate = cvLoadImage(strTemp.toStdString().c_str(), 0);
+#endif
+
     ObjectListSet();
 }
 

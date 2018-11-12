@@ -21,6 +21,7 @@
 #include "recipedata.h"
 #include "mainwindow.h"
 #include "MatToQImage.h"
+#include "geomatch.h"
 
 #include "QZXing.h"
 #include <zxing/NotFoundException.h>
@@ -36,7 +37,7 @@ CImgProcEngine::CImgProcEngine()
 
     memset(&m_DetectResult, 0, sizeof(m_DetectResult));
     //m_sDebugPath = ".";
-    m_bSaveEngineImg = true;
+    m_bSaveEngineImg = false;
 
     QString str;
 
@@ -144,8 +145,8 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
         SinglePattIdentify(croppedImage, pData, rect);
         break;
     case _Inspect_Patt_MatchShapes:
-        strLog.sprintf(("[%s] InspectType : _Inspect_Patt_MatchShapes"), pData->name().toStdString().c_str());
-        theMainWindow->DevLogSave(strLog.toLatin1().data());
+        //strLog.sprintf(("[%s] InspectType : _Inspect_Patt_MatchShapes"), pData->name().toStdString().c_str());
+        //theMainWindow->DevLogSave(strLog.toLatin1().data());
         SinglePattMatchShapes(croppedImage, pData, rect);
         break;
     case _Inspect_Patt_FeatureMatch:
@@ -767,7 +768,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 	CvSeq* m_approxDP_seq = 0;
     //CvSeq* m_dominant_points = 0;    // 특징점 찾기 위한 변수
 	CvSeq* ptseq;
-	CvSeq* defect = cvCreateSeq(CV_SEQ_KIND_GENERIC | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), m_storage);
+//	CvSeq* defect = cvCreateSeq(CV_SEQ_KIND_GENERIC | CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), m_storage);
 
 	cvFindContours(croppedImage, m_storage, &m_seq, sizeof(CvContour), CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 
@@ -811,7 +812,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
             if (nMinCircleRadius > radius || nMaxCircleRadius < radius)
 				continue;
 
-            ptseq = cvCreateSeq((CV_SEQ_KIND_CURVE | CV_SEQ_ELTYPE_POINT | CV_SEQ_FLAG_CLOSED) | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), m_storage);
+            ptseq = cvCreateSeq(CV_SEQ_KIND_CURVE|CV_32SC2, sizeof(CvContour), sizeof(CvPoint), m_storage);
 			if (c->total >= MinMomentSize && c->total < MaxMomentSize)            // 외곽선을 이루는 점의 갯수가 이것보다 미만이면 잡음이라고 판단
 			{
 				for (int i = 0; i < c->total; ++i)
@@ -874,7 +875,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 	}
 
 	if (m_seq) cvClearSeq(m_seq);
-	if (defect) cvClearSeq(defect);
+//	if (defect) cvClearSeq(defect);
 	if (m_storage) cvReleaseMemStorage(&m_storage);
 
 	if (croppedImage) cvReleaseImage(&croppedImage);
@@ -1797,38 +1798,24 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
     return 0;
 }
 
-
-
 int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pData, QRectF rectIn)
 {
     Q_UNUSED(rectIn);
     if (pData->iplTemplate == nullptr)
         return -1;
 
+    clock_t start_time1 = clock();
+
     QString str;
     int retry = 0;
     CParam *pParam;
     IplImage* grayImg = nullptr;
-    //int nThresholdLowValue;
     int nThresholdHighValue;
-
-
-    //nThresholdLowValue = 0;
-    //pParam = pData->getParam(("Low Threshold"), _ProcessValue1+retry);
-    //if (pParam)
-    //    nThresholdLowValue = pParam->Value.toDouble();
 
     nThresholdHighValue = 255;
     pParam = pData->getParam("High Threshold", _ProcessValue1+retry);
     if (pParam)
         nThresholdHighValue = pParam->Value.toDouble();
-
-    float dMatchShapesingRate = 0;
-    if (pData != nullptr) {
-        CParam *pParam = pData->getParam(("Shape matching rate"));
-        if (pParam)
-            dMatchShapesingRate = (float)pParam->Value.toDouble() / 100.0f;
-    }
 
     pData->m_vecDetectResult.clear();
     if (grayImg != nullptr)
@@ -1854,7 +1841,6 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
 
     NoiseOut(pData, grayImg, _ProcessValue1, 212);
     Expansion(pData, grayImg, _ProcessValue1, 213);
-    //IplImage *grayImg1 = cvCloneImage(grayImg);
 
     ///////////////////////////////////////////////////////////
 
@@ -1876,11 +1862,20 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     cvCopy(pData->iplTemplate, g2);
 
     if (nThresholdHighValue == 0)
-        ThresholdOTSU(pData, g2, 255);
+        ThresholdOTSU(pData, g2, 256);
     else
-        ThresholdRange(pData, g2, 255);
+        ThresholdRange(pData, g2, 256);
     NoiseOut(pData, g2, _ProcessValue1, 260);
     Expansion(pData, g2, _ProcessValue1, 261);
+    FilterLargeArea(g2);
+
+    int nGaussian = 3;
+    try {
+        cvSmooth(g2, g2, CV_GAUSSIAN,nGaussian,nGaussian);
+    } catch (...) {
+        qDebug() << "Error g2 cvSmooth()";
+    }
+
     cvCanny(g2, g2, 100, 300, 3);
     if (m_bSaveEngineImg){
         SaveOutImage(g2, pData, ("265_TemplateImageCany.jpg"));
@@ -1895,12 +1890,11 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
         if (s2) cvReleaseMemStorage(&s2);
         return 0;
     }
-    CvSeq* result2 = cvApproxPoly(c2, sizeof(CvContour), s2, CV_POLY_APPROX_DP, cvContourPerimeter(c2)*0.001, 1);
 
-    CvRect boundbox2 = cvBoundingRect(result2);
-    for (int i = 0; i < result2->total; ++i)
+    CvRect boundbox2 = cvBoundingRect(c2);
+    for (int i = 0; i < c2->total; ++i)
     {
-        CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, result2, i);
+        CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, c2, i);
         p->x = p->x - boundbox2.x;
         p->y = p->y - boundbox2.y;
     }
@@ -1909,10 +1903,17 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     {
         IplImage* drawImage = cvCreateImage(cvSize(g2->width, g2->height), grayImg->depth, grayImg->nChannels);
         cvZero(drawImage);
-        cvDrawContours(drawImage, result2, CVX_WHITE, CVX_WHITE, 1, 1, 8); // 외곽선 근사화가 잘되었는지 테스트
+        cvDrawContours(drawImage, c2, CVX_WHITE, CVX_WHITE, 1, 1, 8); // 외곽선 근사화가 잘되었는지 테스트
         str.sprintf(("266_cvApproxPoly_Template.jpg"));
         SaveOutImage(drawImage, pData, str, false);
         if (drawImage) cvReleaseImage(&drawImage);
+    }
+
+    //int nGaussian = 3;
+    try {
+        cvSmooth(grayImg, grayImg, CV_GAUSSIAN,nGaussian,nGaussian);
+    } catch (...) {
+        qDebug() << "Error grayImg cvSmooth()";
     }
 
     ///////////////////////////////////////////////////////////
@@ -1921,73 +1922,12 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     CvSeq* contours = 0;         // 경계 계수를 저장할 변수
 
     int seq = 0;
-    cvCanny(grayImg, grayImg, 100, 300, 3);
     cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-    //iterating through each contour
     while(contours)
     {
-        //obtain a sequence of points of contour, pointed by the variable 'contour' 형상의 점들의 시퀀스 가져오기, 인자 ‘contour’에 의해 지정된
-        CvSeq* result = cvApproxPoly(contours, sizeof(CvContour), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.001, 1);
-        CvRect boundbox = cvBoundingRect(contours);
-        //if (boundbox.x+boundbox.width < grayImg->width && boundbox.y+boundbox.height < grayImg->height)
-        {
-            if (abs(result2->total - result->total) <= 10)
-            {
-                CvSeq* ptseq = cvCreateSeq((CV_SEQ_KIND_CURVE | CV_SEQ_ELTYPE_POINT | CV_SEQ_FLAG_CLOSED) | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), storage);
-                for (int i = 0; i < result->total; ++i)
-                {
-                    CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, result, i);
-                    p->x = p->x - boundbox.x;
-                    p->y = p->y - boundbox.y;
-                    cvSeqPush(ptseq, p);
-                }
 
-                if (m_bSaveEngineImg)
-                {
-                    IplImage* drawImage = cvCreateImage(cvSize(g2->width, g2->height), grayImg->depth, grayImg->nChannels);
-                    cvZero(drawImage);
-                    cvDrawContours(drawImage, result, CVX_WHITE, CVX_WHITE, 1, 1, 8); // 외곽선 근사화가 잘되었는지 테스트
-                    str.sprintf(("270_cvApproxPoly_%d.jpg"), seq);
-                    SaveOutImage(drawImage, pData, str, false);
-                    if (drawImage) cvReleaseImage(&drawImage);
-                }
-                cvClearSeq(ptseq);
-
-                double matching = cvMatchShapes(result, result2, CV_CONTOURS_MATCH_I1); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
-                //double matching2 = cvMatchShapes(result, result2, CV_CONTOURS_MATCH_I2);
-                //double matching3 = cvMatchShapes(result, result2, CV_CONTOURS_MATCH_I3);
-                //qDebug() << "matching" << matching << matching2 << matching3;
-                if (matching > 1.0)
-                    matching = 1.0;
-                double dMatchShapes = (1.0-matching) * 100.0;
-                if (matching <= (1.0 - dMatchShapesingRate)) // || max > 0.9)
-                {
-                    str.sprintf(("Template Shape Match(%d) ===> : %.2f%%  %d:%d"), seq, dMatchShapes, result2->total, result->total);
-                    qDebug() << str;
-                    theMainWindow->DevLogSave(str.toLatin1().data());
-
-                    CvSeq* ptseq = cvCreateSeq((CV_SEQ_KIND_CURVE | CV_SEQ_ELTYPE_POINT | CV_SEQ_FLAG_CLOSED) | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), storage);
-                    for (int i = 0; i < result->total; ++i)
-                    {
-                        CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, result, i);
-                        cvSeqPush(ptseq, p);
-                    }
-                    Point2f centerPoint = CenterOfMoment(ptseq);
-                    cvClearSeq(ptseq);
-
-                    //qDebug() << "centerPoint1 " << centerPoint.x << centerPoint.y ;
-
-                    centerPoint.x += boundbox.x;
-                    centerPoint.y += boundbox.y;
-
-                    //qDebug() << "centerPoint2 " << centerPoint.x << centerPoint.y ;
-
-                    m_DetectResult.dMatchRate = dMatchShapes;
-                    m_DetectResult.pt = centerPoint;
-                    pData->m_vecDetectResult.push_back(m_DetectResult);
-                }
-            }
-        }
+        // QThead Lambda를 이용하면 병렬 처리가 가능함.
+        int iRst = OneMatchShapes(contours, c2, pData, seq);
 
         //obtain the next contour 다음 형상 가져오기
         contours = contours->h_next;
@@ -2001,6 +1941,13 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
                 return true;
             return false;
         });
+
+        clock_t finish_time1 = clock();
+        double total_time = (double)(finish_time1-start_time1)/CLOCKS_PER_SEC;
+        //QString str;
+        str.sprintf("Searching Time=%dms", (int)(total_time*1000));
+        theMainWindow->DevLogSave(str.toLatin1().data());
+
         m_DetectResult = pData->m_vecDetectResult[0];
         pData->m_vecDetectResult.clear();
         pData->m_vecDetectResult.push_back(m_DetectResult);
@@ -2022,11 +1969,72 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     return 0;
 }
 
+int CImgProcEngine::OneMatchShapes(CvSeq* contours, CvSeq* templateseq, RoiObject *pData, int seq)
+{
+    int rst = -1;
+
+    float dMatchShapesingRate = 0;
+    if (pData != nullptr) {
+        CParam *pParam = pData->getParam(("Shape matching rate"));
+        if (pParam)
+            dMatchShapesingRate = (float)pParam->Value.toDouble() / 100.0f;
+    }
+    CvRect tbb = cvBoundingRect(templateseq);
+
+    QString str;
+    CvMemStorage* ptseqstorage = cvCreateMemStorage(0);
+    CvSeq* ptseq = cvCreateSeq(CV_SEQ_KIND_CURVE|CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), ptseqstorage);
+    CvRect boundbox = cvBoundingRect(contours);
+    for (int i = 0; i < contours->total; ++i)
+    {
+        CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, contours, i);
+        CvPoint p1;
+        p1.x = p->x - boundbox.x;
+        p1.y = p->y - boundbox.y;
+        cvSeqPush(ptseq, &p1);
+    }
+
+    Point2f centerPoint = CenterOfMoment(ptseq);
+    CvRect sbb = cvBoundingRect(ptseq);
+    if (m_bSaveEngineImg)
+    {
+        IplImage* drawImage = cvCreateImage(cvSize(sbb.width+sbb.x, sbb.height+sbb.y), IPL_DEPTH_8U, 1);
+        cvZero(drawImage);
+        cvDrawContours(drawImage, ptseq, CVX_WHITE, CVX_WHITE, 1, 1, 8);
+        str.sprintf(("270_cvApproxPoly_%d.jpg"), seq);
+        SaveOutImage(drawImage, pData, str, false);
+        if (drawImage) cvReleaseImage(&drawImage);
+    }
+
+    double matching = cvMatchShapes(ptseq, templateseq, CV_CONTOURS_MATCH_I1); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
+    //double matching2 = cvMatchShapes(searchSeq, templateSeq, CV_CONTOURS_MATCH_I2);
+    //double matching3 = cvMatchShapes(searchSeq, templateSeq, CV_CONTOURS_MATCH_I3);
+    //qDebug() << "matching" << matching << matching2 << matching3;
+    double dMatchShapes = (1.0-matching) * 100.0;
+    if (matching <= (1.0 - dMatchShapesingRate))
+    {
+        m_DetectResult.resultType = RESULTTYPE_RECT;
+        m_DetectResult.dMatchRate = dMatchShapes;
+        m_DetectResult.pt = centerPoint;
+        m_DetectResult.tl = CvPoint2D32f(centerPoint.x-tbb.width/2,centerPoint.y-tbb.height/2);
+        m_DetectResult.br = CvPoint2D32f(centerPoint.x+tbb.width/2,centerPoint.y+tbb.height/2);
+        pData->m_vecDetectResult.push_back(m_DetectResult);
+        rst = 0;
+    }
+
+    cvClearSeq(ptseq);
+    cvReleaseMemStorage(&ptseqstorage);
+
+    return rst;
+}
+
 int CImgProcEngine::SinglePattFeatureMatch(IplImage* croppedImage, RoiObject *pData, QRectF rectIn)
 {
     Q_UNUSED(rectIn);
     //if (pData->iplTemplate == nullptr)
     //    return -1;
+
+    clock_t start_time1 = clock();
 
     CParam *pParam;
     int nMethod = 0;
@@ -2138,6 +2146,14 @@ int CImgProcEngine::SinglePattFeatureMatch(IplImage* croppedImage, RoiObject *pD
 
 //        cvRectangle(iplImg2, pt1, pt3, cvScalar(255, 255, 255), CV_FILLED); // test
 //        theMainWindow->outWidget("test1", iplImg2);
+
+
+        clock_t finish_time1 = clock();
+        double total_time = (double)(finish_time1-start_time1)/CLOCKS_PER_SEC;
+
+        QString str;
+        str.sprintf("Searching Time=%dms", (int)(total_time*1000));
+        theMainWindow->DevLogSave(str.toLatin1().data());
 
     }
 
@@ -2368,7 +2384,7 @@ int CImgProcEngine::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData,
 
             if (type >= 0 && nType == type)
             {
-                CvSeq* ptseq = cvCreateSeq((CV_SEQ_KIND_CURVE | CV_SEQ_ELTYPE_POINT | CV_SEQ_FLAG_CLOSED) | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), storage);
+                CvSeq* ptseq = cvCreateSeq(CV_SEQ_KIND_CURVE | CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), storage);
                 for (int i = 0; i < size; ++i)
                 {
                     CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, c, i);
@@ -3046,7 +3062,7 @@ a1:
     CvSeq* m_approxDP_seq = 0;
     //CvSeq* m_dominant_points = 0;    // 특징점 찾기 위한 변수
     CvSeq* ptseq;
-    CvSeq* defect = cvCreateSeq(CV_SEQ_KIND_GENERIC | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), m_storage);
+  //  CvSeq* defect = cvCreateSeq(CV_SEQ_KIND_GENERIC | CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), m_storage);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // (1) 외곽선 추적
@@ -3102,7 +3118,7 @@ a1:
             CvPoint2D32f center;
             cvMinEnclosingCircle(c, &center, &radius);
 
-            ptseq = cvCreateSeq((CV_SEQ_KIND_CURVE | CV_SEQ_ELTYPE_POINT | CV_SEQ_FLAG_CLOSED) | CV_32SC2, sizeof(CvContour), sizeof(CvPoint), m_storage);
+            ptseq = cvCreateSeq(CV_SEQ_KIND_CURVE | CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), m_storage);
             if (c->total >= MinMomentSize && c->total < MaxMomentSize)            // 외곽선을 이루는 점의 갯수가 이것보다 미만이면 잡음이라고 판단
             {
                 for (int i = 0; i < c->total; ++i)
@@ -3169,7 +3185,7 @@ a1:
     }
 
     if (m_seq) cvClearSeq(m_seq);
-    if (defect) cvClearSeq(defect);
+    //if (defect) cvClearSeq(defect);
     if (m_storage) cvReleaseMemStorage(&m_storage);
 
     if (croppedImage) cvReleaseImage(&croppedImage);
@@ -3292,6 +3308,8 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         SaveOutImage(grayTemplateImg, pData, str);
     }
 
+    clock_t start_time1 = clock();
+
     CvSize size = cvSize(srect.width() - grayTemplateImg->width + 1, srect.height() - grayTemplateImg->height + 1);
     IplImage* C = cvCreateImage(size, IPL_DEPTH_32F, 1); // 상관계수를 구할 이미지(C)
     double min, max;
@@ -3397,7 +3415,7 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                 Expansion(pData, g1, _ProcessValue2, 252);
                 cvCanny(g1, g1, 100, 300, 3);
                 if (m_bSaveEngineImg){
-                    str.sprintf(("255_TemplateImageCany%d.jpg"), nLoop);
+                    str.sprintf(("256_SearchImageCany%d.jpg"), nLoop);
                     SaveOutImage(g1, pData, str);
                 }
 
@@ -3473,6 +3491,13 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         }
     }
 
+    clock_t finish_time1 = clock();
+    double total_time = (double)(finish_time1-start_time1)/CLOCKS_PER_SEC;
+    //QString str;
+    str.sprintf("Searching Time=%dms", (int)(total_time*1000));
+    theMainWindow->DevLogSave(str.toLatin1().data());
+
+
     if(graySearchImg) cvReleaseImage(&graySearchImg);
     if(C) cvReleaseImage(&C);
     if(g2) cvReleaseImage(&g2);
@@ -3527,10 +3552,10 @@ int CImgProcEngine::ThresholdRange(RoiObject *pData, IplImage* grayImg, int nDbg
     //}
 
     if (pData != nullptr) {
-        CParam *pParam = pData->getParam(("Low Threshold"));
+        CParam *pParam = pData->getParam(("Low Threshold"), -1);
         if (pParam)
             nThresholdLowValue = pParam->Value.toDouble();
-        pParam = pData->getParam(("High Threshold"));
+        pParam = pData->getParam(("High Threshold"), -1);
         if (pParam)
             nThresholdHighValue = pParam->Value.toDouble();
     }
@@ -3994,5 +4019,3 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
 
     return 0;
 }
-
-

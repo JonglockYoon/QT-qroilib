@@ -80,6 +80,8 @@ public:
     int MeasureAlignImage(IplImage* img);
     int InspectOneItem(IplImage* img, Qroilib::RoiObject *pData);
 
+    int OneMatchShapes(CvSeq* contours, CvSeq* templateseq, Qroilib::RoiObject *pData, int seq);
+
     bool SetROIAreaForCriteriaPosition(Qroilib::RoiObject *pData, QString strCriteriaROI);
 
     int SingleROICenterOfPlusMark(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rectIn);

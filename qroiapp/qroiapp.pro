@@ -112,7 +112,7 @@ HEADERS +=  \
         app/ProcessingThread.h \
         app/ImageBuffer.h \
         app/MatToQImage.h \
-
+        app/geomatch.h \
 
 FORMS += \
          app/dialogconfig.ui \
@@ -135,6 +135,7 @@ SOURCES +=  \
         app/ProcessingThread.cpp \
         app/ImageBuffer.cpp \
         app/MatToQImage.cpp \
+        app/geomatch.cpp \
 
 RESOURCES += \
     resources.qrc
