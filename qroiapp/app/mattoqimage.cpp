@@ -1,5 +1,5 @@
  
-#include "MatToQImage.h"
+#include "mattoqimage.h"
 
 using namespace cv;
 

@@ -62,6 +62,8 @@ LIBS += -lopencv_highgui
 LIBS += -lopencv_videoio
 LIBS += -lopencv_imgcodecs
 LIBS += -lopencv_ml
+LIBS += -lopencv_features2d
+LIBS += -lopencv_world
 LIBS += -lgstreamer-1.0
 LIBS += -lgobject-2.0
 LIBS += -lglib-2.0
@@ -107,12 +109,12 @@ HEADERS +=  \
         app/dialogconfig.h \
         app/logviewdock.h \
         app/mlogthread.h \
-        app/CaptureThread.h \
-        app/Controller.h \
-        app/ProcessingThread.h \
-        app/ImageBuffer.h \
-        app/MatToQImage.h \
         app/geomatch.h \
+    app/capturethread.h \
+    app/mattoqimage.h \
+    app/imagebuffer.h \
+    app/controller.h \
+    app/processingthread.h
 
 FORMS += \
          app/dialogconfig.ui \
@@ -130,12 +132,12 @@ SOURCES +=  \
         app/dialogconfig.cpp \
         app/logviewdock.cpp \
         app/mlogthread.cpp \
-        app/CaptureThread.cpp \
-        app/Controller.cpp \
-        app/ProcessingThread.cpp \
-        app/ImageBuffer.cpp \
-        app/MatToQImage.cpp \
         app/geomatch.cpp \
+    app/capturethread.cpp \
+    app/mattoqimage.cpp \
+    app/imagebuffer.cpp \
+    app/controller.cpp \
+    app/processingthread.cpp
 
 RESOURCES += \
     resources.qrc

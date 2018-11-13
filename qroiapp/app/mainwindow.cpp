@@ -63,7 +63,7 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 #include "roireader.h"
 #include "dialogconfig.h"
 #include "logviewdock.h"
-#include "Controller.h"
+#include "controller.h"
 
 using namespace Qroilib;
 using namespace cv;

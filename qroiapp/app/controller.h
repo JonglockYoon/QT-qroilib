@@ -3,8 +3,8 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "CaptureThread.h"
-#include "ProcessingThread.h"
+#include "capturethread.h"
+#include "processingthread.h"
 
 // Qt header files
 #include <QtGui>

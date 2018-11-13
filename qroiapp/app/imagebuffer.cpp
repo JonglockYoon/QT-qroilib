@@ -1,7 +1,7 @@
 
 // author : https://github.com/jayrambhia/qt-opencv-app
 
-#include "ImageBuffer.h"
+#include "imagebuffer.h"
 
 using namespace cv;
 // Qt header files

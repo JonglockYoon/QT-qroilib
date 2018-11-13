@@ -20,7 +20,7 @@
 #include "config.h"
 #include "recipedata.h"
 #include "mainwindow.h"
-#include "MatToQImage.h"
+#include "mattoqimage.h"
 #include "geomatch.h"
 
 #include "QZXing.h"
@@ -1719,7 +1719,7 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
         IplImage* C = cvCreateImage(size, IPL_DEPTH_32F, 1); // 상관계수를 구할 이미지(C)
         double min, max;
         double rate = LimitMatchRate / 100.0;
-        std::vector<std::pair<double, double>> pairs;
+        std::vector<std::pair<double, double> > pairs;
         IplImage *clone = cvCloneImage(grayTemplateImg);
         int cnt = 0;
         for (double a = -dAngle; a < dAngle; a=a+dAngleStep) // 패턴을 -30 에서 30도까지 돌려가면서 매칭율이 가장좋은 이미지를 찾는다.

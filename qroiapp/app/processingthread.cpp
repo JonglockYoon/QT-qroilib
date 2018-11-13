@@ -1,8 +1,8 @@
  
 
-#include "ImageBuffer.h"
-#include "ProcessingThread.h"
-#include "MatToQImage.h"
+#include "imagebuffer.h"
+#include "processingthread.h"
+#include "mattoqimage.h"
 
 // Qt header files
 #include <QDebug>
@@ -12,7 +12,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 // Configuration header file
-#include "Config.h"
+#include "config.h"
 
 using namespace cv;
 

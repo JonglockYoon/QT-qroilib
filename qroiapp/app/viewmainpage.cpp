@@ -35,8 +35,8 @@
 #include "mainwindow.h"
 #include "config.h"
 
-#include "Controller.h"
-#include "ImageBuffer.h"
+#include "controller.h"
+#include "imagebuffer.h"
 
 #undef ENABLE_LOG
 #undef LOG

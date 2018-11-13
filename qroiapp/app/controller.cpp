@@ -1,7 +1,7 @@
 
 
-#include "Controller.h"
-#include "ImageBuffer.h"
+#include "controller.h"
+#include "imagebuffer.h"
 
 // Qt header files
 #include <QtGui>

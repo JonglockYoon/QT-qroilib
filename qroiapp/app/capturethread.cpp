@@ -1,12 +1,12 @@
 
 
-#include "CaptureThread.h"
-#include "ImageBuffer.h"
+#include "capturethread.h"
+#include "imagebuffer.h"
 
 // Qt header files
 #include <QDebug>
 // Configuration header file
-#include "Config.h"
+#include "config.h"
 
 CaptureThread::CaptureThread(ImageBuffer *imageBuffer) : QThread(),
                              imageBuffer(imageBuffer)

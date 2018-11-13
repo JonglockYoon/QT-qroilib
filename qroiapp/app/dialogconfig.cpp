@@ -30,8 +30,8 @@
 #include "qextserialenumerator.h"
 #include "mainwindow.h"
 #include "config.h"
-#include "Controller.h"
-#include "CaptureThread.h"
+#include "controller.h"
+#include "capturethread.h"
 
 DialogConfig::DialogConfig(QWidget *parent) :
     QDialog(parent),
