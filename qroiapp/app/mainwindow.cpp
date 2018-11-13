@@ -615,13 +615,13 @@ void MainWindow::setInspectAll()
                 Qroilib::RoiObject *mObject = (Qroilib::RoiObject *)roiObject;
 
                 pImgProcEngine->InspectOneItem(grayImg, mObject);
-                pImgProcEngine->DrawResultCrossMark(grayImg, mObject);
+                pImgProcEngine->DrawResultCrossMark(iplImg, mObject);
                 mObject->m_vecDetectResult.clear();
 
 //                const QRectF bounds = v->boundingRect().intersected(mObject->bounds());
 //                mObject->setBounds(bounds);
 
-                Mat mat = cvarrToMat(grayImg);
+                Mat mat = cvarrToMat(iplImg);
                 mat_to_qimage(mat, img);
 
                 if (v->document()) {

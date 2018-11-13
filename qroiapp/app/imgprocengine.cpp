@@ -37,7 +37,7 @@ CImgProcEngine::CImgProcEngine()
 
     memset(&m_DetectResult, 0, sizeof(m_DetectResult));
     //m_sDebugPath = ".";
-    m_bSaveEngineImg = false;
+    m_bSaveEngineImg = true;
 
     QString str;
 
@@ -1883,7 +1883,7 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
 
     CvMemStorage *s2 = cvCreateMemStorage(0); //storage area for all contours 모든 형상들을 위한 저장공간.
     CvSeq* c2 = 0;         // 경계 계수를 저장할 변수
-    cvFindContours(g2, s2, &c2, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cvFindContours(g2, s2, &c2, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     if (c2 == nullptr || c2->total <= 0) {
         if (grayTemplateImg) cvReleaseImage(&grayTemplateImg);
         if (c2) cvClearSeq(c2);
@@ -1922,7 +1922,7 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     CvSeq* contours = 0;         // 경계 계수를 저장할 변수
 
     int seq = 0;
-    cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     while(contours)
     {
 
@@ -1979,51 +1979,36 @@ int CImgProcEngine::OneMatchShapes(CvSeq* contours, CvSeq* templateseq, RoiObjec
         if (pParam)
             dMatchShapesingRate = (float)pParam->Value.toDouble() / 100.0f;
     }
-    CvRect tbb = cvBoundingRect(templateseq);
+    //CvRect tbb = cvBoundingRect(templateseq);
 
     QString str;
-    CvMemStorage* ptseqstorage = cvCreateMemStorage(0);
-    CvSeq* ptseq = cvCreateSeq(CV_SEQ_KIND_CURVE|CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), ptseqstorage);
-    CvRect boundbox = cvBoundingRect(contours);
-    for (int i = 0; i < contours->total; ++i)
-    {
-        CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, contours, i);
-        CvPoint p1;
-        p1.x = p->x - boundbox.x;
-        p1.y = p->y - boundbox.y;
-        cvSeqPush(ptseq, &p1);
-    }
-
-    Point2f centerPoint = CenterOfMoment(ptseq);
-    CvRect sbb = cvBoundingRect(ptseq);
+    Point2f centerPoint = CenterOfMoment(contours);
+    CvRect sbb = cvBoundingRect(contours);
     if (m_bSaveEngineImg)
     {
-        IplImage* drawImage = cvCreateImage(cvSize(sbb.width+sbb.x, sbb.height+sbb.y), IPL_DEPTH_8U, 1);
+        IplImage* drawImage = cvCreateImage(cvSize(sbb.width, sbb.height), IPL_DEPTH_8U, 1);
         cvZero(drawImage);
-        cvDrawContours(drawImage, ptseq, CVX_WHITE, CVX_WHITE, 1, 1, 8);
+        cvDrawContours(drawImage, contours, CVX_WHITE, CVX_WHITE, 1, 1, 8, CvPoint(-sbb.x, -sbb.y));
         str.sprintf(("270_cvApproxPoly_%d.jpg"), seq);
         SaveOutImage(drawImage, pData, str, false);
         if (drawImage) cvReleaseImage(&drawImage);
     }
 
-    double matching = cvMatchShapes(ptseq, templateseq, CV_CONTOURS_MATCH_I1); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
+    double matching = cvMatchShapes(contours, templateseq, CV_CONTOURS_MATCH_I1); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
     //double matching2 = cvMatchShapes(searchSeq, templateSeq, CV_CONTOURS_MATCH_I2);
     //double matching3 = cvMatchShapes(searchSeq, templateSeq, CV_CONTOURS_MATCH_I3);
     //qDebug() << "matching" << matching << matching2 << matching3;
-    double dMatchShapes = (1.0-matching) * 100.0;
-    if (matching <= (1.0 - dMatchShapesingRate))
+    double dMatchShapes = (1.0 - matching) * 100.0;
+    if (matching >= 0 && matching <= (1.0 - dMatchShapesingRate))
     {
         m_DetectResult.resultType = RESULTTYPE_RECT;
         m_DetectResult.dMatchRate = dMatchShapes;
-        m_DetectResult.pt = centerPoint;
-        m_DetectResult.tl = CvPoint2D32f(centerPoint.x-tbb.width/2,centerPoint.y-tbb.height/2);
-        m_DetectResult.br = CvPoint2D32f(centerPoint.x+tbb.width/2,centerPoint.y+tbb.height/2);
+        m_DetectResult.pt = CvPoint2D32f(centerPoint.x, centerPoint.y);
+        m_DetectResult.tl = CvPoint2D32f(m_DetectResult.pt.x-sbb.width/2,m_DetectResult.pt.y-sbb.height/2);
+        m_DetectResult.br = CvPoint2D32f(m_DetectResult.pt.x+sbb.width/2,m_DetectResult.pt.y+sbb.height/2);
         pData->m_vecDetectResult.push_back(m_DetectResult);
         rst = 0;
     }
-
-    cvClearSeq(ptseq);
-    cvReleaseMemStorage(&ptseqstorage);
 
     return rst;
 }
@@ -3819,10 +3804,10 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
     int size = pData->m_vecDetectResult.size();
     for (int i = 0; i < size; i++) {
         DetectResult *prst = &pData->m_vecDetectResult[i];
-        qDebug() << "DrawResultCrossMark" << prst->pt.x << prst->pt.y;
 
-        double x = prst->pt.x + rect.x();// / gCfg.m_pCamInfo[0].dResX;
-        double y = prst->pt.y + rect.y();// / gCfg.m_pCamInfo[0].dResY;
+        double x = 0;//prst->pt.x + rect.x();// / gCfg.m_pCamInfo[0].dResX;
+        double y = 0;//prst->pt.y + rect.y();// / gCfg.m_pCamInfo[0].dResY;
+        qDebug() << "DrawResultCrossMark" << x << y;
 
         double w = fabs(prst->br.x - prst->tl.x);
         double h = fabs(prst->br.y - prst->tl.y);
@@ -3830,18 +3815,27 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
         {
             if (prst->resultType == RESULTTYPE_RECT4P)
             {
-                x = y = 0;
+                x = rect.x() + prst->tl.x + w / 2;
+                y = rect.y() + prst->tl.y + h / 2;
                 cvLine(iplImage, CvPoint(prst->tl.x,prst->tl.y), CvPoint(prst->tr.x,prst->tr.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
                 cvLine(iplImage, CvPoint(prst->tr.x,prst->tr.y), CvPoint(prst->br.x,prst->br.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
                 cvLine(iplImage, CvPoint(prst->br.x,prst->br.y), CvPoint(prst->bl.x,prst->bl.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
                 cvLine(iplImage, CvPoint(prst->bl.x,prst->bl.y), CvPoint(prst->tl.x,prst->tl.y), cv::Scalar(128, 128, 128), 2, cv::LINE_AA);
             }
+            else if (prst->resultType == RESULTTYPE_RECT)
+            {
+                x = rect.x() + prst->tl.x + w / 2;
+                y = rect.y() + prst->tl.y + h / 2;
+                Point2f pt1;
+                pt1.x = rect.x() + prst->tl.x;
+                pt1.y = rect.y() + prst->tl.y;
+                Point2f pt2 = Point2f((float)pt1.x+w, (float)pt1.y+h);
+                cvRectangle(iplImage, pt1, pt2, CV_RGB(255, 0, 0), 2);
+            }
             else
             {
-                Point2f pt2 = Point2f((float)x+w, (float)y+h);
-                cvRectangle(iplImage, cvPoint(x, y), pt2, CV_RGB(255, 0, 0), 2);
-                x += w/2;
-                y += h/2;
+                x = rect.x() + prst->pt.x;
+                y = rect.y() + prst->pt.y;
             }
         }
 
@@ -3858,7 +3852,7 @@ void CImgProcEngine::DrawResultCrossMark(IplImage *iplImage, RoiObject *pData)
             pt2.x = x;
             pt2.y = y + 40;
             cvLine(iplImage, pt1, pt2, CV_RGB(192, 192, 192), 2, 8, 0);
-            }
+        }
     }
 }
 
