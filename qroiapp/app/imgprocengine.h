@@ -80,7 +80,7 @@ public:
     int MeasureAlignImage(IplImage* img);
     int InspectOneItem(IplImage* img, Qroilib::RoiObject *pData);
 
-    int OneMatchShapes(CvSeq* contours, CvSeq* templateseq, Qroilib::RoiObject *pData, int seq);
+    int OneMatchShapes(vector<vector<Point> >& contours, vector<vector<Point> >& templateseq, Qroilib::RoiObject *pData, int seq);
 
     bool SetROIAreaForCriteriaPosition(Qroilib::RoiObject *pData, QString strCriteriaROI);
 
@@ -115,6 +115,7 @@ public:
     void Thinner(Qroilib::RoiObject *pData, IplImage* grayImg, int nDbg = 220);
 
     void SaveOutImage(IplImage* pImgOut, Qroilib::RoiObject *pData, QString strMsg, bool bClear = false);
+    void SaveOutImage(cv::Mat imgOut, Qroilib::RoiObject *pData, QString strMsg);
 
     Point2f CrossPointOfThinner(Qroilib::RoiObject *pData, IplImage* img, CvSeq* ptseq);
     int CenterOfPlusmarkVerify(Qroilib::RoiObject *pData, IplImage* imageIn, cv::Point2f cpt);

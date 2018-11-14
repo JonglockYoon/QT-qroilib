@@ -1881,32 +1881,28 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
         SaveOutImage(g2, pData, ("265_TemplateImageCany.jpg"));
     }
 
-    CvMemStorage *s2 = cvCreateMemStorage(0); //storage area for all contours 모든 형상들을 위한 저장공간.
-    CvSeq* c2 = 0;         // 경계 계수를 저장할 변수
-    cvFindContours(g2, s2, &c2, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    if (c2 == nullptr || c2->total <= 0) {
+    vector<vector<cv::Point> > c2;
+    cv::Mat g2mat = cvarrToMat(g2);
+    cv::findContours( g2mat, c2, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    if (c2.size() == 0) {
         if (grayTemplateImg) cvReleaseImage(&grayTemplateImg);
-        if (c2) cvClearSeq(c2);
-        if (s2) cvReleaseMemStorage(&s2);
         return 0;
     }
 
-    CvRect boundbox2 = cvBoundingRect(c2);
-    for (int i = 0; i < c2->total; ++i)
+    cv::Rect boundbox2 = cv::boundingRect( Mat(c2[0]) );
+    for (int i = 0; i < c2[0].size(); ++i)
     {
-        CvPoint* p = CV_GET_SEQ_ELEM(CvPoint, c2, i);
+        cv::Point* p = &c2[0][i];
         p->x = p->x - boundbox2.x;
         p->y = p->y - boundbox2.y;
     }
 
     if (m_bSaveEngineImg)
     {
-        IplImage* drawImage = cvCreateImage(cvSize(g2->width, g2->height), grayImg->depth, grayImg->nChannels);
-        cvZero(drawImage);
-        cvDrawContours(drawImage, c2, CVX_WHITE, CVX_WHITE, 1, 1, 8); // 외곽선 근사화가 잘되었는지 테스트
-        str.sprintf(("266_cvApproxPoly_Template.jpg"));
-        SaveOutImage(drawImage, pData, str, false);
-        if (drawImage) cvReleaseImage(&drawImage);
+        cv::Mat m = cv::Mat(g2->width, g2->height, CV_8SC1);
+        cv::drawContours(m, c2, 0, CVX_WHITE, 1, 8);
+        str.sprintf(("266_Template_Contour.jpg"));
+        SaveOutImage(m, pData, str);
     }
 
     //int nGaussian = 3;
@@ -1918,20 +1914,13 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
 
     ///////////////////////////////////////////////////////////
 
-    CvMemStorage *storage = cvCreateMemStorage(0); //storage area for all contours 모든 형상들을 위한 저장공간.
-    CvSeq* contours = 0;         // 경계 계수를 저장할 변수
-
-    int seq = 0;
-    cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    while(contours)
+    vector<vector<Point> > contours;
+    cv::Mat mat = cvarrToMat(grayImg);
+    cv::findContours(mat, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    for( size_t i = 0; i< contours.size(); i++ )
     {
-
         // QThead Lambda를 이용하면 병렬 처리가 가능함.
-        int iRst = OneMatchShapes(contours, c2, pData, seq);
-
-        //obtain the next contour 다음 형상 가져오기
-        contours = contours->h_next;
-        seq++;
+        int iRst = OneMatchShapes(contours, c2, pData, i);
     }
 
     int size = pData->m_vecDetectResult.size();
@@ -1955,21 +1944,14 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
         theMainWindow->DevLogSave(str.toLatin1().data());
     }
 
-    if (contours) cvClearSeq(contours);
-    if (storage) cvReleaseMemStorage(&storage);
-    if (c2) cvClearSeq(c2);
-    if (s2) cvReleaseMemStorage(&s2);
-
-
     if (grayImg) cvReleaseImage(&grayImg);
-    //if (grayImg1) cvReleaseImage(&grayImg1);
     if (grayTemplateImg) cvReleaseImage(&grayTemplateImg);
 
 
     return 0;
 }
 
-int CImgProcEngine::OneMatchShapes(CvSeq* contours, CvSeq* templateseq, RoiObject *pData, int seq)
+int CImgProcEngine::OneMatchShapes(vector<vector<Point> >& contours, vector<vector<Point> >& templateseq, RoiObject *pData, int seq)
 {
     int rst = -1;
 
@@ -1979,22 +1961,22 @@ int CImgProcEngine::OneMatchShapes(CvSeq* contours, CvSeq* templateseq, RoiObjec
         if (pParam)
             dMatchShapesingRate = (float)pParam->Value.toDouble() / 100.0f;
     }
-    //CvRect tbb = cvBoundingRect(templateseq);
+
+    Moments mu = moments( contours[seq], false );
+    Point2f mc = Point2f( mu.m10/mu.m00 , mu.m01/mu.m00 );
 
     QString str;
-    Point2f centerPoint = CenterOfMoment(contours);
-    CvRect sbb = cvBoundingRect(contours);
+    cv::Rect sbb = cv::boundingRect( Mat(contours[seq]) );
     if (m_bSaveEngineImg)
     {
-        IplImage* drawImage = cvCreateImage(cvSize(sbb.width, sbb.height), IPL_DEPTH_8U, 1);
-        cvZero(drawImage);
-        cvDrawContours(drawImage, contours, CVX_WHITE, CVX_WHITE, 1, 1, 8, CvPoint(-sbb.x, -sbb.y));
-        str.sprintf(("270_cvApproxPoly_%d.jpg"), seq);
-        SaveOutImage(drawImage, pData, str, false);
-        if (drawImage) cvReleaseImage(&drawImage);
+        cv::Mat m = cv::Mat(sbb.width, sbb.height, CV_8SC1);
+        cv::drawContours(m, contours, seq, CVX_WHITE, 1, 8, noArray(), 0, Point(-sbb.x, -sbb.y));
+        str.sprintf(("270_SearchContour_%d.jpg"), seq);
+        SaveOutImage(m, pData, str);
     }
 
-    double matching = cvMatchShapes(contours, templateseq, CV_CONTOURS_MATCH_I1); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
+    double matching = cv::matchShapes(contours[seq], templateseq[0], CV_CONTOURS_MATCH_I1, 0); // 작은 값 일수록 두 이미지의 형상이 가까운 (0은 같은 모양)라는 것이된다.
+    //double matching = cvMatchShapes(contours, templateseq, CV_CONTOURS_MATCH_I1);
     //double matching2 = cvMatchShapes(searchSeq, templateSeq, CV_CONTOURS_MATCH_I2);
     //double matching3 = cvMatchShapes(searchSeq, templateSeq, CV_CONTOURS_MATCH_I3);
     //qDebug() << "matching" << matching << matching2 << matching3;
@@ -2003,7 +1985,7 @@ int CImgProcEngine::OneMatchShapes(CvSeq* contours, CvSeq* templateseq, RoiObjec
     {
         m_DetectResult.resultType = RESULTTYPE_RECT;
         m_DetectResult.dMatchRate = dMatchShapes;
-        m_DetectResult.pt = CvPoint2D32f(centerPoint.x, centerPoint.y);
+        m_DetectResult.pt = CvPoint2D32f(mc.x, mc.y);
         m_DetectResult.tl = CvPoint2D32f(m_DetectResult.pt.x-sbb.width/2,m_DetectResult.pt.y-sbb.height/2);
         m_DetectResult.br = CvPoint2D32f(m_DetectResult.pt.x+sbb.width/2,m_DetectResult.pt.y+sbb.height/2);
         pData->m_vecDetectResult.push_back(m_DetectResult);
@@ -2269,6 +2251,15 @@ int CImgProcEngine::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData,
 
     cvFindContours(grayImg, storage, &contours, sizeof(CvContour), CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
     //iterating through each contour 각형상별로 반복
+
+    if (m_bSaveEngineImg)
+    {
+        cvZero(grayImg);
+        cvDrawContours(grayImg, contours, CVX_WHITE, CVX_WHITE, 1, 1, 8);
+        str.sprintf(("219_cvFindContours.jpg"));
+        SaveOutImage(grayImg, pData, str, false);
+    }
+
     while(contours)
     {
         //obtain a sequence of points of contour, pointed by the variable 'contour' 형상의 점들의 시퀀스 가져오기, 인자 ‘contour’에 의해 지정된
@@ -2280,7 +2271,7 @@ int CImgProcEngine::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData,
             {
                 IplImage* drawImage = cvCreateImage(cvSize(grayImg->width, grayImg->height), grayImg->depth, 3);
                 cvZero(drawImage);
-                cvDrawContours(drawImage, result, CVX_WHITE, CVX_WHITE, 1, 1, 8); // 외곽선 근사화가 잘되었는지 테스트
+                cvDrawContours(drawImage, result, CVX_WHITE, CVX_WHITE, 1, 1, 8);
                 str.sprintf(("220_cvApproxPoly.jpg"));
                 SaveOutImage(drawImage, pData, str, false);
                 if (drawImage) cvReleaseImage(&drawImage);
@@ -3870,14 +3861,19 @@ void CImgProcEngine::SaveOutImage(IplImage* pImgOut, RoiObject *pData, QString s
 
     //qDebug() << "SaveOutImage:" << str;
 }
+void CImgProcEngine::SaveOutImage(cv::Mat imgOut, RoiObject *pData, QString strMsg)
+{
+    if (!gCfg.m_bSaveEngineImg)
+        return;
+    QString str = ("");
+    if (pData != nullptr)
+        str.sprintf("%s/[%s]%s_%s", m_sDebugPath.toStdString().c_str(), pData->groupName().toStdString().c_str(), pData->name().toStdString().c_str(), strMsg.toStdString().c_str());
+    else
+        str.sprintf("%s/%s", m_sDebugPath.toStdString().c_str(), strMsg.toStdString().c_str());
+    cv::imwrite((const char *)str.toStdString().c_str(), imgOut);
 
-//void CImgProcEngine::SaveOutImage(IplImage* pImgOut, QString strMsg, bool bClear/*=false*/)
-//{
-//	QString str = ("");
-//	str.sprintf(("%s\\%s"), m_sDebugPath.toStdString().c_str(), strMsg);
-//	CT2A ascii(str); cvSaveImage(ascii, pImgOut);
-//	if (bClear) cvZero(pImgOut);
-//}
+    //qDebug() << "SaveOutImage:" << str;
+}
 
 
 int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
