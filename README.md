@@ -67,15 +67,14 @@ https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Lib
 -----
 https://blog.naver.com/jerry1455/221397184991 - OpenCV #7 Contours 응용
 https://blog.naver.com/jerry1455/221389104013 - OpenCV #6 패턴 및 피처 매칭(Pattern & Feature Matching)
-https://blog.naver.com/jerry1455/221368080208 - OpenCV#5(OpenCV Blob APIs)</p>
-https://blog.naver.com/jerry1455/221365405520 - OpenCV#4(blob feature)</p>
-https://blog.naver.com/jerry1455/221359367760 - OpenCV#3(LineFit ,EdgeCorner,FindShape,CenterOfBlob)</p>
-https://blog.naver.com/jerry1455/221354695256 - OpenCV#2(Canny,Sobel,Laplacian)</p>
-https://blog.naver.com/jerry1455/221341480823 - OpenCV#1(Binarization,Morphology,Arithmetic)</p>
+https://blog.naver.com/jerry1455/221368080208 - OpenCV#5 OpenCV Blob APIs
+https://blog.naver.com/jerry1455/221365405520 - OpenCV#4 blob feature
+https://blog.naver.com/jerry1455/221359367760 - OpenCV#3 LineFit ,EdgeCorner,FindShape,CenterOfBlob
+https://blog.naver.com/jerry1455/221354695256 - OpenCV#2 Canny,Sobel,Laplacian
+https://blog.naver.com/jerry1455/221341480823 - OpenCV#1 Binarization,Morphology,Arithmetic
 
 -----
 
-<pre>
 applications using qroilib.
 
 qroiviewer : image viewer using qroilib.
