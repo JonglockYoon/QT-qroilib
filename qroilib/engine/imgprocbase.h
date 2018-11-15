@@ -63,7 +63,7 @@ protected:
 
     cv::Point2f getCorner(std::vector<cv::Point2f>& corners, cv::Point2f center, int CornerType);
     double getObjectAngle(IplImage *src);
-    double GetDistance2D(CvPoint p1, CvPoint p2);
+    double GetDistance2D(cv::Point2f p1, cv::Point2f p2);
 
 public:
     cv::Point2f CenterOfMoment(CvSeq* c);

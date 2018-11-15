@@ -289,18 +289,20 @@ void DialogLinefit::ExecRansacLinefitBlob(IplImage* iplImg)
         cvFitLine(contours, CV_DIST_HUBER, 0, 0.001, 0.001, line);
         CvRect boundbox = cvBoundingRect(contours);
 
+        double vx = line[0];
+        double vy = line[1];
         double d = sqrt(line[0] * line[0] + line[1] * line[1]);
-        line[0] /= d;
-        line[1] /= d;
+        line[0] = vx / d;
+        line[1] = vy / d;
         double t = boundbox.width + boundbox.height;
 
         // 영상에 선을 그립니다.
         int x0= line[2]; // 선에 놓은 한 점
         int y0= line[3];
-        int x1= x0 - t*line[0]; // 기울기에 길이를 갖는 벡터 추가
-        int y1= y0 - t*line[1];
-        int x2= x0 + t*line[0];
-        int y2= y0 + t*line[1];
+        int x1= x0 + t*line[0]; // 기울기에 길이를 갖는 벡터 추가
+        int y1= y0 + t*line[1];
+        int x2= x0 - t*line[0];
+        int y2= y0 - t*line[1];
         cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
 
         contours = contours->h_next;

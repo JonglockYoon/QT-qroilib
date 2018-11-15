@@ -495,7 +495,7 @@ double CImgProcBase::getObjectAngle(IplImage *src)
     double th = 0.5 * atan((2 * cm.m11) / (cm.m20 - cm.m02));
     return th * (180 / 3.14);
 }
-double CImgProcBase::GetDistance2D(CvPoint p1, CvPoint p2)
+double CImgProcBase::GetDistance2D(cv::Point2f p1, cv::Point2f p2)
 {
     return sqrt(pow((float)p1.x - p2.x, 2) + pow((float)p1.y - p2.y, 2));
 }
@@ -505,7 +505,7 @@ int CImgProcBase::FilterLargeBlob(IplImage* grayImg, int nAxisLength)
 {
     CBlobResult blobs;
     blobs = CBlobResult(grayImg, nullptr);
-    blobs.Filter(blobs, B_EXCLUDE, CBlobGetMajorAxisLength(), B_GREATER, nAxisLength); // 블럽 큰것 제거.
+    blobs.Filter(blobs, B_EXCLUDE, CBlobGetMajorAxisLength(), B_GREATER, nAxisLength); // Erase Large blob.
     cvZero(grayImg);
     int blobCount = blobs.GetNumBlobs();
     if (blobCount > 0) {
@@ -613,7 +613,7 @@ void CImgProcBase::FilterLargeDiameter(IplImage* grayImg)
 }
 
 
-//Moment 로 중심점 계산 : 공간 모멘트를 통해 중심점 구하기
+//Calculate Center of Moment
 Point2f CImgProcBase::CenterOfMoment(CvSeq* c)
 {
     double M;
@@ -621,11 +621,10 @@ Point2f CImgProcBase::CenterOfMoment(CvSeq* c)
     double cX, cY, m00 = 1.0;
     Point2f point;
 
-    // moment 변수 선언
     CvMoments moments;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // (4) cvMoment 로 중심점 계산
+    // (4) Calculate Center of Moment using cvMoment
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     cvMoments(c, &moments);
 
@@ -876,7 +875,7 @@ double CImgProcBase::SubPixelHessianEdge(IplImage *src, int nDir)
             break;
         }
     }
-    //  첫번째 contour 선택 완료
+    //  first contour selected.
 
     if (select < 0)
         return -1;
@@ -886,7 +885,7 @@ double CImgProcBase::SubPixelHessianEdge(IplImage *src, int nDir)
     Contour &contour = contours[select];
     switch (nDir)
     {
-    case 0: // 세로선
+    case 0: // vertical line
     case 1:
         std::stable_sort(contour.points.begin(), contour.points.end(), [](const Point2f lhs, const Point2f rhs)->bool {
             if (lhs.x < rhs.x) // assending
@@ -894,7 +893,7 @@ double CImgProcBase::SubPixelHessianEdge(IplImage *src, int nDir)
             return false;
         });
         break;
-    case 2: // 가로선
+    case 2: // horizontal line
     case 3:
         std::stable_sort(contour.points.begin(), contour.points.end(), [](const Point2f lhs, const Point2f rhs)->bool {
             if (lhs.y < rhs.y) // assending

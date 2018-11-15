@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="3456" height="4608" roiwidth="1" roiheight="1" nextobjectid="1">
+<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="563" height="188" roiwidth="1" roiheight="1" nextobjectid="1">
  <objectgroup name="channel1" x="-1" y="-1">
-  <object id="1" name="noname1109055345" x="0" y="7" width="3308" height="4531">
-   <pattern child="2"/>
-   <param InspectType="14">
-    <param00 steptype="1" name="Low Threshold" valuetype="1" value="0" detail=""/>
-    <param01 steptype="1" name="High Threshold" valuetype="1" value="200" detail=""/>
-    <param02 steptype="1" name="Noise out 1" valuetype="1" value="1" detail=""/>
-    <param03 steptype="1" name="Noise out 2" valuetype="1" value="-20" detail=""/>
-    <param04 steptype="1" name="Shape matching rate" valuetype="2" value="85.00" detail=""/>
-   </param>
-  </object>
-  <object id="2" x="312.318" y="1144.1" width="698.8" height="756.4">
-   <rectangle parent="1"/>
-   <param InspectType="500">
-    <param00 steptype="1" name="" valuetype="1" value="0" detail=""/>
+  <object id="1" name="noname1114134526" x="9" y="3" width="545" height="181">
+   <rectangle/>
+   <param InspectType="509">
+    <param00 steptype="1" name="thinningType" valuetype="4" value="0" detail="ZHANGSUEN,GUOHALL"/>
+    <param01 steptype="1" name="MorphSize" valuetype="1" value="5" detail=""/>
+    <param02 steptype="1" name="Size1" valuetype="1" value="100" detail=""/>
    </param>
   </object>
  </objectgroup>

@@ -152,6 +152,9 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Point_Start,   CParam(_ProcessValue1, (""), _IntValue, ("0")), // do not delete.
     _Inspect_Point_Coordnation,  CParam(_ProcessValue1, ("Mark color"), _IntValue, ("128")), // not yet implement.
 
+    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("thinningType"), _ComboValue, ("0"), ("ZHANGSUEN,GUOHALL")),
+    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("MorphSize"), _IntValue, ("3")),
+    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Size1"), _IntValue, ("10")),
 
     _Inspect_Type_End,  CParam(_FilterValue, (""), _IntValue, ("")), // 반드시 있어야한다.
 };
@@ -193,6 +196,8 @@ void CRecipeData::InitParamData()
     m_sInspList[_Inspect_Roi_Corner].sprintf(("Corner"));
     m_sInspList[_Inspect_Teseract].sprintf(("OCR"));
     m_sInspList[_Inspect_BarCode].sprintf(("BarCode"));
+    m_sInspList[_Inspect_Line_Measurement].sprintf(("Thinning"));
+
 
     m_sInspList[_Inspect_Point_Coordnation].sprintf(("Point"));
 

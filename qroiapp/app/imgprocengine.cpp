@@ -22,6 +22,7 @@
 #include "mainwindow.h"
 #include "mattoqimage.h"
 #include "geomatch.h"
+#include "opencv2/ximgproc.hpp"
 
 #include "QZXing.h"
 #include <zxing/NotFoundException.h>
@@ -175,6 +176,9 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
         break;
     case _Inspect_BarCode:
         SingleROIBarCode(croppedImage, pData, rect);
+        break;
+    case _Inspect_Line_Measurement:
+        SingleROILineMeasurement(croppedImage, pData, rect);
         break;
     }
 	cvReleaseImage(&croppedImage);
@@ -3991,7 +3995,6 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
     QImage img;
     img = MatToQImage(m);
 
-
     QString decode;
     try {
         decode = qz.decodeImage(img);
@@ -4006,6 +4009,207 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
     theMainWindow->DevLogSave(str.toLatin1().data());
     m_DetectResult.str = str.toLatin1().data();
     pData->m_vecDetectResult.push_back(m_DetectResult);
+
+    return 0;
+}
+
+// ref https://docs.opencv.org/3.4/dd/d49/tutorial_py_contour_features.html
+// https://stackoverflow.com/questions/47910428/contour-width-measurement-along-its-entire-lendth 이미지 사용.
+int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
+{
+    if (pData == nullptr)
+        return -1;
+
+    int size1 = 1;
+    int morph_size = 3;
+    CParam *pParam = pData->getParam(("Size1"));
+    if (pParam)
+       size1 = (int)pParam->Value.toDouble();
+    pParam = pData->getParam(("MorphSize"));
+    if (pParam)
+       morph_size = (int)pParam->Value.toDouble();
+
+    QString str;
+    cv::Mat mat = cv::cvarrToMat(croppedImage);
+
+    cv::Mat ZS, gray;
+    cv::ximgproc::thinning(mat, ZS, ximgproc::THINNING_ZHANGSUEN);
+//    cv::ximgproc::thinning(mat, img_thinning_GH, ximgproc::THINNING_GUOHALL);
+
+    //cv::Mat element7(7, 7, CV_8U, cv::Scalar(1));
+    //morphologyEx( ZS, ZS, cv::MORPH_DILATE, element7 );
+
+    if (m_bSaveEngineImg)
+    {
+        str.sprintf(("201_ZS.jpg"));
+        SaveOutImage(ZS, pData, str);
+//        str.sprintf(("201_ZH.jpg"));
+//        SaveOutImage(img_thinning_GH, pData, str);
+    }
+
+
+#if 0
+
+
+        double vx = line[0];
+        double vy = line[1];
+        double d = sqrt(line[0] * line[0] + line[1] * line[1]);
+        line[0] = vx / d;
+        line[1] = vy / d;
+        double t = boundbox.width + boundbox.height;
+
+        // 영상에 선을 그립니다.
+        int x0= line[2]; // 선에 놓은 한 점
+        int y0= line[3];
+        int x1= x0 + t*line[0]; // 기울기에 길이를 갖는 벡터 추가
+        int y1= y0 + t*line[1];
+        int x2= x0 - t*line[0];
+        int y2= y0 - t*line[1];
+        cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
+
+
+        double dAngle = -((double)atan2(y2 - y1, x2 - x1) * 180.0f / PI);
+        if (dAngle < 0)
+            dAngle = 180 + dAngle;
+        qDebug() << "angle: " << dAngle;
+
+        double dAdjAngle = 90.0;
+        double a = (dAdjAngle * PI) / 180; // radian
+        double dx1 = (cos(a) * (x1 - x0)) - (sin(a) * (y1 - y0)) + x0;
+        double dy1 = (sin(a) * (x1 - x0)) + (cos(a) * (y1 - y0)) + y0;
+        double dx2 = (cos(a) * (x2 - x0)) - (sin(a) * (y2 - y0)) + x0;
+        double dy2 = (sin(a) * (x2 - x0)) + (cos(a) * (y2 - y0)) + y0;
+        cvLine( tmp, CvPoint(dx1,dy1), CvPoint(dx2,dy2), CV_RGB(128,128,128), 1, 8 );
+
+        dAngle = -((double)atan2(dy2 - dy1, dx2 - dx1) * 180.0f / PI);
+        if (dAngle < 0)
+            dAngle = 180 + dAngle;
+        qDebug() << "angle: " << dAngle;
+
+
+
+
+
+    int fontFace = FONT_HERSHEY_SIMPLEX;
+    double fontScale = 0.5;
+    Mat omat1 = Mat(mat.rows*10,mat.cols*10, CV_8SC1, cvScalar(0.));
+
+    Mat omat = Mat(mat.rows,mat.cols, CV_8SC1, cvScalar(0.));
+    vector<cv::Point> vec;
+    CBlobResult blobs;
+    blobs = CBlobResult(ZS);
+    int nBlobs = blobs.GetNumBlobs();
+    for (int i=0; i<nBlobs; i++) {
+        CBlob *p = blobs.GetBlob(i);
+        CBlobContour *c = p->GetExternalContour();
+        t_PointList pl = c->GetContourPoints();
+        for (int j=0; j<pl.size(); j++) {
+            vec.push_back(pl[j]);
+        }
+
+
+        vector<Point2f> approx;
+        //approxPolyDP(Mat(czs[i]), approx, arcLength(Mat(czs[i]), true)*0.001, false);
+        approxPolyDP(Mat(vec), approx, 0.4, false);
+
+        char text[64];
+        for (int j=0; j<approx.size(); j++) {
+            cv::Point2f pt = approx[j];
+            pt.x *= 10;
+            pt.y *= 10;
+            //circle(omat1, pt, 1, CVX_WHITE, 1, 8);
+            sprintf(text, "%d", j);
+            if (j%2 == 0)
+                putText(omat1, text, pt, fontFace, fontScale, CVX_WHITE, 1, 8);
+        }
+
+        for (int k=0; k<approx.size()-3; k++) {
+            Point2f p1 = approx[k];
+            Point2f p2 = approx[k+2];
+            double d = sqrt(pow((float)p1.x - p2.x, 2) + pow((float)p1.y - p2.y, 2));
+            if (d < 5.0) {
+                Point2f p1 = approx[k-1];
+                Point2f p2 = approx[k+3];
+                double d = sqrt(pow((float)p1.x - p2.x, 2) + pow((float)p1.y - p2.y, 2));
+                if (d > 5.0) // 종단점을 살리는 목적.
+                    approx[k+1] = approx[k+2];
+            }
+        }
+        for (int k=0; k<approx.size()-1; k++) {
+            Point2f pt1 = approx[k];
+            Point2f pt2 = approx[k+1];
+            cv::line(omat, pt1, pt2, CVX_WHITE, 1, 8);
+        }
+        approx.clear();
+        vec.clear();
+
+    }
+
+    str.sprintf(("211_Contour.jpg"));
+    SaveOutImage(omat, pData, str);
+    str.sprintf(("212_Contour.jpg"));
+    SaveOutImage(omat1, pData, str);
+#endif	
+	
+#if 0
+    Mat result;//(mat.size(),CV_8U,Scalar::all(0));
+    Mat dist;
+    distanceTransform(ZS, dist, DIST_L2, 3);//, CV_8U);
+
+    normalize(dist, dist, 0, 255, NORM_MINMAX);
+    //threshold(dist, dist, .1, 1., CV_THRESH_BINARY);
+
+    dist.convertTo(result,CV_8U);
+
+    if (m_bSaveEngineImg)
+    {
+        str.sprintf(("202_ZS.jpg"));
+        SaveOutImage(result, pData, str);
+    }
+
+    SparseMat ms(dist);
+    SparseMatConstIterator_<float> it = ms.begin<float>(),it_end = ms.end<float>();
+    Mat lig(dist.rows,dist.cols,CV_8U,Scalar::all(0));
+    for (; it != it_end; it ++)
+    {
+        // print element indices and the element value
+         const SparseMat::Node* n = it.node();
+         if (lig.at<uchar>(n->idx[0])==0)
+         {
+             qDebug()<< "("<<n->idx[0]<<","<<n->idx[1]<<") = " <<it.value<float>()<<"\t";
+             lig.at<uchar>(n->idx[0])=200;
+         }
+
+    }
+    if (m_bSaveEngineImg)
+    {
+        str.sprintf(("204_ZS.jpg"));
+        SaveOutImage(lig, pData, str);
+    }
+
+    gray = cv::Mat(mat.rows, mat.cols, CV_8SC1);
+    ZS.copyTo(gray);
+
+    cv::Mat element3(3, 3, CV_8U, cv::Scalar(1));
+
+
+    // Create a structuring element (SE)
+    Mat dst;
+    Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+    //morphologyEx( gray, dst, cv::MORPH_TOPHAT, element3 );
+    morphologyEx( gray, dst, MORPH_TOPHAT, element, Point(-1,-1), size1 );
+    if (m_bSaveEngineImg)
+    {
+        str.sprintf(("210_ZS.jpg"));
+        SaveOutImage(dst, pData, str);
+    }
+
+    vector<vector<cv::Point> > czs;
+    cv::findContours( gray, czs, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+    mat = Mat(mat.rows,mat.cols, CV_8SC1, cvScalar(0.));
+
+
+#endif
 
     return 0;
 }
