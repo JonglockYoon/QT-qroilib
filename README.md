@@ -63,19 +63,19 @@ https://blog.naver.com/jerry1455/221335173223 - Multi Capture Image (OpenCV Mult
 https://blog.naver.com/jerry1455/221332990270 - Capture Image (OpenCV Capture Image)
 https://blog.naver.com/jerry1455/221332701399 - qroilib image viewer(OpenCV Image viewer)
 https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Library)?
-<pre>
+
 -----
-</pre>
-https://blog.naver.com/jerry1455/221397184991 - OpenCV #7 Contours 응용
+
+https://blog.naver.com/jerry1455/221397184991 - OpenCV #7 Contours 응용.
 https://blog.naver.com/jerry1455/221389104013 - OpenCV #6 패턴 및 피처 매칭(Pattern & Feature Matching)
-https://blog.naver.com/jerry1455/221368080208 - OpenCV#5 OpenCV Blob APIs
-https://blog.naver.com/jerry1455/221365405520 - OpenCV#4 blob feature
-https://blog.naver.com/jerry1455/221359367760 - OpenCV#3 LineFit ,EdgeCorner,FindShape,CenterOfBlob
-https://blog.naver.com/jerry1455/221354695256 - OpenCV#2 Canny,Sobel,Laplacian
-https://blog.naver.com/jerry1455/221341480823 - OpenCV#1 Binarization,Morphology,Arithmetic
-<pre>
+https://blog.naver.com/jerry1455/221368080208 - OpenCV#5 OpenCV Blob APIs.
+https://blog.naver.com/jerry1455/221365405520 - OpenCV#4 blob feature.
+https://blog.naver.com/jerry1455/221359367760 - OpenCV#3 LineFit ,EdgeCorner,FindShape,CenterOfBlob.
+https://blog.naver.com/jerry1455/221354695256 - OpenCV#2 Canny,Sobel,Laplacian.
+https://blog.naver.com/jerry1455/221341480823 - OpenCV#1 Binarization,Morphology,Arithmetic.
+
 -----
-</pre>
+
 -----
 <pre>
 applications using qroilib.
