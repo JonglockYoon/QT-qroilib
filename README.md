@@ -35,7 +35,13 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 다음 블로그에 각 Program의 설명들이 있습니다.
 </pre>
-https://blog.naver.com/jerry1455/221382069339 - qroiapp tesseract with OpenCV
+https://blog.naver.com/jerry1455/221396435441 - qroilibapp 패턴매칭 과 피처매칭 속도비교 with OpenCV
+https://blog.naver.com/jerry1455/221389173153 - qroilibapp 피처매칭(feature matching) with OpenCV
+https://blog.naver.com/jerry1455/221388359589 - qroilibapp 템플릿매칭(패턴매칭) with OpenCV
+https://blog.naver.com/jerry1455/221387457617 - qroilibapp barcode decoding with QZXing
+https://blog.naver.com/jerry1455/221386839273 - qroilibapp OpenCV camera capture image semaphore 도입
+https://blog.naver.com/jerry1455/221385871213 - qroilibapp 구조 with OpenCV
+https://blog.naver.com/jerry1455/221382069339 - qroilibapp tesseract with OpenCV
 https://blog.naver.com/jerry1455/221377504552 - qroilib simulator ImageSegmentation (distanceTransform,watershed)
 https://blog.naver.com/jerry1455/221376401327 - qroilib simulator user’s manual
 https://blog.naver.com/jerry1455/221372070859 - qroilib Simulator (OpenCV edge application)
