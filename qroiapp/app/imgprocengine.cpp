@@ -4047,6 +4047,20 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
 //        SaveOutImage(img_thinning_GH, pData, str);
     }
 
+    vector<cv::Point> vec;
+    CBlobResult blobs;
+    blobs = CBlobResult(ZS);
+    int nBlobs = blobs.GetNumBlobs();
+    for (int i=0; i<nBlobs; i++) {
+        CBlob *p = blobs.GetBlob(i);
+        CBlobContour *c = p->GetExternalContour();
+        t_PointList pl = c->GetContourPoints();
+        for (int j=0; j<pl.size(); j++) {
+            vec.push_back(pl[j]);
+        }
+        OneLineMeasurement(vec, pData);
+        vec.clear();
+    }
 
 #if 0
 
@@ -4067,11 +4081,6 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
         int y2= y0 - t*line[1];
         cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
 
-
-        double dAngle = -((double)atan2(y2 - y1, x2 - x1) * 180.0f / PI);
-        if (dAngle < 0)
-            dAngle = 180 + dAngle;
-        qDebug() << "angle: " << dAngle;
 
         double dAdjAngle = 90.0;
         double a = (dAdjAngle * PI) / 180; // radian
@@ -4095,17 +4104,6 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
     Mat omat1 = Mat(mat.rows*10,mat.cols*10, CV_8SC1, cvScalar(0.));
 
     Mat omat = Mat(mat.rows,mat.cols, CV_8SC1, cvScalar(0.));
-    vector<cv::Point> vec;
-    CBlobResult blobs;
-    blobs = CBlobResult(ZS);
-    int nBlobs = blobs.GetNumBlobs();
-    for (int i=0; i<nBlobs; i++) {
-        CBlob *p = blobs.GetBlob(i);
-        CBlobContour *c = p->GetExternalContour();
-        t_PointList pl = c->GetContourPoints();
-        for (int j=0; j<pl.size(); j++) {
-            vec.push_back(pl[j]);
-        }
 
 
         vector<Point2f> approx;
@@ -4141,7 +4139,6 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
             cv::line(omat, pt1, pt2, CVX_WHITE, 1, 8);
         }
         approx.clear();
-        vec.clear();
 
     }
 
@@ -4213,3 +4210,44 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
 
     return 0;
 }
+
+int CImgProcEngine::OneLineMeasurement(vector<Point>& cone, RoiObject *pData)
+{
+    int rst = -1;
+
+    int size = cone.size();
+    for (int i = 0; i < size-1; i++)
+    {
+        int x1 = cone[i].x;
+        int y1 = cone[i].y;
+        int x2 = cone[i+1].x;
+        int y2 = cone[i+1].y;
+        int x0 = cone[i].x;
+        int y0 = cone[i].y;
+
+        double dAngle = -((double)atan2(y2 - y1, x2 - x1) * 180.0f / PI);
+        if (dAngle < 0)
+            dAngle = 180 + dAngle;
+        qDebug() << "angle1: " << dAngle;
+
+        double dAdjAngle = 90.0;
+        double a = (dAdjAngle * PI) / 180; // radian
+        double dx1 = (cos(a) * (x1 - x0)) - (sin(a) * (y1 - y0)) + x0;
+        double dy1 = (sin(a) * (x1 - x0)) + (cos(a) * (y1 - y0)) + y0;
+        double dx2 = (cos(a) * (x2 - x0)) - (sin(a) * (y2 - y0)) + x0;
+        double dy2 = (sin(a) * (x2 - x0)) + (cos(a) * (y2 - y0)) + y0;
+        //cvLine( tmp, CvPoint(dx1,dy1), CvPoint(dx2,dy2), CV_RGB(128,128,128), 1, 8 );
+
+        dAngle = -((double)atan2(dy2 - dy1, dx2 - dx1) * 180.0f / PI);
+        if (dAngle < 0)
+            dAngle = 180 + dAngle;
+        qDebug() << "angle2: " << dAngle;
+
+
+    }
+
+
+    return rst;
+}
+
+
