@@ -14,7 +14,7 @@ Exposure=9
 
 [GeneralApp]
 LastRecipe=NoModel
-ROOT_DIR=.
+ROOT_DIR=D:/qt/QT-qroilib/bin
 SAVEENGINEIMG=true
 SAVELOG=true
 SAVE_IMAGE_DIR=

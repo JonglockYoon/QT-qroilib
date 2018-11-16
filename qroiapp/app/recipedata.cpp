@@ -156,8 +156,8 @@ Qroilib::ParamTable paramTable[] = {
     //_Inspect_Line_Measurement, CParam(_ProcessValue1, ("MorphSize"), _IntValue, ("3")),
     _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Size1"), _IntValue, ("10")),
     _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Size2"), _IntValue, ("10")),
-    _Inspect_Line_Measurement,  CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다.
-    _Inspect_Line_Measurement,  CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다..
+    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다.
+    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다..
 
     _Inspect_Type_End,  CParam(_FilterValue, (""), _IntValue, ("")), // 반드시 있어야한다.
 };
@@ -328,7 +328,8 @@ bool CRecipeData::SaveRecipeData()
 
     Qroilib::DocumentView* v = pMainView->view(0);
     if (v) {
-        writer.writeRoiGroupStart(v->mRoi, fileName);
+        if (writer.writeRoiGroupStart(v->mRoi, fileName) == false)
+            return false;
     }
     else return false;
 

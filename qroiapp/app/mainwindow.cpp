@@ -728,7 +728,9 @@ void MainWindow::setLoadRoi()
 
 void MainWindow::setWriteRoi()
 {
-    g_cRecipeData->SaveRecipeData();
+    if (g_cRecipeData->SaveRecipeData() == false) {
+        pLogViewDock->Add(QString(), "fail WriteRoi");
+    }
 
     return;
 }

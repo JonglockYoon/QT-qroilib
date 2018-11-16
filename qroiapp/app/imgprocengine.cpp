@@ -4086,6 +4086,7 @@ return 0;
         SaveOutImage(ZS, pData, str);
     }
 
+#if 0
     vector<cv::Point2f> vec;
     CBlobResult blobs;
     blobs = CBlobResult(ZS);
@@ -4101,10 +4102,24 @@ return 0;
         OneLineMeasurement(mat, vec, pData);
         vec.clear();
     }
+#else
+    vector<vector<cv::Point> > cvec;
+    cv::findContours( ZS, cvec, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+    for (int i=0; i<cvec.size(); i++) {
+        vector<Point2f> approx;
+        approxPolyDP(Mat(cvec[i]), approx, 0.3, false);
+        if (m_bSaveEngineImg)
+        {
+            //str.sprintf(("205_approx.jpg"));
+            //SaveOutImage(Mat(approx), pData, str);
+        }
+        OneLineMeasurement(mat, approx, pData);
+    }
+#endif
 
     if (m_bSaveEngineImg)
     {
-        str.sprintf(("202_matout.jpg"));
+        str.sprintf(("210_matout.jpg"));
         SaveOutImage(mat, pData, str);
     }
 
@@ -4127,27 +4142,27 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
 {
     int rst = -1;
 
-    int size1 = 1200;
-    int size2 = 1200;
-    CParam *pParam = pData->getParam(("Size1"));
-    if (pParam)
-       size1 = (int)pParam->Value.toDouble();
-    pParam = pData->getParam(("Size2"));
-    if (pParam)
-       size2 = (int)pParam->Value.toDouble();
+//    int size1 = 0;
+//    int size2 = 99999;
+//    CParam *pParam = pData->getParam(("Size1"));
+//    if (pParam)
+//       size1 = (int)pParam->Value.toDouble();
+//    pParam = pData->getParam(("Size2"));
+//    if (pParam)
+//       size2 = (int)pParam->Value.toDouble();
 
-    const int term = 10;
+    const int term = 7;
     int size = cone.size();
     for (int i = 0; i < size-term; i=i+term)
     {
-        if (i >= size1 && i < size2) {
-            static int ii = 0;
-            ii++;
-        }
-        else continue;
+//        if (i >= size1 && i < size2) {
+//            static int ii = 0;
+//            ii++;
+//        }
+//        else continue;
 
-        float x0 = cone[i+5].x;
-        float y0 = cone[i+5].y;
+        float x0 = cone[i+term/2].x;
+        float y0 = cone[i+term/2].y;
 
         vector<double> vAngle;
         vAngle.clear();
@@ -4155,20 +4170,20 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
         double dAngle2 = 0;
         int sign = 0;
         for (int j=i; j<i+term; j++) {
-            if (cone.size() <= j+5)
+            if (cone.size() <= j+2)
                 break;
             float x1 = cone[j].x;
             float y1 = cone[j].y;
-            float x2 = cone[j+3].x;
-            float y2 = cone[j+3].y;
+            float x2 = cone[j+2].x;
+            float y2 = cone[j+2].y;
             dAngle = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
-            x1 = cone[j+1].x;
-            y1 = cone[j+1].y;
-            x2 = cone[j+4].x;
-            y2 = cone[j+4].y;
-            dAngle2 = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
-            if (dAngle < dAngle2)
-                dAngle = dAngle2;
+//            x1 = cone[j+1].x;
+//            y1 = cone[j+1].y;
+//            x2 = cone[j+4].x;
+//            y2 = cone[j+4].y;
+//            dAngle2 = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
+//            if (dAngle < dAngle2)
+//                dAngle = dAngle2;
 
 
 //            if (sign == 0) {
@@ -4182,7 +4197,7 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
 //            else if (dAngle > 0 && sign < 0)
 //                    dAngle *= -1;
             vAngle.push_back(dAngle);
-            line( m, Point(x1,y1), Point(x2,y2), CV_RGB(192,192,192), 1, 8 );
+            line( m, Point(x1,y1), Point(x2,y2), CV_RGB(221,221,221), 1, 8 );
         }
         if (vAngle.size() < term)
             continue;
@@ -4190,11 +4205,18 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
             return lhs < rhs;
         });
         dAngle = 0;
-        for (int k=2; k<term-2; k++) {
-            dAngle += vAngle[k];
-        }
-        dAngle /= (term-4);
-        dAngle = vAngle[term-1];
+//        for (int k=0; k<term; k++) {
+//            dAngle += vAngle[k];
+//        }
+//        dAngle /= (term);
+
+//        for (int k=2; k<term-2; k++) {
+//            dAngle += vAngle[k];
+//        }
+//        dAngle /= (term-4);
+
+        dAngle = vAngle[term/2];
+
 
         qDebug() << "angle1: " << dAngle;
 
@@ -4203,7 +4225,7 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
         double s = sin((a2)*CV_PI/180);
         double c = cos((a2)*CV_PI/180);
         Point p2(x0+c*llen, y0+s*llen);
-        line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
+        line( m, Point(x0,y0), p2, CV_RGB(64,64,64), 1, 8 );
 
         a2 = (dAngle - 90);
         s = sin((a2)*CV_PI/180);
