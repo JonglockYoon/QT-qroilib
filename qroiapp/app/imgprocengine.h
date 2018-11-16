@@ -81,7 +81,7 @@ public:
     int InspectOneItem(IplImage* img, Qroilib::RoiObject *pData);
 
     int OneMatchShapes(vector<vector<Point> >& contours, vector<vector<Point> >& templateseq, Qroilib::RoiObject *pData, int seq);
-    int OneLineMeasurement(vector<Point>& cone, Qroilib::RoiObject *pData);
+    int OneLineMeasurement(Mat m, vector<Point2f>& cone, Qroilib::RoiObject *pData);
 
     bool SetROIAreaForCriteriaPosition(Qroilib::RoiObject *pData, QString strCriteriaROI);
 

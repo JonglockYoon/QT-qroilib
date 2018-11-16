@@ -2531,9 +2531,6 @@ int CImgProcEngine::EdgeCorner(Qroilib::RoiObject *pData, IplImage* graySearchIm
     {
         double dLargeArea = 0;
         double_stl_vector area = blobs.GetSTLResult(CBlobGetArea());
-        std::stable_sort(area.begin(), area.end(), [](const double lhs, const double rhs)->bool {
-            return lhs > rhs;
-        });
         if (area.size() >= 2)
             dLargeArea = area[1];
         else if (area.size() >= 1)
@@ -4020,34 +4017,76 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
     if (pData == nullptr)
         return -1;
 
+#if 0
+    cv::Mat gray = cv::cvarrToMat(croppedImage);
+    threshold(gray,gray,100,255,0);
+
+    Moments M = moments(gray);
+    Point cen( int(M.m10/M.m00), int(M.m01/M.m00) );
+
+    for (int i=0; i<360; i+=20)
+    {
+        double s = sin(i*CV_PI/180);
+        double c = cos(i*CV_PI/180);
+        Point p2(cen.x+s*250, cen.y+c*250); // any radius will do, we just want the direction
+
+        LineIterator it(gray, cen, p2, 8);
+        Rect bounds(0, 0, gray.cols, gray.rows);
+        int cnt = 0;
+        while(bounds.contains(it.pos()))
+        {
+            uchar pixel = gray.at<uchar>(it.pos());
+            // if you stare really hard, you'll see the cheat ;)
+            Point pt = it.pos();
+            if (cnt > 3 && pixel > 200) // non dark(it's not really black in the image!)
+               gray.at<uchar>(pt.y, pt.x) = 128;
+            else if (cnt > 3)
+               break;
+            it++;
+            cnt++;
+        }
+    }
+    imshow("lines", gray);
+
+return 0;
+#endif
+
     int size1 = 1;
     int morph_size = 3;
+    int thinningType = 0;
     CParam *pParam = pData->getParam(("Size1"));
     if (pParam)
        size1 = (int)pParam->Value.toDouble();
     pParam = pData->getParam(("MorphSize"));
     if (pParam)
        morph_size = (int)pParam->Value.toDouble();
+    pParam = pData->getParam(("thinningType"));
+    if (pParam)
+       thinningType = (int)pParam->Value.toDouble();
+
+    NoiseOut(pData, croppedImage);
 
     QString str;
     cv::Mat mat = cv::cvarrToMat(croppedImage);
 
-    cv::Mat ZS, gray;
-    cv::ximgproc::thinning(mat, ZS, ximgproc::THINNING_ZHANGSUEN);
-//    cv::ximgproc::thinning(mat, img_thinning_GH, ximgproc::THINNING_GUOHALL);
+    cv::Mat ZS;
+    if (thinningType == 0)
+        cv::ximgproc::thinning(mat, ZS, ximgproc::THINNING_ZHANGSUEN);
+    else
+        cv::ximgproc::thinning(mat, ZS, ximgproc::THINNING_GUOHALL);
 
     //cv::Mat element7(7, 7, CV_8U, cv::Scalar(1));
     //morphologyEx( ZS, ZS, cv::MORPH_DILATE, element7 );
 
     if (m_bSaveEngineImg)
     {
-        str.sprintf(("201_ZS.jpg"));
+        str.sprintf(("201_mat.jpg"));
+        SaveOutImage(mat, pData, str);
+        str.sprintf(("201_ZH.jpg"));
         SaveOutImage(ZS, pData, str);
-//        str.sprintf(("201_ZH.jpg"));
-//        SaveOutImage(img_thinning_GH, pData, str);
     }
 
-    vector<cv::Point> vec;
+    vector<cv::Point2f> vec;
     CBlobResult blobs;
     blobs = CBlobResult(ZS);
     int nBlobs = blobs.GetNumBlobs();
@@ -4056,193 +4095,121 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
         CBlobContour *c = p->GetExternalContour();
         t_PointList pl = c->GetContourPoints();
         for (int j=0; j<pl.size(); j++) {
-            vec.push_back(pl[j]);
+            vec.push_back(Point2f(pl[j].x, pl[j].y));
         }
-        OneLineMeasurement(vec, pData);
+
+        OneLineMeasurement(mat, vec, pData);
         vec.clear();
     }
 
+    if (m_bSaveEngineImg)
+    {
+        str.sprintf(("202_matout.jpg"));
+        SaveOutImage(mat, pData, str);
+    }
+
 #if 0
-
-
-        double vx = line[0];
-        double vy = line[1];
-        double d = sqrt(line[0] * line[0] + line[1] * line[1]);
-        line[0] = vx / d;
-        line[1] = vy / d;
-        double t = boundbox.width + boundbox.height;
-
-        // 영상에 선을 그립니다.
-        int x0= line[2]; // 선에 놓은 한 점
-        int y0= line[3];
-        int x1= x0 + t*line[0]; // 기울기에 길이를 갖는 벡터 추가
-        int y1= y0 + t*line[1];
-        int x2= x0 - t*line[0];
-        int y2= y0 - t*line[1];
-        cvLine( tmp, CvPoint(x1,y1), CvPoint(x2,y2), CV_RGB(128,128,128), 1, 8 );
-
-
-        double dAdjAngle = 90.0;
-        double a = (dAdjAngle * PI) / 180; // radian
-        double dx1 = (cos(a) * (x1 - x0)) - (sin(a) * (y1 - y0)) + x0;
-        double dy1 = (sin(a) * (x1 - x0)) + (cos(a) * (y1 - y0)) + y0;
-        double dx2 = (cos(a) * (x2 - x0)) - (sin(a) * (y2 - y0)) + x0;
-        double dy2 = (sin(a) * (x2 - x0)) + (cos(a) * (y2 - y0)) + y0;
-        cvLine( tmp, CvPoint(dx1,dy1), CvPoint(dx2,dy2), CV_RGB(128,128,128), 1, 8 );
-
-        dAngle = -((double)atan2(dy2 - dy1, dx2 - dx1) * 180.0f / PI);
-        if (dAngle < 0)
-            dAngle = 180 + dAngle;
-        qDebug() << "angle: " << dAngle;
-
-
-
-
-
     int fontFace = FONT_HERSHEY_SIMPLEX;
     double fontScale = 0.5;
-    Mat omat1 = Mat(mat.rows*10,mat.cols*10, CV_8SC1, cvScalar(0.));
-
-    Mat omat = Mat(mat.rows,mat.cols, CV_8SC1, cvScalar(0.));
-
-
-        vector<Point2f> approx;
-        //approxPolyDP(Mat(czs[i]), approx, arcLength(Mat(czs[i]), true)*0.001, false);
-        approxPolyDP(Mat(vec), approx, 0.4, false);
-
-        char text[64];
-        for (int j=0; j<approx.size(); j++) {
-            cv::Point2f pt = approx[j];
-            pt.x *= 10;
-            pt.y *= 10;
-            //circle(omat1, pt, 1, CVX_WHITE, 1, 8);
-            sprintf(text, "%d", j);
-            if (j%2 == 0)
-                putText(omat1, text, pt, fontFace, fontScale, CVX_WHITE, 1, 8);
-        }
-
-        for (int k=0; k<approx.size()-3; k++) {
-            Point2f p1 = approx[k];
-            Point2f p2 = approx[k+2];
-            double d = sqrt(pow((float)p1.x - p2.x, 2) + pow((float)p1.y - p2.y, 2));
-            if (d < 5.0) {
-                Point2f p1 = approx[k-1];
-                Point2f p2 = approx[k+3];
-                double d = sqrt(pow((float)p1.x - p2.x, 2) + pow((float)p1.y - p2.y, 2));
-                if (d > 5.0) // 종단점을 살리는 목적.
-                    approx[k+1] = approx[k+2];
-            }
-        }
-        for (int k=0; k<approx.size()-1; k++) {
-            Point2f pt1 = approx[k];
-            Point2f pt2 = approx[k+1];
-            cv::line(omat, pt1, pt2, CVX_WHITE, 1, 8);
-        }
-        approx.clear();
-
-    }
-
-    str.sprintf(("211_Contour.jpg"));
-    SaveOutImage(omat, pData, str);
-    str.sprintf(("212_Contour.jpg"));
-    SaveOutImage(omat1, pData, str);
-#endif	
-	
-#if 0
-    Mat result;//(mat.size(),CV_8U,Scalar::all(0));
-    Mat dist;
-    distanceTransform(ZS, dist, DIST_L2, 3);//, CV_8U);
-
-    normalize(dist, dist, 0, 255, NORM_MINMAX);
-    //threshold(dist, dist, .1, 1., CV_THRESH_BINARY);
-
-    dist.convertTo(result,CV_8U);
-
-    if (m_bSaveEngineImg)
-    {
-        str.sprintf(("202_ZS.jpg"));
-        SaveOutImage(result, pData, str);
-    }
-
-    SparseMat ms(dist);
-    SparseMatConstIterator_<float> it = ms.begin<float>(),it_end = ms.end<float>();
-    Mat lig(dist.rows,dist.cols,CV_8U,Scalar::all(0));
-    for (; it != it_end; it ++)
-    {
-        // print element indices and the element value
-         const SparseMat::Node* n = it.node();
-         if (lig.at<uchar>(n->idx[0])==0)
-         {
-             qDebug()<< "("<<n->idx[0]<<","<<n->idx[1]<<") = " <<it.value<float>()<<"\t";
-             lig.at<uchar>(n->idx[0])=200;
-         }
-
-    }
-    if (m_bSaveEngineImg)
-    {
-        str.sprintf(("204_ZS.jpg"));
-        SaveOutImage(lig, pData, str);
-    }
-
     gray = cv::Mat(mat.rows, mat.cols, CV_8SC1);
     ZS.copyTo(gray);
-
     cv::Mat element3(3, 3, CV_8U, cv::Scalar(1));
-
-
-    // Create a structuring element (SE)
     Mat dst;
     Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
     //morphologyEx( gray, dst, cv::MORPH_TOPHAT, element3 );
     morphologyEx( gray, dst, MORPH_TOPHAT, element, Point(-1,-1), size1 );
-    if (m_bSaveEngineImg)
-    {
-        str.sprintf(("210_ZS.jpg"));
-        SaveOutImage(dst, pData, str);
-    }
-
-    vector<vector<cv::Point> > czs;
-    cv::findContours( gray, czs, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
-    mat = Mat(mat.rows,mat.cols, CV_8SC1, cvScalar(0.));
-
-
 #endif
 
     return 0;
 }
 
-int CImgProcEngine::OneLineMeasurement(vector<Point>& cone, RoiObject *pData)
+int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *pData)
 {
     int rst = -1;
 
-    int size = cone.size();
-    for (int i = 0; i < size-1; i++)
-    {
-        int x1 = cone[i].x;
-        int y1 = cone[i].y;
-        int x2 = cone[i+1].x;
-        int y2 = cone[i+1].y;
-        int x0 = cone[i].x;
-        int y0 = cone[i].y;
+    int size1 = 1200;
+    int size2 = 1200;
+    CParam *pParam = pData->getParam(("Size1"));
+    if (pParam)
+       size1 = (int)pParam->Value.toDouble();
+    pParam = pData->getParam(("Size2"));
+    if (pParam)
+       size2 = (int)pParam->Value.toDouble();
 
-        double dAngle = -((double)atan2(y2 - y1, x2 - x1) * 180.0f / PI);
-        if (dAngle < 0)
-            dAngle = 180 + dAngle;
+    const int term = 10;
+    int size = cone.size();
+    for (int i = 0; i < size-term; i=i+term)
+    {
+        if (i >= size1 && i < size2) {
+            static int ii = 0;
+            ii++;
+        }
+        else continue;
+
+        float x0 = cone[i+5].x;
+        float y0 = cone[i+5].y;
+
+        vector<double> vAngle;
+        vAngle.clear();
+        double dAngle = 0;
+        double dAngle2 = 0;
+        int sign = 0;
+        for (int j=i; j<i+term; j++) {
+            if (cone.size() <= j+5)
+                break;
+            float x1 = cone[j].x;
+            float y1 = cone[j].y;
+            float x2 = cone[j+3].x;
+            float y2 = cone[j+3].y;
+            dAngle = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
+            x1 = cone[j+1].x;
+            y1 = cone[j+1].y;
+            x2 = cone[j+4].x;
+            y2 = cone[j+4].y;
+            dAngle2 = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
+            if (dAngle < dAngle2)
+                dAngle = dAngle2;
+
+
+//            if (sign == 0) {
+//                if (dAngle < 0)
+//                    sign = -1;
+//                else
+//                    sign = 1;
+//            }
+//            if (dAngle < 0 && sign > 0)
+//                dAngle *= -1;
+//            else if (dAngle > 0 && sign < 0)
+//                    dAngle *= -1;
+            vAngle.push_back(dAngle);
+            line( m, Point(x1,y1), Point(x2,y2), CV_RGB(192,192,192), 1, 8 );
+        }
+        if (vAngle.size() < term)
+            continue;
+        std::stable_sort(vAngle.begin(), vAngle.end(), [](const double lhs, const double rhs)->bool {
+            return lhs < rhs;
+        });
+        dAngle = 0;
+        for (int k=2; k<term-2; k++) {
+            dAngle += vAngle[k];
+        }
+        dAngle /= (term-4);
+        dAngle = vAngle[term-1];
+
         qDebug() << "angle1: " << dAngle;
 
-        double dAdjAngle = 90.0;
-        double a = (dAdjAngle * PI) / 180; // radian
-        double dx1 = (cos(a) * (x1 - x0)) - (sin(a) * (y1 - y0)) + x0;
-        double dy1 = (sin(a) * (x1 - x0)) + (cos(a) * (y1 - y0)) + y0;
-        double dx2 = (cos(a) * (x2 - x0)) - (sin(a) * (y2 - y0)) + x0;
-        double dy2 = (sin(a) * (x2 - x0)) + (cos(a) * (y2 - y0)) + y0;
-        //cvLine( tmp, CvPoint(dx1,dy1), CvPoint(dx2,dy2), CV_RGB(128,128,128), 1, 8 );
+        const int llen = 13;
+        double a2 = (dAngle + 90);
+        double s = sin((a2)*CV_PI/180);
+        double c = cos((a2)*CV_PI/180);
+        Point p2(x0+c*llen, y0+s*llen);
+        line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
 
-        dAngle = -((double)atan2(dy2 - dy1, dx2 - dx1) * 180.0f / PI);
-        if (dAngle < 0)
-            dAngle = 180 + dAngle;
-        qDebug() << "angle2: " << dAngle;
-
+        a2 = (dAngle - 90);
+        s = sin((a2)*CV_PI/180);
+        c = cos((a2)*CV_PI/180);
+        p2 = Point(x0+c*llen, y0+s*llen);
+        line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
 
     }
 
