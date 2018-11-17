@@ -4107,12 +4107,7 @@ return 0;
     cv::findContours( ZS, cvec, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     for (int i=0; i<cvec.size(); i++) {
         vector<Point2f> approx;
-        approxPolyDP(Mat(cvec[i]), approx, 0.3, false);
-        if (m_bSaveEngineImg)
-        {
-            //str.sprintf(("205_approx.jpg"));
-            //SaveOutImage(Mat(approx), pData, str);
-        }
+        approxPolyDP(Mat(cvec[i]), approx, 0.4, false); // eps는 0.4 or 0.5가 적합.
         OneLineMeasurement(mat, approx, pData);
     }
 #endif
@@ -4142,18 +4137,22 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
 {
     int rst = -1;
 
+    int interval = 7;
+    CParam *pParam = pData->getParam(("Interval"));
+    if (pParam)
+       interval = (int)pParam->Value.toDouble();
+
 //    int size1 = 0;
 //    int size2 = 99999;
-//    CParam *pParam = pData->getParam(("Size1"));
+//    pParam = pData->getParam(("Size1"));
 //    if (pParam)
 //       size1 = (int)pParam->Value.toDouble();
 //    pParam = pData->getParam(("Size2"));
 //    if (pParam)
 //       size2 = (int)pParam->Value.toDouble();
 
-    const int term = 7;
     int size = cone.size();
-    for (int i = 0; i < size-term; i=i+term)
+    for (int i = 0; i < size-interval; i=i+interval)
     {
 //        if (i >= size1 && i < size2) {
 //            static int ii = 0;
@@ -4161,63 +4160,44 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
 //        }
 //        else continue;
 
-        float x0 = cone[i+term/2].x;
-        float y0 = cone[i+term/2].y;
+        float x0 = cone[i+interval/2].x;
+        float y0 = cone[i+interval/2].y;
 
         vector<double> vAngle;
         vAngle.clear();
         double dAngle = 0;
-        double dAngle2 = 0;
-        int sign = 0;
-        for (int j=i; j<i+term; j++) {
+        int mid = interval / 2;
+        for (int j=i; j<i+interval; j++) {
             if (cone.size() <= j+2)
                 break;
             float x1 = cone[j].x;
             float y1 = cone[j].y;
             float x2 = cone[j+2].x;
             float y2 = cone[j+2].y;
+
+            double d1 = sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+            double d2 = sqrt(pow(cone[j+1].x - x1, 2) + pow(cone[j+1].y - y1, 2));
+            //되돌아 나오는 꼭지점 처리를 위함.
+            if (d1 < 3 && d2 >= 3)
+            {
+                mid = vAngle.size();
+                x1 = x0 = cone[j+1].x;
+                y1 = y0 = cone[j+1].y;
+            }
             dAngle = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
-//            x1 = cone[j+1].x;
-//            y1 = cone[j+1].y;
-//            x2 = cone[j+4].x;
-//            y2 = cone[j+4].y;
-//            dAngle2 = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
-//            if (dAngle < dAngle2)
-//                dAngle = dAngle2;
-
-
-//            if (sign == 0) {
-//                if (dAngle < 0)
-//                    sign = -1;
-//                else
-//                    sign = 1;
-//            }
-//            if (dAngle < 0 && sign > 0)
-//                dAngle *= -1;
-//            else if (dAngle > 0 && sign < 0)
-//                    dAngle *= -1;
             vAngle.push_back(dAngle);
             line( m, Point(x1,y1), Point(x2,y2), CV_RGB(221,221,221), 1, 8 );
         }
-        if (vAngle.size() < term)
+        if (vAngle.size() == 0)
             continue;
-        std::stable_sort(vAngle.begin(), vAngle.end(), [](const double lhs, const double rhs)->bool {
-            return lhs < rhs;
-        });
+
+        if (mid != (interval / 2)) {
+            std::stable_sort(vAngle.begin(), vAngle.end(), [](const double lhs, const double rhs)->bool {
+                return lhs < rhs;
+            });
+        }
         dAngle = 0;
-//        for (int k=0; k<term; k++) {
-//            dAngle += vAngle[k];
-//        }
-//        dAngle /= (term);
-
-//        for (int k=2; k<term-2; k++) {
-//            dAngle += vAngle[k];
-//        }
-//        dAngle /= (term-4);
-
-        dAngle = vAngle[term/2];
-
-
+        dAngle = vAngle[mid];
         qDebug() << "angle1: " << dAngle;
 
         const int llen = 13;
@@ -4233,8 +4213,28 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
         p2 = Point(x0+c*llen, y0+s*llen);
         line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
 
-    }
+        // 최종 종단점 처리를 위해 필요.
+        if (i+interval >= size-interval) {
+            x0 = cone[size-1].x;
+            y0 = cone[size-1].y;
+            size = vAngle.size();
+            dAngle = vAngle[size-1];
 
+            const int llen = 13;
+            double a2 = (dAngle + 90);
+            double s = sin((a2)*CV_PI/180);
+            double c = cos((a2)*CV_PI/180);
+            Point p2(x0+c*llen, y0+s*llen);
+            line( m, Point(x0,y0), p2, CV_RGB(64,64,64), 1, 8 );
+
+            a2 = (dAngle - 90);
+            s = sin((a2)*CV_PI/180);
+            c = cos((a2)*CV_PI/180);
+            p2 = Point(x0+c*llen, y0+s*llen);
+            line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
+        }
+
+    }
 
     return rst;
 }
