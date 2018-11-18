@@ -153,8 +153,8 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Point_Coordnation,  CParam(_ProcessValue1, ("Mark color"), _IntValue, ("128")), // not yet implement.
 
     _Inspect_Line_Measurement, CParam(_ProcessValue1, ("thinningType"), _ComboValue, ("0"), ("ZHANGSUEN,GUOHALL")),
-//    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Size1"), _IntValue, ("10")),
-//    _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Size2"), _IntValue, ("10")),
+    //_Inspect_Line_Measurement, CParam(_ProcessValue1, ("Start"), _IntValue, ("0")),
+    //_Inspect_Line_Measurement, CParam(_ProcessValue1, ("End"), _IntValue, ("99999")),
     _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다.
     _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다..
     _Inspect_Line_Measurement, CParam(_ProcessValue1, ("Interval"), _IntValue, ("7")),

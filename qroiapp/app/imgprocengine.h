@@ -81,7 +81,17 @@ public:
     int InspectOneItem(IplImage* img, Qroilib::RoiObject *pData);
 
     int OneMatchShapes(vector<vector<Point> >& contours, vector<vector<Point> >& templateseq, Qroilib::RoiObject *pData, int seq);
-    int OneLineMeasurement(Mat m, vector<Point2f>& cone, Qroilib::RoiObject *pData);
+    typedef struct {
+        cv::Point2f first;
+        cv::Point2f center;
+        cv::Point2f second;
+
+        cv::Point2f p1;
+        cv::Point2f p2;
+    } ElemLineIt;
+    void MakeOneElemLine(Point cen, double dAngle, ElemLineIt &elem);
+    int AppendOneLine(cv::Mat& mat, vector<ElemLineIt> &vecLineIt, ElemLineIt e, int interval, double dAngle);
+    int OneLineMeasurement(cv::Mat& mat, vector<Point>& cone, Qroilib::RoiObject *pData, vector<ElemLineIt> &vecLineIt);
 
     bool SetROIAreaForCriteriaPosition(Qroilib::RoiObject *pData, QString strCriteriaROI);
 

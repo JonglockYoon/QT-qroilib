@@ -7,7 +7,7 @@
     <param00 steptype="1" name="thinningType" valuetype="4" value="0" detail="ZHANGSUEN,GUOHALL"/>
     <param01 steptype="1" name="Noise out 1" valuetype="1" value="-2" detail=""/>
     <param02 steptype="1" name="Noise out 2" valuetype="1" value="2" detail=""/>
-    <param03 steptype="1" name="Interval" valuetype="1" value="3" detail=""/>
+    <param03 steptype="1" name="Interval" valuetype="1" value="5" detail=""/>
    </param>
   </object>
  </objectgroup>

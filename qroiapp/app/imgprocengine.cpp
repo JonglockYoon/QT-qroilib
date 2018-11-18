@@ -4017,40 +4017,6 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
     if (pData == nullptr)
         return -1;
 
-#if 0
-    cv::Mat gray = cv::cvarrToMat(croppedImage);
-    threshold(gray,gray,100,255,0);
-
-    Moments M = moments(gray);
-    Point cen( int(M.m10/M.m00), int(M.m01/M.m00) );
-
-    for (int i=0; i<360; i+=20)
-    {
-        double s = sin(i*CV_PI/180);
-        double c = cos(i*CV_PI/180);
-        Point p2(cen.x+s*250, cen.y+c*250); // any radius will do, we just want the direction
-
-        LineIterator it(gray, cen, p2, 8);
-        Rect bounds(0, 0, gray.cols, gray.rows);
-        int cnt = 0;
-        while(bounds.contains(it.pos()))
-        {
-            uchar pixel = gray.at<uchar>(it.pos());
-            // if you stare really hard, you'll see the cheat ;)
-            Point pt = it.pos();
-            if (cnt > 3 && pixel > 200) // non dark(it's not really black in the image!)
-               gray.at<uchar>(pt.y, pt.x) = 128;
-            else if (cnt > 3)
-               break;
-            it++;
-            cnt++;
-        }
-    }
-    imshow("lines", gray);
-
-return 0;
-#endif
-
     int size1 = 1;
     int morph_size = 3;
     int thinningType = 0;
@@ -4086,31 +4052,58 @@ return 0;
         SaveOutImage(ZS, pData, str);
     }
 
-#if 0
-    vector<cv::Point2f> vec;
-    CBlobResult blobs;
-    blobs = CBlobResult(ZS);
-    int nBlobs = blobs.GetNumBlobs();
-    for (int i=0; i<nBlobs; i++) {
-        CBlob *p = blobs.GetBlob(i);
-        CBlobContour *c = p->GetExternalContour();
-        t_PointList pl = c->GetContourPoints();
-        for (int j=0; j<pl.size(); j++) {
-            vec.push_back(Point2f(pl[j].x, pl[j].y));
-        }
+    vector<vector<cv::Point> > contours;
+    cv::findContours( mat, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+    mat = cv::Mat::zeros(mat.size(), mat.type());
 
-        OneLineMeasurement(mat, vec, pData);
-        vec.clear();
-    }
-#else
     vector<vector<cv::Point> > cvec;
     cv::findContours( ZS, cvec, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     for (int i=0; i<cvec.size(); i++) {
-        vector<Point2f> approx;
+        vector<cv::Point> approx;
         approxPolyDP(Mat(cvec[i]), approx, 0.4, false); // eps는 0.4 or 0.5가 적합.
-        OneLineMeasurement(mat, approx, pData);
+
+        vector<ElemLineIt> vecLineIt;
+        vecLineIt.clear();
+        OneLineMeasurement(mat, approx, pData, vecLineIt);
+
+        drawContours(mat, contours, i, CVX_WHITE, 2);
+        if (m_bSaveEngineImg)
+        {
+            str.sprintf(("205_matcont_%d.jpg"), i);
+            SaveOutImage(mat, pData, str);
+        }
+
+        Rect bounds(0, 0, mat.cols, mat.rows);
+        for (int j=0; j<vecLineIt.size(); j++) {
+            ElemLineIt *e = &vecLineIt[j];
+            LineIterator it1(mat, e->center, e->first, 8);
+            int cnt = 0;
+            while(bounds.contains(it1.pos())) {
+                uchar pixel = mat.at<uchar>(it1.pos());
+                if (pixel == 255) {
+                    e->p1 = it1.pos();
+                    break;
+                }
+                 Point pt = it1.pos();
+                 mat.at<uchar>(pt.y, pt.x) = 128;
+                 it1++;
+                 cnt++;
+            }
+            LineIterator it2(mat, e->center, e->second, 8);
+            while(bounds.contains(it2.pos())) {
+                uchar pixel = mat.at<uchar>(it2.pos());
+                if (pixel == 255) {
+                    e->p2 = it2.pos();
+                    break;
+                }
+                 Point pt = it2.pos();
+                 mat.at<uchar>(pt.y, pt.x) = 128;
+                 it2++;
+                 cnt++;
+            }
+            cnt--;
+        }
     }
-#endif
 
     if (m_bSaveEngineImg)
     {
@@ -4118,25 +4111,15 @@ return 0;
         SaveOutImage(mat, pData, str);
     }
 
-#if 0
-    int fontFace = FONT_HERSHEY_SIMPLEX;
-    double fontScale = 0.5;
-    gray = cv::Mat(mat.rows, mat.cols, CV_8SC1);
-    ZS.copyTo(gray);
-    cv::Mat element3(3, 3, CV_8U, cv::Scalar(1));
-    Mat dst;
-    Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
-    //morphologyEx( gray, dst, cv::MORPH_TOPHAT, element3 );
-    morphologyEx( gray, dst, MORPH_TOPHAT, element, Point(-1,-1), size1 );
-#endif
-
     return 0;
 }
 
-int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *pData)
+int CImgProcEngine::OneLineMeasurement(cv::Mat& mat, vector<Point>& cone, RoiObject *pData, vector<ElemLineIt> &vecLineIt)
 {
+    ElemLineIt e1;
     int rst = -1;
 
+    const int llen = 512;//13;
     int interval = 7;
     CParam *pParam = pData->getParam(("Interval"));
     if (pParam)
@@ -4144,10 +4127,10 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
 
 //    int size1 = 0;
 //    int size2 = 99999;
-//    pParam = pData->getParam(("Size1"));
+//    pParam = pData->getParam(("Start"));
 //    if (pParam)
 //       size1 = (int)pParam->Value.toDouble();
-//    pParam = pData->getParam(("Size2"));
+//    pParam = pData->getParam(("End"));
 //    if (pParam)
 //       size2 = (int)pParam->Value.toDouble();
 
@@ -4178,7 +4161,7 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
             double d1 = sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
             double d2 = sqrt(pow(cone[j+1].x - x1, 2) + pow(cone[j+1].y - y1, 2));
             //되돌아 나오는 꼭지점 처리를 위함.
-            if (d1 < 3 && d2 >= 3)
+            if (d1 < 3.0 && d2 >= 3.0)
             {
                 mid = vAngle.size();
                 x1 = x0 = cone[j+1].x;
@@ -4186,7 +4169,7 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
             }
             dAngle = ((double)atan2(y1 - y2, x1 - x2) * 180.0f / PI);
             vAngle.push_back(dAngle);
-            line( m, Point(x1,y1), Point(x2,y2), CV_RGB(221,221,221), 1, 8 );
+            //line( m, Point(x1,y1), Point(x2,y2), CV_RGB(221,221,221), 1, 8 );
         }
         if (vAngle.size() == 0)
             continue;
@@ -4196,22 +4179,11 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
                 return lhs < rhs;
             });
         }
-        dAngle = 0;
+        //dAngle = 0;
         dAngle = vAngle[mid];
         qDebug() << "angle1: " << dAngle;
-
-        const int llen = 13;
-        double a2 = (dAngle + 90);
-        double s = sin((a2)*CV_PI/180);
-        double c = cos((a2)*CV_PI/180);
-        Point p2(x0+c*llen, y0+s*llen);
-        line( m, Point(x0,y0), p2, CV_RGB(64,64,64), 1, 8 );
-
-        a2 = (dAngle - 90);
-        s = sin((a2)*CV_PI/180);
-        c = cos((a2)*CV_PI/180);
-        p2 = Point(x0+c*llen, y0+s*llen);
-        line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
+        MakeOneElemLine(Point(x0,y0), dAngle, e1);
+        AppendOneLine(mat, vecLineIt, e1, interval, dAngle);
 
         // 최종 종단점 처리를 위해 필요.
         if (i+interval >= size-interval) {
@@ -4219,24 +4191,51 @@ int CImgProcEngine::OneLineMeasurement(Mat m, vector<Point2f>& cone, RoiObject *
             y0 = cone[size-1].y;
             size = vAngle.size();
             dAngle = vAngle[size-1];
-
-            const int llen = 13;
-            double a2 = (dAngle + 90);
-            double s = sin((a2)*CV_PI/180);
-            double c = cos((a2)*CV_PI/180);
-            Point p2(x0+c*llen, y0+s*llen);
-            line( m, Point(x0,y0), p2, CV_RGB(64,64,64), 1, 8 );
-
-            a2 = (dAngle - 90);
-            s = sin((a2)*CV_PI/180);
-            c = cos((a2)*CV_PI/180);
-            p2 = Point(x0+c*llen, y0+s*llen);
-            line( m, Point(x0,y0), p2, CV_RGB(128,128,128), 1, 8 );
+            MakeOneElemLine(Point(x0,y0), dAngle, e1);
+            AppendOneLine(mat, vecLineIt, e1, interval, dAngle);
         }
-
     }
 
     return rst;
 }
 
+void CImgProcEngine::MakeOneElemLine(Point cen, double dAngle, ElemLineIt &elem)
+{
+    const int llen = 512;//13;
+    double a2 = (dAngle + 90);
+    double s = sin((a2)*CV_PI/180);
+    double c = cos((a2)*CV_PI/180);
+    Point p2(cen.x+c*llen, cen.y+s*llen);
+    elem.center = Point(cen.x,cen.y);
+    elem.first = p2;
 
+    a2 = (dAngle - 90);
+    s = sin((a2)*CV_PI/180);
+    c = cos((a2)*CV_PI/180);
+    p2 = Point(cen.x+c*llen, cen.y+s*llen);
+    elem.second = p2;
+}
+
+int CImgProcEngine::AppendOneLine(cv::Mat& mat, vector<ElemLineIt> &vecLineIt, ElemLineIt ee, int interval, double dAngle)
+{
+    ElemLineIt e1;
+    int size = vecLineIt.size();
+    // interval 보다 거리가 멀면 중간에 같은 각도의 라인을 추가한다.
+    ElemLineIt le = ee;
+    if (size > 0)
+        le.center = vecLineIt[size-1].center;
+    double d = sqrt(pow(le.center.x - ee.center.x, 2) + pow(le.center.y - ee.center.y, 2));
+    if (d > interval) {
+        LineIterator it(mat, le.center, ee.center, 8);
+        vector<Point> buf(it.count);
+        for(int i = 0; i < it.count; i++, ++it) {
+            buf[i] = it.pos();
+        }
+        for(int i=interval; i<it.count; i=i+interval) {
+            MakeOneElemLine(buf[i], dAngle, e1);
+            vecLineIt.push_back(e1);
+        }
+    }
+    vecLineIt.push_back(ee);
+    return 0;
+}
