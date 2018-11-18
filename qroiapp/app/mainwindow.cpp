@@ -857,3 +857,44 @@ void MainWindow::DevLogSave(string strMsg, ...)
     }
 }
 
+
+//
+// 같은 이름의 outWidget은 만들지 않는다.
+void MainWindow::outWidget(QString title, Mat& mat)
+{
+    OutWidget *myWidget = nullptr;
+    int size = vecOutWidget.size();
+    for (int i=0; i<size; i++) {
+        QString name = vecOutWidget[i]->windowTitle();
+        if (title == name) {
+            myWidget = vecOutWidget[i];
+            break;
+        }
+    }
+    if (!myWidget){
+        myWidget= new OutWidget(title, this);
+        vecOutWidget.push_back(myWidget);
+    }
+
+    DocumentView* v = myWidget->mViewOutPage->currentView();
+    if (!v)
+        return;
+    QImage img;
+    mat_to_qimage(mat, img);
+    if (v) {
+        v->mRoi->setWidth(img.width());
+        v->mRoi->setHeight(img.height());
+
+        v->document()->setImageInternal(img);
+        v->imageView()->updateBuffer();
+
+        v->updateLayout();
+        myWidget->mViewOutPage->updateLayout();
+        const QImage *pimg = v->image();
+        myWidget->mViewOutPage->processedImage(pimg);
+
+        Qroilib::RasterImageView* pImgView = myWidget->mViewOutPage->imageView();
+        pImgView->setScalerSmooth(true);
+    }
+    myWidget->show();
+}

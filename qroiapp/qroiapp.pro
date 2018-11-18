@@ -114,7 +114,9 @@ HEADERS +=  \
     app/mattoqimage.h \
     app/imagebuffer.h \
     app/controller.h \
-    app/processingthread.h
+    app/processingthread.h \
+    app/viewoutpage.h \
+    app/outwidget.h
 
 FORMS += \
          app/dialogconfig.ui \
@@ -137,7 +139,9 @@ SOURCES +=  \
     app/mattoqimage.cpp \
     app/imagebuffer.cpp \
     app/controller.cpp \
-    app/processingthread.cpp
+    app/processingthread.cpp \
+    app/viewoutpage.cpp \
+    app/outwidget.cpp
 
 RESOURCES += \
     resources.qrc

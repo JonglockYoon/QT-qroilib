@@ -23,6 +23,7 @@ Copyright 2018 jerry1455@gmail.com
 #include "logviewdock.h"
 #include "config.h"
 #include "mlogthread.h"
+#include "outwidget.h"
 
 class QModelIndex;
 class QUrl;
@@ -54,6 +55,10 @@ public:
 
     Qroilib::RoiObject *ManualInspection(int ch);
     void SetCameraPause(int viewNumber, int bPause);
+
+public:
+    void outWidget(QString title, cv::Mat& mat);
+    QVector<OutWidget*> vecOutWidget;
 
 protected:
     void closeEvent(QCloseEvent *event);

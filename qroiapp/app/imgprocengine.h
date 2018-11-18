@@ -88,6 +88,7 @@ public:
 
         cv::Point2f p1;
         cv::Point2f p2;
+        int len;
     } ElemLineIt;
     void MakeOneElemLine(Point cen, double dAngle, ElemLineIt &elem);
     int AppendOneLine(cv::Mat& mat, vector<ElemLineIt> &vecLineIt, ElemLineIt e, int interval, double dAngle);

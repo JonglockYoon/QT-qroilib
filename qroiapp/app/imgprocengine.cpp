@@ -159,7 +159,6 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
         break;
 	case _Inspect_Roi_SubpixelEdgeWithThreshold:
         //strLog.sprintf(("[%s] InspectType : _Inspect_Roi_SubpixelEdgeWithThreshold"), pData->name().toStdString().c_str());
-        //g_cLog->AddLog(strLog, _LOG_LIST_INSP);
         SingleROISubPixEdgeWithThreshold(croppedImage, pData, rect);
 		break;
     case _Inspect_Roi_Circle_With_Threshold:
@@ -537,7 +536,6 @@ int CImgProcEngine::MeasureAlignImage(IplImage* src)
                 }
             }
         }
-        //g_cLog->AddLog(_LOG_LIST_SYS, ("Measure Align Start"));
 
         double dRetAngle = 0;
         CvPoint2D32f center;
@@ -620,7 +618,6 @@ int CImgProcEngine::MeasureAlignImage(IplImage* src)
         }
         else {
             nErrorType = 2;
-            //g_cLog->AddLog(_LOG_LIST_SYS, ("Measure Error..."));
             return nErrorType;
         }
         RotateImage(src, dRetAngle, center); // degree 입력
@@ -631,8 +628,6 @@ int CImgProcEngine::MeasureAlignImage(IplImage* src)
             str.sprintf(("%d_MeasureAlignDst.jpg"), 121);
             SaveOutImage(src, nullptr, str);
         }
-
-        //g_cLog->AddLog(_LOG_LIST_SYS, ("Measure Align End..."));
 
     }
     else if (nMesAlingNum) // nMesAlingNum == 1 이면 가로 또는 세로위치만 이동한다. (한개만 사용)
@@ -2847,7 +2842,6 @@ int CImgProcEngine::EdgeCornerByLine(Qroilib::RoiObject *pData, IplImage* grayCr
     h = workImg->height - 1;
     if (pt.x <= 1 || pt.x >= w || pt.y <= 1 || pt.y >= h) {
         str.sprintf(("Edge position is out range of ROI"));
-        //g_cLog->AddLog(_LOG_LIST_SYS, str);
         qDebug() << str;
         ret = -1;
     }
@@ -2876,14 +2870,12 @@ int CImgProcEngine::EdgeCornerByLine(Qroilib::RoiObject *pData, IplImage* grayCr
     int nRet2 = dgeVerify(pData, croppedImageVerify, pt);
     if (nRet2 < 0) {
         str.sprintf(("EdgeVerify error : Edge not found"));
-        //g_cLog->AddLog(_LOG_LIST_SYS, str);
         ret = -1;
     }
 
     int nRet3 = dgeVerifyBlob(pData, croppedImageVerify, pt);
     if (nRet3 < 0) {
         str.sprintf(("EdgeVerifyBlob error : blob is too small"));
-        //g_cLog->AddLog(_LOG_LIST_SYS, str);
         ret = -1;
     }
 #endif
@@ -3350,14 +3342,12 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         cvMatchTemplate(graySearchImg, grayTemplateImg, C, CV_TM_CCOEFF_NORMED); // 제곱차 매칭
         cvMinMaxLoc(C, &min, &max, nullptr, &left_top); // 상관계수가 최대값을 값는 위치 찾기
         //str.sprintf(("MatchTemplate : %.3f"), max);
-        //g_cLog->AddLog(_LOG_LIST_SYS, str);
         if (maxRate < max)
             maxRate = max;
 
         if (max >= dMatchingRate)	// OpenCV의 Template Matching 함수를 이용해서 유사한 패턴을 찾은다음, Shape 기능을 이용하여 한번더 검사한다.
         {
             str.sprintf(("TemplateMatch step%d : %.2f%%"), nLoop, max*100);
-            //g_cLog->AddLog(_LOG_LIST_SYS, str);
 
             cvSetImageROI(graySearchImg, cvRect(left_top.x, left_top.y, grayTemplateImg->width, grayTemplateImg->height));
             if (m_bSaveEngineImg)
@@ -3444,7 +3434,6 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
                 nLoop++;
                 //if (nLoop > 10) {
                 //	str.sprintf(("MatchShape failed"));
-                //	//g_cLog->AddLog(_LOG_LIST_SYS, str);
                 //	break;
                 //}
             } else {
@@ -3457,20 +3446,16 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
         else
         {
             nLoop++;
-            //if (nLoop > 10) {
-                //dMatchShapes = maxRate * 100;
-                str.sprintf(("TemplateMatch Result Fail ===> : %.2f%%"), maxRate * 100);
-                theMainWindow->DevLogSave(str.toLatin1().data());
-                max = maxRate;
-                m_DetectResult.result = false; // NG
-                break;
-            //}
+            str.sprintf(("TemplateMatch Result Fail ===> : %.2f%%"), maxRate * 100);
+            theMainWindow->DevLogSave(str.toLatin1().data());
+            max = maxRate;
+            m_DetectResult.result = false; // NG
+            break;
         }
     }
 
     clock_t finish_time1 = clock();
     double total_time = (double)(finish_time1-start_time1)/CLOCKS_PER_SEC;
-    //QString str;
     str.sprintf("Searching Time=%dms", (int)(total_time*1000));
     theMainWindow->DevLogSave(str.toLatin1().data());
 
@@ -4102,7 +4087,18 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
                  cnt++;
             }
             cnt--;
+            e->len = cnt; // pixel count
         }
+
+        double total = 0;
+        for (int j=0; j<vecLineIt.size(); j++) {
+            ElemLineIt *e = &vecLineIt[j];
+            total += e->len;
+        }
+
+        str.sprintf(("LineMeasure AvgWidth=%.1f"), total/vecLineIt.size());
+        theMainWindow->DevLogSave(str.toLatin1().data());
+
     }
 
     if (m_bSaveEngineImg)
@@ -4110,6 +4106,7 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
         str.sprintf(("210_matout.jpg"));
         SaveOutImage(mat, pData, str);
     }
+    theMainWindow->outWidget("LineMeasurement", mat);
 
     return 0;
 }
