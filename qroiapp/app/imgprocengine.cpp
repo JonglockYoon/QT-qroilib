@@ -130,6 +130,10 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
     if (rect.right() >= graySearchImg->width) rect.setRight(graySearchImg->width);
     if (rect.bottom() >= graySearchImg->height) rect.setBottom(graySearchImg->height);
     pData->setBounds(rect);
+    if (rect.width() < 0 || rect.height() < 0) {
+        cvReleaseImage(&graySearchImg);
+        return -1;
+    }
 
     Point2f left_top = Point2f(rect.left(), rect.top());
     cvSetImageROI(graySearchImg, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
@@ -2091,6 +2095,8 @@ int CImgProcEngine::SinglePattFeatureMatch(IplImage* croppedImage, RoiObject *pD
 
     if (corner.size() > 0)
     {
+        qDebug() << "there are " << good_matches.size() << " good matches";
+
         cv::Point pt1 = corner[0];
         cv::Point pt2 = corner[1];
         cv::Point pt3 = corner[2];
@@ -3879,6 +3885,9 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 
     ThresholdRange(pData, croppedImage, 200);
 
+    NoiseOut(pData, croppedImage, _ProcessValue1, 202);
+    Expansion(pData, croppedImage, _ProcessValue1, 204);
+
     int iMinY = 0, iMaxY = 100000;
     if (pData != NULL) {
         CParam *pParam = pData->getParam(("Min Size Y"));
@@ -3890,12 +3899,9 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
     }
     FilterBlobBoundingBoxYLength(croppedImage, iMinY, iMaxY);
     if (gCfg.m_bSaveEngineImg) {
-        str.sprintf(("%03d_Filter.BMP"), 201);
+        str.sprintf(("%03d_Filter.BMP"), 205);
         SaveOutImage(croppedImage, pData, str, false);
     }
-
-    NoiseOut(pData, croppedImage, _ProcessValue1, 202);
-    Expansion(pData, croppedImage, _ProcessValue1, 204);
 
     NoiseOut(pData, croppedImage, _ProcessValue2, 206);
     Expansion(pData, croppedImage, _ProcessValue2, 208);
@@ -3971,11 +3977,20 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 
 int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
 {
+    QString str;
     QZXing qz;
+
+    ThresholdRange(pData, croppedImage, 130);
+    NoiseOut(pData, croppedImage, _ProcessValue1, 131);
 
     cv::Mat m = cv::cvarrToMat(croppedImage);
     QImage img;
     img = MatToQImage(m);
+
+    if (gCfg.m_bSaveEngineImg) {
+        str.sprintf(("%03d_Input.BMP"), 210);
+        SaveOutImage(croppedImage, pData, str, false);
+    }
 
     QString decode;
     try {
@@ -3986,7 +4001,6 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
 
     qDebug() << "Barcode :" << decode;
 
-    QString str;
     str = "Barcode : " + decode;
     theMainWindow->DevLogSave(str.toLatin1().data());
     m_DetectResult.str = str.toLatin1().data();

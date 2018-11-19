@@ -220,6 +220,8 @@ void ViewMainPage::connectToCamera(int windowNumber, int deviceNumber)
 
 void ViewMainPage::disconnectCamera(int windowNumber)
 {
+    if (myCamController[windowNumber]->captureThread == nullptr)
+        return;
     // Check if camera is connected
     if(myCamController[windowNumber]->captureThread->isCameraConnected())
     {
@@ -276,7 +278,7 @@ void ViewMainPage::completed(int seq)
 {
     qDebug() << "DocumentView complete" << seq;
     //OpenCam(seq);
-#if 1 // test
+#if 0 // test
     QStringList List;
     List << "None";
 

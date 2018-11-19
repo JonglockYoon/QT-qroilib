@@ -94,6 +94,8 @@ void DialogConfig::enableAutoExposure(bool on)
 
 #ifdef Q_OS_WIN
         Controller* pController = pView->myCamController[seq];
+        if (pController->captureThread == nullptr)
+            return;
         if (on)
             pController->captureThread->cap.set(CV_CAP_PROP_AUTO_EXPOSURE, 3); // 1-manual, 3-auto
         else
@@ -156,7 +158,8 @@ void DialogConfig::setExposureValue(int val)
 #ifdef Q_OS_WIN
         gCfg.m_nCamExposure = val;
         Controller* pController = pView->myCamController[seq];
-        pController->captureThread->cap.set(CV_CAP_PROP_EXPOSURE, val-10);
+        if (pController->captureThread)
+            pController->captureThread->cap.set(CV_CAP_PROP_EXPOSURE, val-10);
 #else
         char video[64];
 		struct v4l2_control ctrl;

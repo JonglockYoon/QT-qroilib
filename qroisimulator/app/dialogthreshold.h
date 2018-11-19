@@ -37,6 +37,11 @@ private slots:
     void setEditValueth1(const QString &val);
     void setEditValueth2(const QString &val);
 
+    void setValueh1(int val);
+    void setValueh2(int val);
+    void setEditValueh1(const QString &val);
+    void setEditValueh2(const QString &val);
+
     void on_pushButtonClose_clicked();
     void on_pushButtonExec_clicked();
     void updatePlayerUI(const QImage* img);
@@ -50,6 +55,7 @@ public:
     double ThresholdOTSU(IplImage* grayImg, IplImage* outImg);
     int AdaptiveThreshold(IplImage* grayImg, IplImage* outImg);
     void AverageBrightInspection(IplImage* iplImg, IplImage* outImg);
+    void ClaheTest(IplImage* iplImg, IplImage* outImg);
 
 private:
     Ui::DialogThreshold *ui;
@@ -65,6 +71,9 @@ private:
     int AreaSize = 11;
     int low = 100;
     int high = 255;
+
+    float clipLimit = 2.0;
+    int tileGridSize = 8;
 };
 
 #endif // DIALOGTHRESHOLD_H

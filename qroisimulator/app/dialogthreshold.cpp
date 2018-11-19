@@ -35,8 +35,28 @@ DialogThreshold::DialogThreshold(QWidget *parent) :
     ui->comboBoxThresholdMethod->insertItem(1, QIcon(), QString::fromLocal8Bit("Threshold"));
     ui->comboBoxThresholdMethod->insertItem(2, QIcon(), QString::fromLocal8Bit("OTSU"));
     ui->comboBoxThresholdMethod->insertItem(3, QIcon(), QString::fromLocal8Bit("HistogramEqualize"));
-    ui->comboBoxThresholdMethod->insertItem(4, QIcon(), QString::fromLocal8Bit("AverageBright Inspection"));
+    ui->comboBoxThresholdMethod->insertItem(4, QIcon(), QString::fromLocal8Bit("CLAHE"));
+    ui->comboBoxThresholdMethod->insertItem(5, QIcon(), QString::fromLocal8Bit("AverageBright Inspection"));
     ui->comboBoxThresholdMethod->setCurrentIndex(method);
+
+    // CLAHE group
+    ui->sliderh1->setRange(0, 20);
+    ui->sliderh1->setValue((int)clipLimit);
+    ui->sliderh1->setSingleStep(1);
+    ui->sliderh2->setRange(0, 64);
+    ui->sliderh2->setValue(tileGridSize);
+    ui->sliderh2->setSingleStep(1);
+
+    // threshold group
+    QObject::connect(ui->sliderh1, SIGNAL(valueChanged(int)), this, SLOT(setValueh1(int)));
+    QObject::connect(ui->sliderh2, SIGNAL(valueChanged(int)), this, SLOT(setValueh2(int)));
+    QObject::connect(ui->edith1, SIGNAL(textChanged(const QString &)), this, SLOT(setEditValueh1(const QString &)));
+    QObject::connect(ui->edith2, SIGNAL(textChanged(const QString &)), this, SLOT(setEditValueh2(const QString &)));
+    str = QString("%1").arg(clipLimit);
+    ui->edith1->setText(str);
+    str = QString("%1").arg(tileGridSize);
+    ui->edith2->setText(str);
+
 
     // Adaptive group
     ui->slidera1->setRange(0, 300);
@@ -153,6 +173,29 @@ void DialogThreshold::setEditValueth2(const QString &val)
 {
     high = val.toInt();
     ui->sliderth2->setValue(high);
+}
+
+void DialogThreshold::setValueh1(int val)
+{
+    clipLimit = (float)val;
+    QString str = QString("%1").arg(val);
+    ui->edith1->setText(str);
+}
+void DialogThreshold::setValueh2(int val)
+{
+    tileGridSize = val;
+    QString str = QString("%1").arg(val);
+    ui->edith2->setText(str);
+}
+void DialogThreshold::setEditValueh1(const QString &val)
+{
+    clipLimit = (float)val.toInt();
+    ui->sliderh1->setValue(clipLimit);
+}
+void DialogThreshold::setEditValueh2(const QString &val)
+{
+    tileGridSize = val.toInt();
+    ui->sliderh2->setValue(tileGridSize);
 }
 
 void DialogThreshold::changeNot(bool checked)
@@ -350,6 +393,19 @@ void DialogThreshold::on_pushButtonExec_clicked()
     }
 }
 
+//https://docs.opencv.org/3.4.0/d5/daf/tutorial_py_histogram_equalization.html
+//https://m.blog.naver.com/samsjang/220543360864
+void DialogThreshold::ClaheTest(IplImage* iplImg, IplImage* outImg)
+{
+    Ptr<CLAHE> clahe = createCLAHE();
+    clahe->setClipLimit(clipLimit);
+    clahe->setTilesGridSize(cv::Size(tileGridSize,tileGridSize));
+
+    cv::Mat mat = cv::cvarrToMat(iplImg);
+    cv::Mat dst = cv::cvarrToMat(outImg);
+    clahe->apply(mat, dst);
+}
+
 void DialogThreshold::AverageBrightInspection(IplImage* iplImg, IplImage* outImg)
 {
 
@@ -498,7 +554,7 @@ void DialogThreshold::ExecThreshold(IplImage* iplImg)
     if (!tmp)
         tmp = cvCreateImage(cvSize(iplImg->width, iplImg->height), iplImg->depth, iplImg->nChannels);
 
-    if (ui->chkBoxGaussian) {
+    if (ui->chkBoxGaussian->isChecked()) {
        cvSmooth(iplImg, iplImg, CV_GAUSSIAN,7,7);
     }
 
@@ -517,6 +573,9 @@ void DialogThreshold::ExecThreshold(IplImage* iplImg)
             cvEqualizeHist(iplImg, tmp);
             break;
         case 4:
+            ClaheTest(iplImg, tmp);
+            break;
+        case 5:
             AverageBrightInspection(iplImg, tmp);
             break;
     }

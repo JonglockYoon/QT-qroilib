@@ -148,6 +148,10 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Teseract, CParam(_ProcessValue3, ("Smooth size"), _IntValue, ("7")),
 
     _Inspect_BarCode, CParam(_ProcessValue1, ("Type"), _ComboValue, ("Multiformat")),
+    _Inspect_BarCode, CParam(_ProcessValue1, ("Low Threshold"), _IntValue, ("0")),
+    _Inspect_BarCode, CParam(_ProcessValue1, ("High Threshold"), _IntValue, ("100")),
+    _Inspect_BarCode, CParam(_ProcessValue1, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다
+    _Inspect_BarCode, CParam(_ProcessValue1, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다.
 
     _Inspect_Point_Start,   CParam(_ProcessValue1, (""), _IntValue, ("0")), // do not delete.
     _Inspect_Point_Coordnation,  CParam(_ProcessValue1, ("Mark color"), _IntValue, ("128")), // not yet implement.
