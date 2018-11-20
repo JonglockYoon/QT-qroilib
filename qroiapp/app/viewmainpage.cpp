@@ -278,7 +278,7 @@ void ViewMainPage::completed(int seq)
 {
     qDebug() << "DocumentView complete" << seq;
     //OpenCam(seq);
-#if 0 // test
+#if 1 // test
     QStringList List;
     List << "None";
 

@@ -7,23 +7,23 @@
     <x>0</x>
     <y>0</y>
     <width>385</width>
-    <height>498</height>
+    <height>565</height>
    </rect>
   </property>
   <property name="mouseTracking">
    <bool>false</bool>
   </property>
+  <property name="tabletTracking">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Application</string>
-  </property>
-  <property name="tabletTracking" stdset="0">
-   <bool>true</bool>
   </property>
   <widget class="QPushButton" name="pushButtonClose">
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>453</y>
+     <y>523</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -44,7 +44,7 @@
    <property name="geometry">
     <rect>
      <x>96</x>
-     <y>453</y>
+     <y>523</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -65,7 +65,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>460</y>
+     <y>530</y>
      <width>71</width>
      <height>16</height>
     </rect>
@@ -106,7 +106,7 @@
      <x>20</x>
      <y>80</y>
      <width>351</width>
-     <height>361</height>
+     <height>421</height>
     </rect>
    </property>
    <property name="title">
@@ -413,6 +413,45 @@
      <string>Coin</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="StitchCB1">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>360</y>
+      <width>101</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PANORAMA</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="StitchCB2">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>360</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>SCANS</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="StitchCB3">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>390</y>
+      <width>101</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Use GPU</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QLabel" name="label_7">
    <property name="geometry">
@@ -530,6 +569,19 @@
      <width>41</width>
      <height>20</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonStitching">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>440</y>
+     <width>111</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Stitching</string>
    </property>
   </widget>
  </widget>

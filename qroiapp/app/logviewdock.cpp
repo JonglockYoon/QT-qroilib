@@ -17,9 +17,9 @@ LogViewDock::LogViewDock(QString name, QWidget *parent)
     : QDockWidget(name, parent)
 {
     setMinimumWidth(100);
-    setMaximumWidth(400);
+    setMaximumWidth(640);
     setMinimumHeight(50);
-    setMaximumHeight(600);
+    setMaximumHeight(480);
 
     modelLog = new QStandardItemModel(0,2,this);
     modelLog->setHorizontalHeaderItem(0, new QStandardItem(QString("time")));

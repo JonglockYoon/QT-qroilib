@@ -328,6 +328,11 @@ void DialogApplication::on_radioButtonImgSeg_clicked()
     restoreLoadedImage();
     method = 6;
 }
+void DialogApplication::on_radioButtonStitching_clicked()
+{
+    restoreLoadedImage();
+    method = 7;
+}
 
 cv::Mat DialogApplication::convertFFTMag()
 {
@@ -425,6 +430,9 @@ void DialogApplication::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
             ImageSegmentationCoin(iplImg);
         //else if (ui->SegCB3->isChecked())
         //    ImageSegmentationLineWidth(iplImg);
+        break;
+    case 7:
+        StitchingTest(iplImg, iplImg2);
         break;
     }
     theMainWindow->outWidget(mName, outImg);
@@ -1071,7 +1079,6 @@ void DialogApplication::ColorDetect(IplImage* iplImg, IplImage* iplImg2)
     return;
 }
 
-
 void DialogApplication::FFTTest()
 {
     cv::Mat fourierTransform;
@@ -1307,6 +1314,85 @@ void DialogApplication::ImageSegmentationCard(IplImage* iplImg)
 
     IplImage ipl = dst;
     cvCopy(&ipl, outImg);
+
+}
+
+void DialogApplication::StitchingTest(IplImage* iplImg, IplImage* iplImg2)
+{
+    Mat imggray = cv::cvarrToMat(iplImg);
+    Mat imggray2 = cv::cvarrToMat(iplImg2);
+    if (imggray.empty() || imggray2.empty())
+       return;
+    Mat img, img2;
+    cv::cvtColor(imggray, img, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(imggray2, img2, cv::COLOR_GRAY2BGR);
+    vector<Mat> imgs;
+    if (0) // test
+    {
+#if 0
+        Rect rect(0, 0, img.cols / 2, img.rows);
+        imgs.push_back(img(rect).clone());
+        rect.x = img.cols / 3;
+        imgs.push_back(img(rect).clone());
+        rect.x = img.cols / 2;
+        imgs.push_back(img(rect).clone());
+#else
+        Rect rect(0, 0, img.cols / 3 * 2, img.rows);
+        imgs.push_back(img(rect).clone());
+        Rect rect2(img.cols / 3, 0, img.cols - img.cols / 3, img.rows);
+        Mat m = img(rect2).clone();
+        IplImage ipl = m;
+        CImgProcBase base;
+        base.RotateImage(&ipl, 5.0);
+        imgs.push_back(m);
+#endif
+    }
+    else {
+        imgs.push_back(img);
+        imgs.push_back(img2);
+    }
+
+    clock_t start_time1 = clock();
+
+    bool try_use_gpu = false;
+    if (ui->StitchCB3->isChecked())
+        try_use_gpu = true;
+    Stitcher::Mode mode = Stitcher::PANORAMA;
+    if (ui->StitchCB2->isChecked())
+        mode = Stitcher::SCANS;
+    Mat pano;
+    Ptr<Stitcher> stitcher = Stitcher::create(mode, try_use_gpu);
+    Stitcher::Status status = stitcher->stitch(imgs, pano);
+    if (status != Stitcher::OK)
+    {
+        qDebug() << "Can't stitch images, error code = " << int(status);
+        return;
+    }
+
+    clock_t finish_time1 = clock();
+    double total_time = (double)(finish_time1-start_time1)/CLOCKS_PER_SEC;
+
+    qDebug() <<" Stitcher Time = "<<total_time*1000<<"ms";
+
+    if (outImg) {
+        if (outImg->width != iplImg->width || outImg->height != iplImg->height) {
+            cvReleaseImage(&outImg);
+            outImg = nullptr;
+        }
+    }
+
+    if (!outImg)
+        outImg = cvCreateImage(cvSize(pano.cols, pano.rows), IPL_DEPTH_8U, 3);
+
+    Mat out = cv::cvarrToMat(outImg);
+    pano.copyTo(out);
+
+    char text[128];
+    sprintf(text, "%.1f ms",  total_time*1000);
+    CvFont font;
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.4, 0.4, 0, 1, CV_AA);
+    cvRectangle(outImg, CvPoint(0,0), CvPoint(outImg->width,20), cvScalar(255, 255, 255), CV_FILLED);
+    cvPutText(outImg, text, cvPoint(10, 15), &font, cvScalar(128, 128, 128));
 
 }
 
@@ -1558,3 +1644,4 @@ void DialogApplication::ImageSegmentationLineWidth(IplImage* iplImg)
     IplImage ipl = img;
     cvCopy(&ipl, outImg);
 }
+

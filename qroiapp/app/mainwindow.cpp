@@ -283,7 +283,7 @@ d(new MainWindow::Private)
     dirName += gCfg.m_sLastRecipeName;
     dir.mkdir(dirName);
 
-    setMinimumSize(800, 480);
+    setMinimumSize(320, 240);
 
     d->q = this;
     d->setupContextManager();

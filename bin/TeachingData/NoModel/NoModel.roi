@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="2448" height="3264" roiwidth="1" roiheight="1" nextobjectid="3">
+<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="640" height="480" roiwidth="1" roiheight="1" nextobjectid="1">
  <objectgroup name="channel1" x="-1" y="-1">
-  <object id="1" name="noname1119194716" x="32.2105" y="150.316" width="2322.74" height="2877.47">
-   <pattern child="2"/>
-   <param InspectType="15">
-    <param00 steptype="1" name="Method" valuetype="4" value="2" detail="SURF,SIFT,ORB"/>
-    <param01 steptype="1" name="Param1" valuetype="1" value="9000" detail=""/>
-    <param02 steptype="1" name="kDistanceCoef" valuetype="1" value="5" detail=""/>
-    <param03 steptype="1" name="kMaxMatchingSize" valuetype="1" value="200" detail=""/>
-   </param>
-  </object>
-  <object id="2" x="981.835" y="1458.28" width="180.495" height="42.4316">
-   <rectangle parent="1"/>
-   <param InspectType="500">
-    <param00 steptype="1" name="" valuetype="1" value="0" detail=""/>
+  <object id="1" name="noname1120190144" x="16.7895" y="21.4211" width="596.684" height="434.684">
+   <rectangle/>
+   <param InspectType="508">
+    <param00 steptype="1" name="Type" valuetype="4" value="0" detail=""/>
+    <param01 steptype="1" name="Low Threshold" valuetype="1" value="100" detail=""/>
+    <param02 steptype="1" name="High Threshold" valuetype="1" value="255" detail=""/>
+    <param03 steptype="1" name="Noise out 1" valuetype="1" value="-1" detail=""/>
+    <param04 steptype="1" name="Noise out 2" valuetype="1" value="0" detail=""/>
    </param>
   </object>
  </objectgroup>

@@ -21,7 +21,6 @@
 #include "recipedata.h"
 #include "mainwindow.h"
 #include "mattoqimage.h"
-#include "geomatch.h"
 #include "opencv2/ximgproc.hpp"
 
 #include "QZXing.h"
@@ -3978,7 +3977,7 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
 {
     QString str;
-    QZXing qz;
+    QZXing *qz = new QZXing(nullptr);
 
     ThresholdRange(pData, croppedImage, 130);
     NoiseOut(pData, croppedImage, _ProcessValue1, 131);
@@ -3994,7 +3993,7 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
 
     QString decode;
     try {
-        decode = qz.decodeImage(img);
+        decode = qz->decodeImage(img);
     }
     catch(zxing::NotFoundException  &e){}
     catch(zxing::ReaderException  &e){}
@@ -4005,6 +4004,8 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
     theMainWindow->DevLogSave(str.toLatin1().data());
     m_DetectResult.str = str.toLatin1().data();
     pData->m_vecDetectResult.push_back(m_DetectResult);
+
+    delete qz;
 
     return 0;
 }

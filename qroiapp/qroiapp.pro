@@ -109,7 +109,6 @@ HEADERS +=  \
         app/dialogconfig.h \
         app/logviewdock.h \
         app/mlogthread.h \
-        app/geomatch.h \
     app/capturethread.h \
     app/mattoqimage.h \
     app/imagebuffer.h \
@@ -134,7 +133,6 @@ SOURCES +=  \
         app/dialogconfig.cpp \
         app/logviewdock.cpp \
         app/mlogthread.cpp \
-        app/geomatch.cpp \
     app/capturethread.cpp \
     app/mattoqimage.cpp \
     app/imagebuffer.cpp \

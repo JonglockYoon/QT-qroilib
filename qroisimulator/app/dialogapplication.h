@@ -86,6 +86,8 @@ private slots:
 
     void on_radioButtonImgSeg_clicked();
 
+    void on_radioButtonStitching_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 public:
@@ -100,6 +102,7 @@ public:
     cv::Mat ftI;
     cv::Mat displayImage;
     void FFTTest();
+    void StitchingTest(IplImage* iplImg, IplImage* iplImg2);
     void FilterHueBoundary(cv::Mat& input);
     void ImageSegmentationCard(IplImage* iplImg);
     void ImageSegmentationCoin(IplImage* iplImg);
