@@ -63,6 +63,7 @@ LIBS += -lopencv_shape
 LIBS += -lopencv_features2d
 LIBS += -lopencv_xfeatures2d
 LIBS += -lopencv_calib3d
+LIBS += -lopencv_stitching
 LIBS += -lgstreamer-1.0
 LIBS += -lgobject-2.0
 LIBS += -lglib-2.0
