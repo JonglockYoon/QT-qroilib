@@ -53,6 +53,9 @@ DialogConfig::DialogConfig(QWidget *parent) :
     setFocusValue(val1);
     ui->sliderFocus->setValue(val1);
 
+    qDebug() << "Exposure:" << getAutoExposureValue(0);
+    qDebug() << "Focus:" << getAutoFocusValue(0);
+
     enableAutoExposure(false);
     enableAutoFocus(false);
 
@@ -200,6 +203,8 @@ void DialogConfig::setExposureValue(int value)
         case 13: exposure = 5000; break;
         case 14: exposure = 10000; break;
     }
+    //exposure = 14 - value;
+
 #endif
     gCfg.m_nCamExposure = value;
 
@@ -237,8 +242,9 @@ void DialogConfig::setExposureValue(int value)
 		}
 
         try {
+            qDebug() << "Set Exposure : " << exposure;
             ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
-            ctrl.value = value;
+            ctrl.value = exposure;
             if (-1 == v4l2_ioctl(fd,VIDIOC_S_CTRL,&ctrl)) {
                 perror("setting exposure absolute");
                 ::v4l2_close(fd);
@@ -246,7 +252,7 @@ void DialogConfig::setExposureValue(int value)
                 seq++;
                 continue;
             }
-    		qDebug() << "setExposureValue ok" << val;
+            qDebug() << "setExposureValue ok : " << value;
         } catch (cv::Exception &e) {
             qDebug() << "e = " << e.what();
         } catch (...) {
