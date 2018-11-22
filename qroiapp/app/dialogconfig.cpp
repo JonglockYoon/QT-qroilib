@@ -41,21 +41,20 @@ DialogConfig::DialogConfig(QWidget *parent) :
 
     model2 = new QStringListModel(this);
 
-#ifdef Q_OS_WIN
-    int val = gCfg.m_nCamExposure;//getExposureValue(0);
-    ui->sliderExposure->setRange(0, 9);
+    int val = gCfg.m_nCamExposure;
+    ui->sliderExposure->setRange(0, 14);
     ui->sliderExposure->setSingleStep(1);
     setExposureValue(val);
     ui->sliderExposure->setValue(val);
-#else
-    ui->sliderExposure->setRange(10, 30000);
-    ui->sliderExposure->setSingleStep(100);
-    int val = gCfg.m_nCamExposure;//getExposureValue(0);
-    setExposureValue(val);
-    ui->sliderExposure->setValue(val);
-#endif
+
+    int val1 = gCfg.m_nCamFocus;
+    ui->sliderFocus->setRange(0, 100);
+    ui->sliderFocus->setSingleStep(1);
+    setFocusValue(val1);
+    ui->sliderFocus->setValue(val1);
 
     enableAutoExposure(false);
+    enableAutoFocus(false);
 
     if (gCfg.m_nCamNumber < 2)
     {
@@ -66,6 +65,7 @@ DialogConfig::DialogConfig(QWidget *parent) :
     SetData();
 
     connect(ui->sliderExposure, SIGNAL(valueChanged(int)), this, SLOT(setExposureValue(int)));
+    connect(ui->sliderFocus, SIGNAL(valueChanged(int)), this, SLOT(setFocusValue(int)));
 
     this->setWindowTitle("Config");
 
@@ -139,11 +139,73 @@ void DialogConfig::enableAutoExposure(bool on)
     }
 }
 
-void DialogConfig::setExposureValue(int val)
+void DialogConfig::enableAutoFocus(bool on)
 {
     ViewMainPage* pView = theMainWindow->viewMainPage();
     int seq = 0;
-    qDebug() << "setExposureValue" << val;
+    while (true) {
+        if (seq >= gCfg.m_nCamNumber)
+            break;
+
+        if (!pView->myCamController[seq]) {
+            seq++;
+            continue;
+        }
+
+        Controller* pController = pView->myCamController[seq];
+        if (pController->captureThread)
+            pController->captureThread->cap.set(CV_CAP_PROP_AUTOFOCUS, on);
+
+        theMainWindow->SetCameraPause(seq, false);
+        seq++;
+    }
+}
+
+void DialogConfig::setExposureValue(int value)
+{
+    int exposure = 1;
+#ifdef Q_OS_WIN
+    switch (value) {
+        case 0: exposure = -14; break;
+        case 1: exposure = -13; break;
+        case 2: exposure = -12; break;
+        case 3: exposure = -11; break;
+        case 4: exposure = -10; break;
+        case 5: exposure = -9; break;
+        case 6: exposure = -8; break;
+        case 7: exposure = -7; break;
+        case 8: exposure = -6; break;
+        case 9: exposure = -5; break;
+        case 10: exposure = -4; break;
+        case 11: exposure = -3; break;
+        case 12: exposure = -2; break;
+        case 13: exposure = -1; break;
+        case 14: exposure = 0; break;
+    }
+#else
+    switch (value) {
+        case 0: exposure = 1; break;
+        case 1: exposure = 2; break;
+        case 2: exposure = 5; break;
+        case 3: exposure = 10; break;
+        case 4: exposure = 20; break;
+        case 5: exposure = 39; break;
+        case 6: exposure = 78; break;
+        case 7: exposure = 156; break;
+        case 8: exposure = 312; break;
+        case 9: exposure = 625; break;
+        case 10: exposure = 1250; break;
+        case 11: exposure = 1250; break;
+        case 12: exposure = 2500; break;
+        case 13: exposure = 5000; break;
+        case 14: exposure = 10000; break;
+    }
+#endif
+    gCfg.m_nCamExposure = value;
+
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+    int seq = 0;
+    qDebug() << "setExposureValue" << value;
     while (true) {
         if (seq >= gCfg.m_nCamNumber)
             break;
@@ -156,10 +218,12 @@ void DialogConfig::setExposureValue(int val)
 
         theMainWindow->SetCameraPause(seq, true);
 #ifdef Q_OS_WIN
-        gCfg.m_nCamExposure = val;
         Controller* pController = pView->myCamController[seq];
         if (pController->captureThread)
-            pController->captureThread->cap.set(CV_CAP_PROP_EXPOSURE, val-10);
+        {
+            qDebug() << "Set Exposure : " << exposure;
+            pController->captureThread->cap.set(CV_CAP_PROP_EXPOSURE, exposure);
+        }
 #else
         char video[64];
 		struct v4l2_control ctrl;
@@ -174,7 +238,7 @@ void DialogConfig::setExposureValue(int val)
 
         try {
             ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
-            ctrl.value = val;
+            ctrl.value = value;
             if (-1 == v4l2_ioctl(fd,VIDIOC_S_CTRL,&ctrl)) {
                 perror("setting exposure absolute");
                 ::v4l2_close(fd);
@@ -191,27 +255,53 @@ void DialogConfig::setExposureValue(int val)
 
 		::v4l2_close(fd);
 
-        gCfg.m_nCamExposure = val;
-
 #endif
         theMainWindow->SetCameraPause(seq, false);
         seq++;
     }
 }
 
-int DialogConfig::getExposureValue(int seq)
+void DialogConfig::setFocusValue(int value)
+{
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+    int seq = 0;
+    gCfg.m_nCamFocus = value;
+
+    while (true) {
+        if (seq >= gCfg.m_nCamNumber)
+            break;
+
+        if (!pView->myCamController[seq]) {
+            seq++;
+            continue;
+        }
+
+        Controller* pController = pView->myCamController[seq];
+        if (pController->captureThread)
+        {
+            double focus = (double)value / 100.0;
+            qDebug() << "Set Focus : " << focus;
+            pController->captureThread->cap.set(CV_CAP_PROP_FOCUS, focus);
+        }
+
+        seq++;
+    }
+}
+
+
+int DialogConfig::getAutoExposureValue(int seq)
 {
     int val = 0;
     ViewMainPage* pView = theMainWindow->viewMainPage();
 
     if (!pView->myCamController[seq])
-        return -1;
+        return 0;
 
     theMainWindow->SetCameraPause(seq, true);
 
-#ifdef Q_OS_WIN
+#if 1//def Q_OS_WIN
     Controller* pController = pView->myCamController[seq];
-    val = pController->captureThread->cap.get(CV_CAP_PROP_EXPOSURE) + 13;
+    val = pController->captureThread->cap.get(CV_CAP_PROP_AUTO_EXPOSURE);
 #else
     char video[64];
     struct v4l2_queryctrl qctrl;
@@ -244,6 +334,23 @@ int DialogConfig::getExposureValue(int seq)
     val = qctrl.default_value;
 	
 #endif
+
+    theMainWindow->SetCameraPause(seq, false);
+    return val;
+}
+
+int DialogConfig::getAutoFocusValue(int seq)
+{
+    int val = 0;
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+
+    if (!pView->myCamController[seq])
+        return 0;
+
+    theMainWindow->SetCameraPause(seq, true);
+
+    Controller* pController = pView->myCamController[seq];
+    val = pController->captureThread->cap.get(CV_CAP_PROP_AUTOFOCUS);
 
     theMainWindow->SetCameraPause(seq, false);
     return val;
@@ -375,3 +482,60 @@ void DialogConfig::on_pushButtonClose_clicked()
     hide();
 }
 
+
+void DialogConfig::on_pushButtonAutoExposure_clicked()
+{
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+    int seq = 0;
+
+    while (true) {
+        if (seq >= gCfg.m_nCamNumber)
+            break;
+
+        if (!pView->myCamController[seq]) {
+            seq++;
+            continue;
+        }
+
+        Controller* pController = pView->myCamController[seq];
+        if (pController->captureThread) {
+#if 0//ndef Q_OS_WIN
+            int val = 1 - getAutoExposureValue(seq);
+            qDebug() << "Set Auto Exposure : " << val;
+            pController->captureThread->cap.set(CV_CAP_PROP_AUTO_EXPOSURE, val);
+#else
+            enableAutoExposure(true);
+#endif
+        }
+
+        seq++;
+    }
+}
+
+void DialogConfig::on_pushButtonAutoFocus_clicked()
+{
+    ViewMainPage* pView = theMainWindow->viewMainPage();
+    int seq = 0;
+    while (true) {
+        if (seq >= gCfg.m_nCamNumber)
+            break;
+
+        if (!pView->myCamController[seq]) {
+            seq++;
+            continue;
+        }
+
+        Controller* pController = pView->myCamController[seq];
+        if (pController->captureThread) {
+#if 0//ndef Q_OS_WIN
+            int val = 1 - getAutoFocusValue(seq);
+            qDebug() << "Set Auto Focus : " << val;
+            //ref:https://github.com/cdemel/OpenCV/blob/master/samples/cpp/cameracontrol.cpp
+            pController->captureThread->cap.set(CV_CAP_PROP_AUTOFOCUS, val);
+#else
+            enableAutoFocus(true);
+#endif
+        }
+        seq++;
+    }
+}

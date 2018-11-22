@@ -38,6 +38,7 @@ public:
     QString m_sCamera2;
 
     int m_nCamExposure;
+    int m_nCamFocus;
 
 };
 

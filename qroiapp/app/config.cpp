@@ -50,6 +50,7 @@ void CConfig::ReadConfig()
     m_sCamera1 = settings.value("CamInfo/Cam1", "").toString();
     m_sCamera2 = settings.value("CamInfo/Cam2", "").toString();
     m_nCamExposure = settings.value("CamInfo/Exposure", 0).toInt();
+    m_nCamFocus = settings.value("CamInfo/Focus", 0).toInt();
 
     if (m_pCamInfo)
         delete m_pCamInfo;
@@ -80,6 +81,7 @@ void CConfig::WriteConfig()
     settings.setValue("CamInfo/Cam1", m_sCamera1);
     settings.setValue("CamInfo/Cam2", m_sCamera2);
     settings.setValue("CamInfo/Exposure", m_nCamExposure);
+    settings.setValue("CamInfo/Focus", m_nCamFocus);
 
     if(m_pCamInfo){
         for(int i=0; i<m_nCamNumber; i++){

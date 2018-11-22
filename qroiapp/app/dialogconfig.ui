@@ -7,23 +7,23 @@
     <x>0</x>
     <y>0</y>
     <width>393</width>
-    <height>264</height>
+    <height>319</height>
    </rect>
   </property>
   <property name="mouseTracking">
    <bool>false</bool>
   </property>
+  <property name="tabletTracking">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Config</string>
-  </property>
-  <property name="tabletTracking" stdset="0">
-   <bool>true</bool>
   </property>
   <widget class="QPushButton" name="pushButtonSave">
    <property name="geometry">
     <rect>
      <x>230</x>
-     <y>200</y>
+     <y>250</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -43,10 +43,10 @@
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>20</x>
+     <y>20</y>
      <width>361</width>
-     <height>171</height>
+     <height>221</height>
     </rect>
    </property>
    <property name="font">
@@ -62,7 +62,7 @@
    <widget class="QLineEdit" name="lineEditResY">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>266</x>
       <y>130</y>
       <width>61</width>
       <height>21</height>
@@ -72,7 +72,7 @@
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>123</x>
+      <x>179</x>
       <y>129</y>
       <width>81</width>
       <height>21</height>
@@ -88,7 +88,7 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>124</x>
+      <x>180</x>
       <y>105</y>
       <width>81</width>
       <height>21</height>
@@ -104,11 +104,78 @@
    <widget class="QLineEdit" name="lineEditResX">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>266</x>
       <y>106</y>
       <width>61</width>
       <height>21</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QSlider" name="sliderFocus">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>170</y>
+      <width>131</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>true</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal</string>
+    </property>
+    <property name="minimum">
+     <number>-13</number>
+    </property>
+    <property name="maximum">
+     <number>-1</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>focus</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonAutoExposure">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>170</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AutoExposure</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonAutoFocus">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>170</y>
+      <width>75</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AutoFocus</string>
     </property>
    </widget>
   </widget>
@@ -169,7 +236,7 @@
     <rect>
      <x>30</x>
      <y>130</y>
-     <width>81</width>
+     <width>131</width>
      <height>19</height>
     </rect>
    </property>
@@ -193,7 +260,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>200</y>
+     <y>250</y>
      <width>111</width>
      <height>41</height>
     </rect>
