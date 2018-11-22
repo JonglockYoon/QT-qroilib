@@ -44,6 +44,7 @@ qroisimulator:
 #include "dialoglinefit.h"
 #include "dialogcircle.h"
 #include "dialogapplication.h"
+#include "dialogapitest.h"
 
 struct MainWindow::Private
 {
@@ -73,6 +74,7 @@ struct MainWindow::Private
     QAction *ransaccircleImage;
 
     QAction *applicationImage;
+    QAction *apiTestImage;
 
     void setupWidgets()
     {
@@ -123,6 +125,8 @@ struct MainWindow::Private
 
         applicationImage = new QAction(QIcon(), tr("&Application ..."), q);
         connect(applicationImage, SIGNAL(triggered(bool)), q, SLOT(setApplication()));
+        apiTestImage = new QAction(QIcon(), tr("&API Test ..."), q);
+        connect(apiTestImage, SIGNAL(triggered(bool)), q, SLOT(setApiTest()));
 
         fileMenu = new QMenu(tr("&File"), q);
         fileMenu->addAction(saveImage);
@@ -144,6 +148,7 @@ struct MainWindow::Private
 
         applicationMenu = new QMenu(tr("&Application"), q);
         applicationMenu->addAction(applicationImage);
+        applicationMenu->addAction(apiTestImage);
 
         q->menuBar()->addMenu(fileMenu);
         q->menuBar()->addMenu(simulatorMenu);
@@ -470,3 +475,9 @@ void MainWindow::setApplication()
     dlgapp->show();
 }
 
+void MainWindow::setApiTest()
+{
+    DialogApiTest *dlgapp;
+    dlgapp = new DialogApiTest(this);
+    dlgapp->show();
+}

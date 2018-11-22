@@ -110,6 +110,7 @@ HEADERS +=  \
         app/dialogcircle.h \
         app/dialoglinefit.h \
         app/dialogapplication.h \
+        app/dialogapitest.h \
     app/geomatch.h
 
 FORMS += \
@@ -123,6 +124,8 @@ FORMS += \
         app/dialoglinefit.ui \
         app/dialogcircle.ui \
         app/dialogapplication.ui \
+    app/dialogapitest.ui \
+    app/dialogapitest.ui
 
 
 SOURCES +=  \
@@ -145,6 +148,7 @@ SOURCES +=  \
         app/dialogcircle.cpp \
         app/dialoglinefit.cpp \
         app/dialogapplication.cpp \
+        app/dialogapitest.cpp \
     app/geomatch.cpp
 
 RESOURCES += \

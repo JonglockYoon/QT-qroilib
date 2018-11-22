@@ -67,6 +67,7 @@ public  Q_SLOTS:
     void setCircle();
 
     void setApplication();
+    void setApiTest();
 
 public:
     QVector<OutWidget*> vecOutWidget;
