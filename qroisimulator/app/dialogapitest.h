@@ -32,12 +32,15 @@ private slots:
 
     void on_radioButtoncopyMakeBorder_clicked();
 
+    void on_radioButtoncalcBackProject_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event);
 
 public:
     void ExecApplication(IplImage* iplImg, IplImage* iplImg2);
     void copyMakeBorderTest(IplImage* iplImg);
+    void calcBackProjectTest(IplImage* iplImg, IplImage* iplImg2);
 
 private:
     Ui::DialogApiTest *ui;

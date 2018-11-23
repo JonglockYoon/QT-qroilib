@@ -138,6 +138,19 @@
      <string>CodeScanner</string>
     </property>
    </widget>
+   <widget class="QRadioButton" name="radioButtoncalcBackProject">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>calcBackProject</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QLabel" name="label_7">
    <property name="geometry">
