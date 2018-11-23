@@ -182,6 +182,22 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
     case _Inspect_Line_Measurement:
         SingleROILineMeasurement(croppedImage, pData, rect);
         break;
+    case _Inspect_Color_Matching:
+        {
+        CvSize searchSize = cvSize(img->width, img->height);
+        IplImage* searchImg = cvCreateImage(searchSize, IPL_DEPTH_8U, 3);
+
+        if (img->nChannels == 4) {
+            if (strncmp(img->channelSeq, "BGRA", 4) == 0)
+                cvCvtColor(img, searchImg, CV_BGRA2BGR);
+            else
+                cvCvtColor(img, searchImg, CV_RGBA2BGR);
+        } else if (img->nChannels == 3)
+            cvCopy(img, searchImg);
+        SingleROIColorMatching(searchImg, pData, rect);
+        cvReleaseImage(&searchImg);
+        }
+        break;
     }
 	cvReleaseImage(&croppedImage);
 	cvReleaseImage(&graySearchImg);
@@ -1690,7 +1706,7 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
     CvSize templateSize = cvSize(pData->iplTemplate->width, pData->iplTemplate->height);
     IplImage* grayTemplateImg = cvCreateImage(templateSize, IPL_DEPTH_8U, 1);
     if (pData->iplTemplate->nChannels == 3)
-        cvCvtColor(pData->iplTemplate, grayTemplateImg, CV_RGB2GRAY);
+        cvCvtColor(pData->iplTemplate, grayTemplateImg, CV_BGR2GRAY);
     else
         cvCopy(pData->iplTemplate, grayTemplateImg);
 
@@ -1849,7 +1865,7 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     CvSize templateSize = cvSize(pData->iplTemplate->width, pData->iplTemplate->height);
     IplImage* grayTemplateImg = cvCreateImage(templateSize, IPL_DEPTH_8U, 1);
     if (pData->iplTemplate->nChannels == 3)
-        cvCvtColor(pData->iplTemplate, grayTemplateImg, CV_RGB2GRAY);
+        cvCvtColor(pData->iplTemplate, grayTemplateImg, CV_BGR2GRAY);
     else
         cvCopy(pData->iplTemplate, grayTemplateImg);
 
@@ -4122,6 +4138,105 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
         SaveOutImage(mat, pData, str);
     }
     theMainWindow->outWidget("LineMeasurement", mat);
+
+    return 0;
+}
+
+int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
+{
+    if (pData == nullptr)
+        return -1;
+
+
+    CvSize templateSize = cvSize(pData->iplTemplate->width, pData->iplTemplate->height);
+    IplImage* templateImg = cvCreateImage(templateSize, IPL_DEPTH_8U, 3);
+    if (pData->iplTemplate->nChannels == 3)
+        cvCopy(pData->iplTemplate, templateImg);
+    else
+        cvCvtColor(pData->iplTemplate, templateImg, CV_GRAY2BGR);
+
+
+    int method = 1; // Hue+Saturation
+    int hbins = 30;
+    int sbins = 32;
+    CParam *pParam = pData->getParam(("Method"));
+    if (pParam)
+       method = (int)pParam->Value.toDouble();
+    pParam = pData->getParam(("hbins"));
+    if (pParam)
+       hbins = (int)pParam->Value.toDouble();
+    pParam = pData->getParam(("sbins"));
+    if (pParam)
+       sbins = (int)pParam->Value.toDouble();
+    int nThresholdLowValue = 0;
+    pParam = pData->getParam(("Low Threshold"));
+    if (pParam)
+        nThresholdLowValue = pParam->Value.toDouble();
+    int nThresholdHighValue = 0;
+    pParam = pData->getParam(("High Threshold"));
+    if (pParam)
+        nThresholdHighValue = pParam->Value.toDouble();
+
+    Mat ref_hsv=cvarrToMat(templateImg);
+    Mat tar_hsv =cvarrToMat(croppedImage);
+    cv::imshow("templateImg", ref_hsv);
+    cv::imshow("searchImg", tar_hsv);
+
+    // Quantize the hue to 30 levels
+    // and the saturation to 32 levels
+    int histSize[] = {hbins, sbins};
+    // hue varies from 0 to 179, see cvtColor
+    float hranges[] = { 0, 180 };
+    // saturation varies from 0 (black-gray-white) to
+    // 255 (pure spectrum color)
+    float sranges[] = { 0, 256 };
+    const float* ranges[] = { hranges, sranges };
+    // we compute the histogram from the 0-th and 1-st channels
+    int channels[] = {0, 1};
+
+    int dims = 2;
+
+    if (method == 0) // Hue Only
+    {
+        dims = 1;
+    } else {
+        dims = 2;
+    }
+
+    cv::Mat hist;
+    cvtColor(ref_hsv, ref_hsv, COLOR_BGR2HSV);
+    //GaussianBlur(ref_hsv, ref_hsv, Size(3, 3), 0);
+
+    calcHist(&ref_hsv,
+          1, // Number of source images.
+          channels, // List of the dims channels used to compute the histogram.
+          cv::Mat(), // do not use mask
+          hist,  // Output histogram
+          dims, // dims
+          histSize, // Array of histogram sizes in each dimension. BINS 값.
+          ranges,  // Array of the dims arrays of the histogram bin boundaries in each dimension. Range값.
+          true, // the histogram is uniform
+          false
+      );
+
+    cv::normalize(hist, hist, 1.0);
+
+    cv::Mat result;
+    cvtColor(tar_hsv, tar_hsv, COLOR_BGR2HSV);
+    //GaussianBlur(tar_hsv, tar_hsv, Size(3, 3), 0);
+    calcBackProject(&tar_hsv,
+         1, // Number of source images.
+         channels,// The list of channels used to compute the back projection.
+         hist,    // Input histogram that can be dense or sparse.
+         result,  // Destination back projection array that is a single-channel array of the same size and depth as images[0].
+         ranges,  // Array of arrays of the histogram bin boundaries in each dimension.
+         255.0    // Optional scale factor for the output back projection.
+    );
+
+    cv::threshold(result, result, 35, 255, cv::THRESH_BINARY);
+    //cv::namedWindow("Back Project Result");
+    cv::imshow("Back Project Result", result);
+
 
     return 0;
 }

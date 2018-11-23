@@ -317,7 +317,7 @@ ObjectGroup *RoiReaderPrivate::readObjectGroup()
                 sub = QString("%1/%2.bmp").arg(mPath).arg(name);
                 //cv::Mat m = cv::imread(sub.toStdString(), 0);
                 //obj->iplTemplate = new IplImage(m);
-                obj->iplTemplate = cvLoadImage((const char*)sub.toStdString().c_str(), 0);
+                obj->iplTemplate = cvLoadImage((const char*)sub.toStdString().c_str(), CV_LOAD_IMAGE_COLOR);
             }
         }
     }

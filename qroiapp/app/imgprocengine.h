@@ -109,6 +109,7 @@ public:
     int SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROILineMeasurement(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
+    int SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
 
     cv::Mat drawGoodMatches(
         const cv::Mat& img1,

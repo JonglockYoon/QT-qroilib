@@ -50,6 +50,12 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Patt_MatchShapes,  CParam(_ProcessValue1, ("Shape matching rate"), _DoubleValue, ("85")),
     //_Inspect_Patt_MatchShapes,  CParam(_PriorityValue, ("Priority"), _IntValue, ("5")),
 
+    _Inspect_Color_Matching,  CParam(_ProcessValue1, ("Method"), _ComboValue, ("1"), ("HueOnly,Hue+Saturation")),
+    _Inspect_Color_Matching,  CParam(_ProcessValue1, ("hbins"), _IntValue, ("30")),
+    _Inspect_Color_Matching,  CParam(_ProcessValue1, ("sbins"), _IntValue, ("32")),
+    _Inspect_Color_Matching,  CParam(_ProcessValue2, ("Low Threshold"), _IntValue, ("35")),
+    _Inspect_Color_Matching,  CParam(_ProcessValue2, ("High Threshold"), _IntValue, ("255")),
+
     _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("Method"), _ComboValue, ("2"), ("SURF,SIFT,ORB")),
     _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("Param1"), _IntValue, ("2000")),
     _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("kDistanceCoef"), _IntValue, ("5")),
@@ -193,6 +199,7 @@ void CRecipeData::InitParamData()
     m_sInspList[_Inspect_Patt_Identify].sprintf(("Pattern Identify"));
     m_sInspList[_Inspect_Patt_MatchShapes].sprintf(("Pattern Shape Match"));
     m_sInspList[_Inspect_Patt_FeatureMatch].sprintf(("Feature Match"));
+    m_sInspList[_Inspect_Color_Matching].sprintf(("Color Matching"));
 
     m_sInspList[_Inspect_Roi_CenterOfPlusMark].sprintf(("Center of plusmark"));
     m_sInspList[_Inspect_Roi_SubpixelEdgeWithThreshold].sprintf(("Subpixel Edge with Threshold"));
@@ -284,22 +291,22 @@ void CRecipeData::SaveTemplelateImage(Qroilib::RoiObject *pRoiObject, IplImage *
 {
     QString strTemp;
 
-    IplImage *clone = cvCreateImage(cvSize(iplImg->width, iplImg->height), IPL_DEPTH_8U, 1);
+    IplImage *clone = cvCreateImage(cvSize(iplImg->width, iplImg->height), IPL_DEPTH_8U, 3);
     if (iplImg->nChannels == 3)
-        cvCvtColor(iplImg, clone, CV_RGB2GRAY);
+        cvCopy(iplImg, clone);
     else if (iplImg->nChannels == 4) {
         if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
-            cvCvtColor(iplImg, clone, CV_BGRA2GRAY);
+            cvCvtColor(iplImg, clone, CV_BGRA2BGR);
         else
-            cvCvtColor(iplImg, clone, CV_RGBA2GRAY);
+            cvCvtColor(iplImg, clone, CV_RGBA2BGR);
     } else
-        cvCopy(iplImg, clone);
+        cvCvtColor(iplImg, clone, CV_GRAY2BGR);
 
     if (pRoiObject->iplTemplate){
         cvReleaseImage(&pRoiObject->iplTemplate);
         pRoiObject->iplTemplate = nullptr;
     }
-    pRoiObject->iplTemplate = cvCreateImage(cvSize((int)pRoiObject->mPattern->width(), (int)pRoiObject->mPattern->height()), IPL_DEPTH_8U, 1);
+    pRoiObject->iplTemplate = cvCreateImage(cvSize((int)pRoiObject->mPattern->width(), (int)pRoiObject->mPattern->height()), IPL_DEPTH_8U, 3);
     cvSetImageROI(clone, cvRect((int)pRoiObject->mPattern->x(), (int)pRoiObject->mPattern->y(), (int)pRoiObject->mPattern->width(), (int)pRoiObject->mPattern->height()));
     cvCopy(clone, pRoiObject->iplTemplate);
     cvResetImageROI(clone);
