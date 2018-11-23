@@ -45,9 +45,6 @@ DialogApiTest::DialogApiTest(QWidget *parent) :
     connect(ui->comboBoxSource0, SIGNAL(activated(int)), this, SLOT(activatedComboBoxSource0(int)));
     connect(ui->comboBoxSource1, SIGNAL(activated(int)), this, SLOT(activatedComboBoxSource1(int)));
     QObject::connect(ui->chkBoxRealtime, SIGNAL(clicked(bool)), this, SLOT(changeRealtime(bool)));
-
-
-
 }
 
 DialogApiTest::~DialogApiTest()
@@ -224,7 +221,6 @@ void DialogApiTest::ExecApplication(IplImage* iplImg, IplImage* iplImg2)
         theMainWindow->outWidget(mName, outImg);
 }
 
-// ref : http://programmingfbf7290.tistory.com/entry/경계값-채우기copyMakeBorder-borderIntrepolate?category=666982
 void DialogApiTest::copyMakeBorderTest(IplImage* iplImg)
 {
     Mat image=cvarrToMat(iplImg);
@@ -243,6 +239,7 @@ void DialogApiTest::copyMakeBorderTest(IplImage* iplImg)
 }
 
 // 히스토그램 역투영
+// ref : https://blog.naver.com/ttootp/221244067721
 // ref : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html?highlight=calcbackproject
 // ref : http://vision0814.tistory.com/70
 // ref : http://hongkwan.blogspot.com/2013/01/opencv-4-4-example.html
@@ -264,43 +261,47 @@ void DialogApiTest::calcBackProjectTest(IplImage* iplImg, IplImage* iplImg2)
     // we compute the histogram from the 0-th and 1-st channels
     int channels[] = {0, 1};
 
+    int dims = 2;
 
-    //모델 이미지에 대한 히스토그램 연산
+    if (ui->BPCB2->isChecked()) // Hue Only
+    {
+        dims = 1;
+    } else {
+        dims = 2;
+    }
+
     cv::Mat hist;
     cvtColor(ref_hsv, ref_hsv, COLOR_BGR2HSV);
-    GaussianBlur(ref_hsv, ref_hsv, Size(3, 3), 0);
-    calcHist(&ref_hsv, // 히스토그램 계산
-          1,
-          channels, // 대상 채널
-          cv::Mat(), // 마스크 사용하지 않음
-          hist,  // 결과 히스토그램
-          2,
-          histSize, // 빈도수
-          ranges,  // 화소값 범위
-             true,
-             false
+    //GaussianBlur(ref_hsv, ref_hsv, Size(3, 3), 0);
+
+    calcHist(&ref_hsv,
+          1, // Number of source images.
+          channels, // List of the dims channels used to compute the histogram.
+          cv::Mat(), // do not use mask
+          hist,  // Output histogram
+          dims, // dims
+          histSize, // Array of histogram sizes in each dimension. BINS 값.
+          ranges,  // Array of the dims arrays of the histogram bin boundaries in each dimension. Range값.
+          true, // the histogram is uniform
+          false
       );
 
     cv::normalize(hist, hist, 1.0);
 
-    // 역투영 후의 히스토그램은 정규화를 거친 히스토그램에서
-    // 읽은 확률 값을 입력 영상 내의 각 화소값으로 대치한 것으로 구성
     cv::Mat result;
     cvtColor(tar_hsv, tar_hsv, COLOR_BGR2HSV);
-    GaussianBlur(tar_hsv, tar_hsv, Size(3, 3), 0);
+    //GaussianBlur(tar_hsv, tar_hsv, Size(3, 3), 0);
     calcBackProject(&tar_hsv,
-                     1,
-                     channels,     // 영상 채널에 속하는 히스토그램 차원인 벡터 지정
-                     hist,    // 히스토그램 사용
-                     result,       // 역투영 영상 결과
-                     ranges,       // 각 차원에 대한 값 범위
-                     255.0         // 히스토그램을 1을 255로 매핑하기 위해 선택한 스케일링 인자
+         1, // Number of source images.
+         channels,// The list of channels used to compute the back projection.
+         hist,    // Input histogram that can be dense or sparse.
+         result,  // Destination back projection array that is a single-channel array of the same size and depth as images[0].
+         ranges,  // Array of arrays of the histogram bin boundaries in each dimension.
+         255.0    // Optional scale factor for the output back projection.
     );
 
-    // 역투영 후의 히스토그램은 정규화를 거친 히스토그램에서 읽은 확률 값을 입력 영상 내의 각 화소값으로 대치한 것으로 구성
     cv::threshold(result, result, 35, 255, cv::THRESH_BINARY);
     cv::namedWindow("Back Project Result");
     cv::imshow("Back Project Result", result);
-
 }
 
