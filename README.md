@@ -1,5 +1,5 @@
 # qroilib
-QT Vision ROI Library(QROILIB_VERSION_STRING=0.0.9)
+QT Vision ROI Library(QROILIB_VERSION_STRING=1.0.1)
 -----
 <pre>
 OpenCV : 3.4.0 
@@ -14,6 +14,7 @@ Windows : QT-5.9.0
 0.0.7 : update CImgProcBase::AffineTransform()
 0.0.8 : update OrthogonalRenderer::drawRoiObject()
 0.0.9 : update FillBlob parameter
+1.0.1 : change template image gray to color
 </pre>
 -----
 
