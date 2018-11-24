@@ -192,8 +192,10 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
                 cvCvtColor(img, searchImg, CV_BGRA2BGR);
             else
                 cvCvtColor(img, searchImg, CV_RGBA2BGR);
-        } else if (img->nChannels == 3)
+        }
+        else if (img->nChannels == 3)
             cvCopy(img, searchImg);
+
         SingleROIColorMatching(searchImg, pData, rect);
         cvReleaseImage(&searchImg);
         }
@@ -1688,9 +1690,7 @@ int CImgProcEngine::SingleROICircleWithEdge(IplImage* croppedImage, RoiObject *p
 int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QRectF rect)
 {
     Q_UNUSED(rect);
-    if (pData == nullptr)
-        return -1;
-    if (pData->iplTemplate == nullptr)
+    if (pData == nullptr || pData->iplTemplate == nullptr)
         return -1;
     QString str;
 
@@ -3716,6 +3716,73 @@ int CImgProcEngine::NoiseOut(RoiObject *pData, IplImage* grayImg, int t, int nDb
     cvReleaseStructuringElement(&element);
     return 0;
 }
+int CImgProcEngine::NoiseOut(RoiObject *pData, Mat grayImg, int t, int nDbg, int h)
+{
+    QString str;
+
+    if (t < 0)
+        t = _ProcessValue1;
+
+    // 1. Template이미지의 노이즈 제거
+    int filterSize = 3;  // 필터의 크기를 3으로 설정 (Noise out area)
+    Mat element;
+    if (filterSize <= 0)
+        filterSize = 1;
+    if (filterSize % 2 == 0)
+        filterSize++;
+    element = getStructuringElement(MORPH_RECT, Size(filterSize,filterSize), Point(-1,-1));
+
+    int nNoiseout = 0;
+    if (pData != nullptr) {
+        CParam *pParam = pData->getParam(("Noise out 1"),t);
+        if (pParam)
+            nNoiseout = pParam->Value.toDouble();
+    }
+    if (nNoiseout != 0)
+    {
+        if (nNoiseout < 0)
+            morphologyEx(grayImg, grayImg, MORPH_OPEN, element, Point(-1,-1), -nNoiseout);
+        else
+            morphologyEx(grayImg, grayImg, MORPH_CLOSE, element, Point(-1,-1), nNoiseout);
+    }
+
+    nNoiseout = 0;
+    if (pData != nullptr) {
+        CParam *pParam = pData->getParam(("Noise out 2"),t);
+        if (pParam)
+            nNoiseout = pParam->Value.toDouble();
+    }
+    if (nNoiseout != 0)
+    {
+        if (nNoiseout < 0)
+            morphologyEx(grayImg, grayImg, MORPH_OPEN, element, Point(-1,-1), -nNoiseout);
+        else
+            morphologyEx(grayImg, grayImg, MORPH_CLOSE, element, Point(-1,-1), nNoiseout);
+    }
+
+    nNoiseout = 0;
+    if (pData != nullptr) {
+        CParam *pParam = pData->getParam(("Noise out 3"),t);
+        if (pParam)
+            nNoiseout = pParam->Value.toDouble();
+    }
+    if (nNoiseout != 0)
+    {
+        if (nNoiseout < 0)
+            morphologyEx(grayImg, grayImg, MORPH_OPEN, element, Point(-1,-1), -nNoiseout);
+        else
+            morphologyEx(grayImg, grayImg, MORPH_CLOSE, element, Point(-1,-1), nNoiseout);
+    }
+
+    if (m_bSaveEngineImg){
+        if (h >= 0)
+            str.sprintf(("%d_%03d_cvClose.jpg"), h, nDbg);
+        else str.sprintf(("%03d_cvClose.jpg"), nDbg);
+        SaveOutImage(grayImg, pData, str);
+    }
+
+    return 0;
+}
 
 //
 // Dialate / Erode
@@ -4144,7 +4211,7 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
 
 int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
 {
-    if (pData == nullptr)
+    if (pData == nullptr || pData->iplTemplate == nullptr)
         return -1;
 
 
@@ -4179,8 +4246,8 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
 
     Mat ref_hsv=cvarrToMat(templateImg);
     Mat tar_hsv =cvarrToMat(croppedImage);
-    cv::imshow("templateImg", ref_hsv);
-    cv::imshow("searchImg", tar_hsv);
+    //cv::imshow("templateImg", ref_hsv);
+    //cv::imshow("searchImg", tar_hsv);
 
     // Quantize the hue to 30 levels
     // and the saturation to 32 levels
@@ -4195,7 +4262,6 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
     int channels[] = {0, 1};
 
     int dims = 2;
-
     if (method == 0) // Hue Only
     {
         dims = 1;
@@ -4233,13 +4299,61 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
          255.0    // Optional scale factor for the output back projection.
     );
 
-    cv::threshold(result, result, 35, 255, cv::THRESH_BINARY);
-    //cv::namedWindow("Back Project Result");
-    cv::imshow("Back Project Result", result);
+    cv::threshold(result, result, nThresholdLowValue, nThresholdHighValue, cv::THRESH_BINARY);
 
+    NoiseOut(pData, result, _ProcessValue3, 131);
+
+    double area = 0;
+    pParam = pData->getParam(("Area"));
+    if (pParam)
+       area = pParam->Value.toDouble();
+    if (area > 0)
+    {
+        CBlobResult blobs;
+        blobs = CBlobResult(result);
+        int nBlobs = blobs.GetNumBlobs();
+        for (int i = 0; i < nBlobs; i++) {
+            CBlob *p = blobs.GetBlob(i);
+            if (area > p->Area()) {
+                p->ClearContours();
+            }
+        }
+        int type = result.type();
+        result = cv::Mat::zeros(cv::Size(result.cols, result.rows), type);
+
+        for (int i = 0; i < nBlobs; i++)
+        {
+            CBlob *p = blobs.GetBlob(i);
+            p->FillBlob(result, CVX_WHITE, 0, 0, true);
+        }
+    }
+
+    if (m_bSaveEngineImg)
+    {
+        QString str;
+        str.sprintf(("134_Area.jpg"));
+        SaveOutImage(result, pData, str);
+    }
+
+    //cv::namedWindow("Back Project Result");
+    //cv::imshow("Back Project Result", result);
+    CBlobResult blobs;
+    blobs = CBlobResult(result);
+    int nBlobs = blobs.GetNumBlobs();
+    for (int i = 0; i < nBlobs; i++) {
+        CBlob *p = blobs.GetBlob(i);
+        CvPoint pt = p->getCenter();
+        CvRect r = p->GetBoundingBox();
+        m_DetectResult.pt = CvPoint2D32f(pt.x, pt.y);
+        m_DetectResult.tl = CvPoint2D32f(r.x, r.y);
+        m_DetectResult.br = CvPoint2D32f(r.x + r.width, r.y + r.height);
+        pData->m_vecDetectResult.push_back(m_DetectResult);
+    }
 
     return 0;
 }
+
+
 
 int CImgProcEngine::OneLineMeasurement(cv::Mat& mat, vector<Point>& cone, RoiObject *pData, vector<ElemLineIt> &vecLineIt)
 {

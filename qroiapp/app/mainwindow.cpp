@@ -601,16 +601,16 @@ void MainWindow::setInspectAll()
 
 
         CvSize isize = cvSize(iplImg->width, iplImg->height);
-        IplImage *grayImg = cvCreateImage(isize, IPL_DEPTH_8U, 1);
+        IplImage *colorImg = cvCreateImage(isize, IPL_DEPTH_8U, 3);
         if (iplImg->nChannels == 3)
-            cvCvtColor(iplImg, grayImg, CV_RGB2GRAY);
+            cvCopy(iplImg, colorImg);
         else if (iplImg->nChannels == 4) {
             if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
-                cvCvtColor(iplImg, grayImg, CV_BGRA2GRAY);
+                cvCvtColor(iplImg, colorImg, CV_BGRA2BGR);
             else
-                cvCvtColor(iplImg, grayImg, CV_RGBA2GRAY);
+                cvCvtColor(iplImg, colorImg, CV_RGBA2BGR);
         } else
-            cvCopy(iplImg, grayImg);
+            cvCvtColor(iplImg, colorImg, CV_GRAY2BGR);
 
 
         for (const Layer *layer : v->mRoi->objectGroups()) {
@@ -618,7 +618,7 @@ void MainWindow::setInspectAll()
             for (const Qroilib::RoiObject *roiObject : objectGroup) {
                 Qroilib::RoiObject *mObject = (Qroilib::RoiObject *)roiObject;
 
-                pImgProcEngine->InspectOneItem(grayImg, mObject);
+                pImgProcEngine->InspectOneItem(colorImg, mObject);
                 pImgProcEngine->DrawResultCrossMark(iplImg, mObject);
                 mObject->m_vecDetectResult.clear();
 
@@ -636,8 +636,8 @@ void MainWindow::setInspectAll()
         }
         seq++;
 
-        if (grayImg)
-            cvReleaseImage(&grayImg);
+        if (colorImg)
+            cvReleaseImage(&colorImg);
     }
 }
 
