@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="557" height="264" roiwidth="1" roiheight="1" nextobjectid="1">
+<roimap version="1.0" orientation="orthogonal" renderorder="right-down" width="3456" height="4608" roiwidth="1" roiheight="1" nextobjectid="1">
  <objectgroup name="channel1" x="-1" y="-1">
-  <object id="1" name="noname1123231345" x="0" y="0" width="557" height="264">
+  <object id="1" name="noname1124132542" x="3" y="6" width="3324.4" height="4334.6">
    <pattern child="2"/>
-   <param InspectType="16">
-    <param00 steptype="1" name="Method" valuetype="4" value="1" detail="HueOnly,Hue+Saturation"/>
-    <param01 steptype="1" name="hbins" valuetype="1" value="30" detail=""/>
-    <param02 steptype="1" name="sbins" valuetype="1" value="32" detail=""/>
-    <param03 steptype="2" name="Low Threshold" valuetype="1" value="1" detail=""/>
-    <param04 steptype="2" name="High Threshold" valuetype="1" value="255" detail=""/>
-    <param05 steptype="3" name="Noise out 1" valuetype="1" value="0" detail=""/>
-    <param06 steptype="3" name="Noise out 2" valuetype="1" value="0" detail=""/>
-    <param07 steptype="3" name="Area" valuetype="1" value="1000" detail=""/>
+   <param InspectType="15">
+    <param00 steptype="1" name="Method" valuetype="4" value="2" detail="SURF,SIFT,ORB"/>
+    <param01 steptype="1" name="Param1" valuetype="1" value="9000" detail=""/>
+    <param02 steptype="1" name="kDistanceCoef" valuetype="1" value="10" detail=""/>
+    <param03 steptype="1" name="kMaxMatchingSize" valuetype="1" value="400" detail=""/>
    </param>
   </object>
-  <object id="2" x="96.484" y="109.6" width="45.172" height="38.8">
+  <object id="2" x="294.2" y="1138.2" width="615.6" height="800">
    <rectangle parent="1"/>
    <param InspectType="500">
     <param00 steptype="1" name="" valuetype="1" value="0" detail=""/>

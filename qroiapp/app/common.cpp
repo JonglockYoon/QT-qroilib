@@ -161,7 +161,7 @@ void mat_to_qimage(cv::InputArray image, QImage& out)
         case CV_8UC3:
         {
             Mat mat;
-            cvtColor(image, mat, COLOR_BGR2BGRA); //COLOR_BGR2RGB doesn't behave so use RGBA
+            cvtColor(image, mat, COLOR_BGR2BGRA);
             QImage view(mat.data, mat.cols, mat.rows, mat.step[0], QImage::Format_ARGB32);
             out = view.copy();
             break;

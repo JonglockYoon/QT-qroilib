@@ -370,14 +370,14 @@ IplImage* ViewOutPage::getIplcolor()
         cvReleaseImage(&colorImg);
     colorImg = cvCreateImage(isize, IPL_DEPTH_8U, 3);
     if (iplImg->nChannels == 1)
-        cvCvtColor(iplImg, colorImg, CV_GRAY2RGB);
+        cvCvtColor(iplImg, colorImg, CV_GRAY2BGR);
     else if (iplImg->nChannels == 3)
         cvCopy(iplImg, colorImg);
     else if (iplImg->nChannels == 4) {
         if (strncmp(iplImg->channelSeq, "BGRA", 4) == 0)
-            cvCvtColor(iplImg, colorImg, CV_BGRA2RGB);
+            cvCvtColor(iplImg, colorImg, CV_BGRA2BGR);
         else
-            cvCvtColor(iplImg, colorImg, CV_RGBA2RGB);
+            cvCvtColor(iplImg, colorImg, CV_RGBA2BGR);
 
         int step = colorImg->widthStep;
         int width = colorImg->width;

@@ -101,23 +101,23 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
 	pData->m_vecDetectResult.clear();
 
     CvSize searchSize = cvSize(img->width, img->height);
-	IplImage* graySearchImg = cvCreateImage(searchSize, IPL_DEPTH_8U, 1);
+    IplImage* searchImg = cvCreateImage(searchSize, IPL_DEPTH_8U, 3);
 	QString strLog;
 
     if (img->nChannels == 3)
-		cvCvtColor(img, graySearchImg, CV_RGB2GRAY);
+        cvCopy(img, searchImg);
     else if (img->nChannels == 4) {
         if (strncmp(img->channelSeq, "BGRA", 4) == 0)
-            cvCvtColor(img, graySearchImg, CV_BGRA2GRAY);
+            cvCvtColor(img, searchImg, CV_BGRA2BGR);
         else
-            cvCvtColor(img, graySearchImg, CV_RGBA2GRAY);
+            cvCvtColor(img, searchImg, CV_RGBA2BGR);
     } else
-		cvCopy(img, graySearchImg);
+        cvCvtColor(img, searchImg, CV_GRAY2BGR);
 
 //    if (m_bSaveEngineImg)
 //	{
-//        str.sprintf(("0_%d_grayImage.jpg"), 110);
-//        SaveOutImage(graySearchImg, pData, str, false);
+//        str.sprintf(("0_%d_Image.jpg"), 110);
+//        SaveOutImage(searchImg, pData, str, false);
 //	}
 
 	IplImage* croppedImage;
@@ -126,19 +126,19 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
 
     if (rect.left() < 0)	rect.setLeft(0);
     if (rect.top() < 0)	rect.setTop(0);
-    if (rect.right() >= graySearchImg->width) rect.setRight(graySearchImg->width);
-    if (rect.bottom() >= graySearchImg->height) rect.setBottom(graySearchImg->height);
+    if (rect.right() >= searchImg->width) rect.setRight(searchImg->width);
+    if (rect.bottom() >= searchImg->height) rect.setBottom(searchImg->height);
     pData->setBounds(rect);
     if (rect.width() < 0 || rect.height() < 0) {
-        cvReleaseImage(&graySearchImg);
+        cvReleaseImage(&searchImg);
         return -1;
     }
 
     Point2f left_top = Point2f(rect.left(), rect.top());
-    cvSetImageROI(graySearchImg, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
-    croppedImage = cvCreateImage(cvSize(rect.width(), rect.height()), graySearchImg->depth, graySearchImg->nChannels);
-	cvCopy(graySearchImg, croppedImage);
-	cvResetImageROI(graySearchImg);
+    cvSetImageROI(searchImg, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
+    croppedImage = cvCreateImage(cvSize(rect.width(), rect.height()), searchImg->depth, searchImg->nChannels);
+    cvCopy(searchImg, croppedImage);
+    cvResetImageROI(searchImg);
 
     //int nDirection;
 	switch (pData->mInspectType)
@@ -183,26 +183,11 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
         SingleROILineMeasurement(croppedImage, pData, rect);
         break;
     case _Inspect_Color_Matching:
-        {
-        CvSize searchSize = cvSize(img->width, img->height);
-        IplImage* searchImg = cvCreateImage(searchSize, IPL_DEPTH_8U, 3);
-
-        if (img->nChannels == 4) {
-            if (strncmp(img->channelSeq, "BGRA", 4) == 0)
-                cvCvtColor(img, searchImg, CV_BGRA2BGR);
-            else
-                cvCvtColor(img, searchImg, CV_RGBA2BGR);
-        }
-        else if (img->nChannels == 3)
-            cvCopy(img, searchImg);
-
-        SingleROIColorMatching(searchImg, pData, rect);
-        cvReleaseImage(&searchImg);
-        }
+        SingleROIColorMatching(croppedImage, pData, rect);
         break;
     }
 	cvReleaseImage(&croppedImage);
-	cvReleaseImage(&graySearchImg);
+    cvReleaseImage(&searchImg);
 
 	return 0;
 }
@@ -312,7 +297,7 @@ int CImgProcEngine::GetAlignPtWithMask(RoiObject* pData, IplImage* graySearchImg
     return 0;
 }
 
-int CImgProcEngine::TowPointAlignImage(IplImage* src)
+int CImgProcEngine::TowPointAlignImage(IplImage* gray)
 {
     QString str;
 
@@ -328,7 +313,7 @@ int CImgProcEngine::TowPointAlignImage(IplImage* src)
         for (const Qroilib::RoiObject *roiObject : objectGroup) {
             Qroilib::RoiObject *mObject = (Qroilib::RoiObject *)roiObject;
             if (mObject->mInspectType == _Inspect_Roi_Corner) {
-                GetAlignPtWithMask(mObject, src);
+                GetAlignPtWithMask(mObject, gray);
                 break;
             }
         }
@@ -380,8 +365,8 @@ int CImgProcEngine::TowPointAlignImage(IplImage* src)
 
         // center of image
         CvPoint2D32f dPointCenter;
-        dPointCenter.x = src->width / 2.0  * dResX;
-        dPointCenter.y = src->height / 2.0 * dResY;
+        dPointCenter.x = gray->width / 2.0  * dResX;
+        dPointCenter.y = gray->height / 2.0 * dResY;
 
 
         //align(mask) image rotate.
@@ -467,12 +452,12 @@ int CImgProcEngine::TowPointAlignImage(IplImage* src)
 
 
         cvErode(trans, trans, nullptr, 1);
-        cvAnd(src, trans, src);
+        cvAnd(gray, trans, gray);
 
         if (m_bSaveEngineImg)
         {
             str.sprintf(("206_grapimg.jpg"));
-            SaveOutImage(src, nullptr, str);
+            SaveOutImage(gray, nullptr, str);
         }
 
         if (maskImg) cvReleaseImage(&maskImg);
@@ -535,7 +520,7 @@ int CImgProcEngine::MeasureAlignImage(IplImage* src)
             cvSetImageROI(src, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
             croppedImage = cvCreateImage(cvSize(rect.width(), rect.height()), IPL_DEPTH_8U, 1);
             if (src->nChannels == 3)
-                cvCvtColor(src, croppedImage, CV_RGB2GRAY);
+                cvCvtColor(src, croppedImage, CV_BGR2GRAY);
             else
                 cvCopy(src, croppedImage);
             cvResetImageROI(src);
@@ -668,7 +653,7 @@ int CImgProcEngine::MeasureAlignImage(IplImage* src)
             cvSetImageROI(src, cvRect((int)left_top.x, (int)left_top.y, rect.width(), rect.height()));
             croppedImage = cvCreateImage(cvSize(rect.width(), rect.height()), IPL_DEPTH_8U, 1);
             if (src->nChannels == 3)
-                cvCvtColor(src, croppedImage, CV_RGB2GRAY);
+                cvCvtColor(src, croppedImage, CV_BGR2GRAY);
             else
                 cvCopy(src, croppedImage);
             cvResetImageROI(src);
@@ -708,11 +693,17 @@ int CImgProcEngine::MeasureAlignImage(IplImage* src)
 
 //
 //
-int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObject *pData, QRectF rectIn)
+int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImage, RoiObject *pData, QRectF rectIn)
 {
 	QString str;
     IplImage* drawImage = nullptr;
-	IplImage* croppedImage = cvCloneImage(croppedImageIn);
+    CvSize sz = cvSize(croppedImage->width, croppedImage->height);
+    IplImage* grayImage = cvCreateImage(sz, IPL_DEPTH_8U, 1);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, grayImage, CV_BGR2GRAY);
+    else
+        cvCopy(croppedImage, grayImage);
+
     int MinMomentSize = 6, MaxMomentSize = 600;
 	int nMinCircleRadius = 300;
 	int nMaxCircleRadius = 1000;
@@ -732,12 +723,12 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
             nThresholdValue = pParam->Value.toDouble();
 
 		if (nThresholdValue == 0) {
-			ThresholdOTSU(pData, croppedImage, 130);
+            ThresholdOTSU(pData, grayImage, 130);
 		}
 		else
-			ThresholdRange(pData, croppedImage, 130);
+            ThresholdRange(pData, grayImage, 130);
 
-        NoiseOut(pData, croppedImage, _ProcessValue1, 131);
+        NoiseOut(pData, grayImage, _ProcessValue1, 131);
 	}
 	else {
 		IplConvKernel *element;
@@ -745,40 +736,40 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 		//CBlobResult blobs;
 		//int n;
 
-		cvInRangeS(croppedImage, cvScalar(200), cvScalar(255), croppedImage);
+        cvInRangeS(grayImage, cvScalar(200), cvScalar(255), grayImage);
 
 		filterSize = 3;
         element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
-        cvMorphologyEx(croppedImage, croppedImage, nullptr, element, CV_MOP_OPEN, 2);
-        cvMorphologyEx(croppedImage, croppedImage, nullptr, element, CV_MOP_CLOSE, 2);
+        cvMorphologyEx(grayImage, grayImage, nullptr, element, CV_MOP_OPEN, 2);
+        cvMorphologyEx(grayImage, grayImage, nullptr, element, CV_MOP_CLOSE, 2);
 		cvReleaseStructuringElement(&element);
 
         if (m_bSaveEngineImg)
 		{
 			str.sprintf(("%d_Preprocess.jpg"), 132);
-            SaveOutImage(croppedImage, nullptr, str, false);
+            SaveOutImage(grayImage, nullptr, str, false);
 		}
 	}
 
     if (m_bSaveEngineImg) {
-		drawImage = cvCreateImage(cvSize(croppedImage->width, croppedImage->height), croppedImage->depth, 3);
+        drawImage = cvCreateImage(cvSize(grayImage->width, grayImage->height), grayImage->depth, 3);
         cvZero(drawImage);
     }
-    FilterLargeBlob(croppedImage, nMaxCircleRadius*2);
+    FilterLargeBlob(grayImage, nMaxCircleRadius*2);
     if (m_bSaveEngineImg)
     {
         QString str; str.sprintf(("0_%d_ExcludeLargeBlob.jpg"), 133);
-        SaveOutImage(croppedImage, pData, str);
+        SaveOutImage(grayImage, pData, str);
     }
 
-    FilterLargeArea(croppedImage);
+    FilterLargeArea(grayImage);
     if (m_bSaveEngineImg)
 	{
         str.sprintf(("134_cvApproxInImage.jpg"));
-        SaveOutImage(croppedImage, pData, str, false);
+        SaveOutImage(grayImage, pData, str, false);
 	}
 
-    Expansion(pData, croppedImage, _ProcessValue1, 134);
+    Expansion(pData, grayImage, _ProcessValue1, 134);
 
 
 
@@ -790,7 +781,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 	CvSeq* ptseq;
 //	CvSeq* defect = cvCreateSeq(CV_SEQ_KIND_GENERIC | CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), m_storage);
 
-	cvFindContours(croppedImage, m_storage, &m_seq, sizeof(CvContour), CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    cvFindContours(grayImage, m_storage, &m_seq, sizeof(CvContour), CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// (2) 외곽선 근사화
@@ -806,7 +797,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
         if (m_approxDP_seq == nullptr)
 		{
 			if (m_storage) cvReleaseMemStorage(&m_storage);
-			if (croppedImage) cvReleaseImage(&croppedImage);
+            if (grayImage) cvReleaseImage(&grayImage);
 			if (drawImage) cvReleaseImage(&drawImage);
 			return -1;
 		}
@@ -865,7 +856,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 				////////////////////////////////////////////////////////////////////////////////////////////////////
 				// (4) 중심점 계산
 				////////////////////////////////////////////////////////////////////////////////////////////////////
-                //Point2f centerPoint = CrossPointOfThinner(pData, croppedImageIn, ptseq);
+                //Point2f centerPoint = CrossPointOfThinner(pData, grayImage, ptseq);
                 Point2f centerPoint = CenterOfMoment(ptseq);
 
                 if (m_bSaveEngineImg)
@@ -898,7 +889,7 @@ int CImgProcEngine::SingleROICenterOfPlusMark(IplImage* croppedImageIn, RoiObjec
 //	if (defect) cvClearSeq(defect);
 	if (m_storage) cvReleaseMemStorage(&m_storage);
 
-	if (croppedImage) cvReleaseImage(&croppedImage);
+    if (grayImage) cvReleaseImage(&grayImage);
 	if (drawImage) cvReleaseImage(&drawImage);
 
 	if (m_DetectResult.pt.x == 0 || m_DetectResult.pt.y == 0) return -1;
@@ -1103,7 +1094,13 @@ int CImgProcEngine::CenterOfPlusmarkVerify(RoiObject *pData, IplImage* imageIn, 
 double CImgProcEngine::SingleROISubPixEdgeWithThreshold(IplImage* croppedImage, RoiObject *pData, QRectF rect)
 {
 	QString str;
-	IplImage* grayImg = cvCloneImage(croppedImage);
+    CvSize sz1 = cvSize(croppedImage->width, croppedImage->height);
+    IplImage* grayImg = cvCreateImage(sz1, IPL_DEPTH_8U, 1);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, grayImg, CV_BGR2GRAY);
+    else
+        cvCopy(croppedImage, grayImg);
+
 	vector<cv::Point2f> vecEdges;
 
 	int nThresholdValue = 0;
@@ -1380,7 +1377,12 @@ int CImgProcEngine::SingleROICircleWithThreshold(IplImage* croppedImage, RoiObje
 {
     Q_UNUSED(rect);
     //QString str;
-	IplImage* grayImg = cvCloneImage(croppedImage);
+    CvSize sz = cvSize(croppedImage->width, croppedImage->height);
+    IplImage* grayImg = cvCreateImage(sz, IPL_DEPTH_8U, 1);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, grayImg, CV_BGR2GRAY);
+    else
+        cvCopy(croppedImage, grayImg);
 
     //int ret = 0;
     CvMemStorage* storage = nullptr;
@@ -1472,7 +1474,13 @@ int CImgProcEngine::SingleROICircleWithEdge(IplImage* croppedImage, RoiObject *p
 {
     Q_UNUSED(rect);
     //QString str;
-	IplImage* grayImg = cvCloneImage(croppedImage);
+    CvSize sz = cvSize(croppedImage->width, croppedImage->height);
+    IplImage* grayImg = cvCreateImage(sz, IPL_DEPTH_8U, 1);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, grayImg, CV_BGR2GRAY);
+    else
+        cvCopy(croppedImage, grayImg);
+
 	int filterSize = 3;
     IplConvKernel *element = cvCreateStructuringElementEx(filterSize, filterSize, filterSize / 2, filterSize / 2, CV_SHAPE_RECT, nullptr);
 
@@ -1552,8 +1560,6 @@ int CImgProcEngine::SingleROICircleWithEdge(IplImage* croppedImage, RoiObject *p
 		QString str; str.sprintf(("%d_Src.jpg"), 204);
 		SaveOutImage(grayImg, pData, str);
 	}
-
-
 
 	nNoiseout = 2; // 흑색강조
 	nNoiseout = 10; // 흑색강조 - pba
@@ -1697,7 +1703,7 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
     CvSize searchSize = cvSize(grayImage->width, grayImage->height);
     IplImage* graySearchImg = cvCreateImage(searchSize, IPL_DEPTH_8U, 1);
     if (grayImage->nChannels == 3)
-        cvCvtColor(grayImage, graySearchImg, CV_RGB2GRAY);
+        cvCvtColor(grayImage, graySearchImg, CV_BGR2GRAY);
     else
         cvCopy(grayImage, graySearchImg);
 
@@ -1795,11 +1801,10 @@ int CImgProcEngine::SinglePattIdentify(IplImage* grayImage, RoiObject *pData, QR
 
         if (m_DetectResult.result == true)
         {
-            m_DetectResult.pt = CvPoint2D32f(left_top.x, left_top.y);
+            m_DetectResult.resultType = RESULTTYPE_RECT;
+            m_DetectResult.pt = CvPoint2D32f(left_top.x + pData->iplTemplate->width/2, left_top.y + pData->iplTemplate->height/2);
             m_DetectResult.tl = CvPoint2D32f(left_top.x, left_top.y);
             m_DetectResult.br = CvPoint2D32f(left_top.x + pData->iplTemplate->width, left_top.y + pData->iplTemplate->height);
-            m_DetectResult.dRadius = 0;
-            m_DetectResult.dAngle = 0;
             pData->m_vecDetectResult.push_back(m_DetectResult);
         }
     }
@@ -1821,13 +1826,18 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
     Q_UNUSED(rectIn);
     if (pData->iplTemplate == nullptr)
         return -1;
+    CvSize sz = cvSize(croppedImage->width, croppedImage->height);
+    IplImage* grayImg = cvCreateImage(sz, IPL_DEPTH_8U, 1);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, grayImg, CV_BGR2GRAY);
+    else
+        cvCopy(croppedImage, grayImg);
 
     clock_t start_time1 = clock();
 
     QString str;
     int retry = 0;
     CParam *pParam;
-    IplImage* grayImg = nullptr;
     int nThresholdHighValue;
 
     nThresholdHighValue = 255;
@@ -1836,9 +1846,6 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
         nThresholdHighValue = pParam->Value.toDouble();
 
     pData->m_vecDetectResult.clear();
-    if (grayImg != nullptr)
-        cvReleaseImage(&grayImg);
-    grayImg = cvCloneImage(croppedImage);
 
     if (m_bSaveEngineImg)
     {
@@ -1877,7 +1884,7 @@ int CImgProcEngine::SinglePattMatchShapes(IplImage* croppedImage, RoiObject *pDa
 
 
     IplImage* g2 = cvCreateImage(cvSize(grayTemplateImg->width, grayTemplateImg->height), IPL_DEPTH_8U, 1);
-    cvCopy(pData->iplTemplate, g2);
+    cvCopy(grayTemplateImg, g2);
 
     if (nThresholdHighValue == 0)
         ThresholdOTSU(pData, g2, 256);
@@ -2018,6 +2025,12 @@ int CImgProcEngine::SinglePattFeatureMatch(IplImage* croppedImage, RoiObject *pD
     Q_UNUSED(rectIn);
     //if (pData->iplTemplate == nullptr)
     //    return -1;
+
+    if (m_bSaveEngineImg)
+    {
+        QString str; str.sprintf(("%d_TemplateImg.jpg"), 200);
+        SaveOutImage(pData->iplTemplate, pData, str);
+    }
 
     clock_t start_time1 = clock();
 
@@ -2224,6 +2237,8 @@ int CImgProcEngine::SingleROIFindShape(IplImage* croppedImage, RoiObject *pData,
     if (grayImg != nullptr)
         cvReleaseImage(&grayImg);
     grayImg = cvCloneImage(croppedImage);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, croppedImage, CV_BGR2GRAY);
 
     nThresholdLowValue = 0;
     pParam = pData->getParam(("Low Threshold"), _ProcessValue1+retry);
@@ -2469,6 +2484,9 @@ bool CImgProcEngine::SetROIAreaForCriteriaPosition(RoiObject *pData, QString str
 int CImgProcEngine::SingleROICorner(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
 {
     Q_UNUSED(rect);
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, croppedImage, CV_BGR2GRAY);
+
     int nCornerType = 1;
     int nFindMethod = 1; // 0 - 코너 찾기, 1-가로,세로 Line으로 코너 찾기
     nCornerType = 0;	// 좌상단 코너
@@ -3305,7 +3323,7 @@ double CImgProcEngine::TemplateMatch(RoiObject *pData, IplImage* graySearchImgIn
     double min, max;
 
     IplImage* g2 = cvCreateImage(cvSize(grayTemplateImg->width, grayTemplateImg->height), IPL_DEPTH_8U, 1);
-    cvCopy(pData->iplTemplate, g2);
+    cvCopy(grayTemplateImg, g2);
 
     int nThresholdValue = 0;
     CParam *pParam = pData->getParam(("High Threshold"));
@@ -3953,7 +3971,8 @@ void CImgProcEngine::SaveOutImage(cv::Mat imgOut, RoiObject *pData, QString strM
 int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
 {
     QString str;
-
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, croppedImage, CV_BGR2GRAY);
 
 
     tessApi->SetVariable("tessedit_char_whitelist",
@@ -4062,6 +4081,9 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
     QString str;
     QZXing *qz = new QZXing(nullptr);
 
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, croppedImage, CV_BGR2GRAY);
+
     ThresholdRange(pData, croppedImage, 130);
     NoiseOut(pData, croppedImage, _ProcessValue1, 131);
 
@@ -4099,6 +4121,8 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
 {
     if (pData == nullptr)
         return -1;
+    if (croppedImage->nChannels == 3)
+        cvCvtColor(croppedImage, croppedImage, CV_BGR2GRAY);
 
     int size1 = 1;
     int morph_size = 3;
@@ -4156,6 +4180,11 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
             SaveOutImage(mat, pData, str);
         }
 
+        int linecnt = 0;
+        double total = 0;
+        double maxwidth = 0;
+        double minwidth = 99999;
+
         Rect bounds(0, 0, mat.cols, mat.rows);
         for (int j=0; j<vecLineIt.size(); j++) {
             ElemLineIt *e = &vecLineIt[j];
@@ -4186,15 +4215,21 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
             }
             cnt--;
             e->len = cnt; // pixel count
+
+            if (e->len > 0)
+            {
+                total += e->len;
+                linecnt++;
+                if (e->len > maxwidth)
+                    maxwidth = e->len;
+                if (e->len < minwidth)
+                    minwidth = e->len;
+            }
         }
 
-        double total = 0;
-        for (int j=0; j<vecLineIt.size(); j++) {
-            ElemLineIt *e = &vecLineIt[j];
-            total += e->len;
-        }
-
-        str.sprintf(("LineMeasure AvgWidth=%.1f"), total/vecLineIt.size());
+        str.sprintf(("LineMeasure Avg=%.1f Min=%.1f Max=%.1f"),
+                    total/linecnt, minwidth, maxwidth);
+        qDebug() << str;
         theMainWindow->DevLogSave(str.toLatin1().data());
 
     }
@@ -4344,6 +4379,7 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
         CBlob *p = blobs.GetBlob(i);
         CvPoint pt = p->getCenter();
         CvRect r = p->GetBoundingBox();
+        m_DetectResult.resultType = RESULTTYPE_RECT;
         m_DetectResult.pt = CvPoint2D32f(pt.x, pt.y);
         m_DetectResult.tl = CvPoint2D32f(r.x, r.y);
         m_DetectResult.br = CvPoint2D32f(r.x + r.width, r.y + r.height);
@@ -4422,7 +4458,7 @@ int CImgProcEngine::OneLineMeasurement(cv::Mat& mat, vector<Point>& cone, RoiObj
         }
         //dAngle = 0;
         dAngle = vAngle[mid];
-        qDebug() << "angle1: " << dAngle;
+        //qDebug() << "angle1: " << dAngle;
         MakeOneElemLine(Point(x0,y0), dAngle, e1);
         AppendOneLine(mat, vecLineIt, e1, interval, dAngle);
 
@@ -4474,9 +4510,13 @@ int CImgProcEngine::AppendOneLine(cv::Mat& mat, vector<ElemLineIt> &vecLineIt, E
         }
         for(int i=interval; i<it.count; i=i+interval) {
             MakeOneElemLine(buf[i], dAngle, e1);
-            vecLineIt.push_back(e1);
+            double d1 = sqrt(pow(e1.first.x - e1.second.x, 2) + pow(e1.first.y - e1.second.y, 2));
+            if (d1 > 3)
+                vecLineIt.push_back(e1);
         }
     }
-    vecLineIt.push_back(ee);
+    double d1 = sqrt(pow(ee.first.x - ee.second.x, 2) + pow(ee.first.y - ee.second.y, 2));
+    if (d1 > 3)
+        vecLineIt.push_back(ee);
     return 0;
 }

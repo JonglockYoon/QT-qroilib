@@ -213,7 +213,7 @@ void CRecipeData::InitParamData()
     m_sInspList[_Inspect_Roi_Corner].sprintf(("Corner"));
     m_sInspList[_Inspect_Teseract].sprintf(("OCR"));
     m_sInspList[_Inspect_BarCode].sprintf(("BarCode"));
-    m_sInspList[_Inspect_Line_Measurement].sprintf(("Thinning"));
+    m_sInspList[_Inspect_Line_Measurement].sprintf(("Line Measurement"));
 
 
     m_sInspList[_Inspect_Point_Coordnation].sprintf(("Point"));

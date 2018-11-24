@@ -76,8 +76,8 @@ public:
 
 public:
     int GetAlignPtWithMask(Qroilib::RoiObject* pData, IplImage* graySearchImg);
-    int TowPointAlignImage(IplImage* src);
-    int MeasureAlignImage(IplImage* img);
+    int TowPointAlignImage(IplImage* gray);
+    int MeasureAlignImage(IplImage* src);
     int InspectOneItem(IplImage* img, Qroilib::RoiObject *pData);
 
     int OneMatchShapes(vector<vector<Point> >& contours, vector<vector<Point> >& templateseq, Qroilib::RoiObject *pData, int seq);
