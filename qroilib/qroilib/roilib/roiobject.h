@@ -90,7 +90,7 @@ typedef struct  _tagDetectResult
     CvPoint2D32f bl; // rect4p
     CvPoint2D32f br; // rect, rect4p
     bool	result; // bool
-    std::vector<CvPoint2D32f> vpolygon;
+    //std::vector<CvPoint2D32f> vpolygon;
 
     double dRadius;
     double dAngle;
@@ -98,8 +98,9 @@ typedef struct  _tagDetectResult
     double dValue;
     double dWidth;
     double dHeight;
-    std::string str;
-    IplImage* img;
+    char str[128];
+    //std::string str;
+    //IplImage* img;
 
 } DetectResult;
 

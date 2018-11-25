@@ -79,7 +79,7 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
     str.sprintf("InspectOneItem type=%d", pData->mInspectType);
     theMainWindow->DevLogSave(str.toLatin1().data());
 	m_DetectResult.dRadius = 0;
-    m_DetectResult.img = nullptr;
+    //m_DetectResult.img = nullptr;
 
     if (pData == nullptr)
 		return -1;
@@ -95,8 +95,8 @@ int CImgProcEngine::InspectOneItem(IplImage* img, RoiObject *pData)
 	int size = pData->m_vecDetectResult.size();
 	for (int i = 0; i < size; i++) {
 		DetectResult *prst = &pData->m_vecDetectResult[i];
-        if (prst->img)
-            cvReleaseImage(&prst->img);
+        //if (prst->img)
+        //    cvReleaseImage(&prst->img);
 	}
 	pData->m_vecDetectResult.clear();
 
@@ -4060,7 +4060,7 @@ int CImgProcEngine::SingleROIOCR(IplImage* croppedImage, Qroilib::RoiObject *pDa
 
 
     qDebug() << "OCR Text:" << rst;
-    m_DetectResult.str = std::string(rst);
+    strcpy(m_DetectResult.str, rst);
     pData->m_vecDetectResult.push_back(m_DetectResult);
 
 //    CvFont font;
@@ -4107,7 +4107,7 @@ int CImgProcEngine::SingleROIBarCode(IplImage* croppedImage, Qroilib::RoiObject 
 
     str = "Barcode : " + decode;
     theMainWindow->DevLogSave(str.toLatin1().data());
-    m_DetectResult.str = str.toLatin1().data();
+    strcpy(m_DetectResult.str, str.toLatin1().data());
     pData->m_vecDetectResult.push_back(m_DetectResult);
 
     delete qz;
@@ -4291,7 +4291,7 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
     float hranges[] = { 0, 180 };
     // saturation varies from 0 (black-gray-white) to
     // 255 (pure spectrum color)
-    float sranges[] = { 0, 256 };
+    float sranges[] = { 0, 255 };
     const float* ranges[] = { hranges, sranges };
     // we compute the histogram from the 0-th and 1-st channels
     int channels[] = {0, 1};
@@ -4320,7 +4320,54 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
           false
       );
 
-    cv::normalize(hist, hist, 1.0);
+    // Plot the histogram
+    double maxVal=0;
+    minMaxLoc(hist, 0, &maxVal, 0, 0);
+    int scalew = 10;
+    int scaleh = 1;
+    int hist_h = sbins*scaleh;
+    int hist_w = hbins*scalew;
+    if (dims == 1)
+        hist_h = hbins;
+    Mat histImage( hist_h, hist_w, CV_8UC1, Scalar( 0,0,0) );
+
+    if (dims == 2)
+    {
+        for( int h = 0; h < hbins; h++ )
+            for( int s = 0; s < sbins; s++ )
+            {
+                float binVal = hist.at<float>(h, s);
+                int intensity = cvRound(binVal*255/maxVal);
+                rectangle( histImage, Point(h*scalew, s*scaleh),
+                            Point( (h+1)*scalew - 1, (s+1)*scaleh - 1),
+                            Scalar::all(intensity),
+                            -1 );
+            }
+    }
+    else
+    {
+        normalize(hist, hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+        for (int k=0; k<dims; k++)
+        {
+            int bin_w = cvRound( (double) hist_w/histSize[k] );
+            for( int i = 1; i < histSize[k]; i++ )
+            {
+                line( histImage, Point( bin_w*(i-1), hist_h - cvRound(hist.at<float>(i-1)) ) ,
+                           Point( bin_w*(i), hist_h - cvRound(hist.at<float>(i)) ),
+                           Scalar( 255, 0, 0), 2, 8, 0  );
+            }
+        }
+    }
+    if (m_bSaveEngineImg)
+    {
+        QString str;
+        str.sprintf(("130_hist.jpg"));
+        SaveOutImage(histImage, pData, str);
+    }
+
+
+    //cv::normalize(hist, hist, 1.0);
+    cv::normalize(hist, hist, 0, 1, cv::NORM_MINMAX);
 
     cv::Mat result;
     cvtColor(tar_hsv, tar_hsv, COLOR_BGR2HSV);
@@ -4333,6 +4380,12 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
          ranges,  // Array of arrays of the histogram bin boundaries in each dimension.
          255.0    // Optional scale factor for the output back projection.
     );
+    if (m_bSaveEngineImg)
+    {
+        QString str;
+        str.sprintf(("131_bp.jpg"));
+        SaveOutImage(result, pData, str);
+    }
 
     cv::threshold(result, result, nThresholdLowValue, nThresholdHighValue, cv::THRESH_BINARY);
 
@@ -4378,17 +4431,77 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
     for (int i = 0; i < nBlobs; i++) {
         CBlob *p = blobs.GetBlob(i);
         CvPoint pt = p->getCenter();
-        CvRect r = p->GetBoundingBox();
+        CvRect r1 = p->GetBoundingBox();
         m_DetectResult.resultType = RESULTTYPE_RECT;
         m_DetectResult.pt = CvPoint2D32f(pt.x, pt.y);
-        m_DetectResult.tl = CvPoint2D32f(r.x, r.y);
-        m_DetectResult.br = CvPoint2D32f(r.x + r.width, r.y + r.height);
+        m_DetectResult.tl = CvPoint2D32f(r1.x, r1.y);
+        m_DetectResult.br = CvPoint2D32f(r1.x + r1.width, r1.y + r1.height);
+
+        cv:Rect rect = r1;
+        Mat tar = tar_hsv(rect);
+        double per = HistEMD(ref_hsv, tar);
+        m_DetectResult.dMatchRate = per;
         pData->m_vecDetectResult.push_back(m_DetectResult);
     }
 
     return 0;
 }
 
+//Ref : http://study.marearts.com/2014/11/opencv-emdearth-mover-distance-example.html
+double CImgProcEngine::HistEMD(cv::Mat& ref_hsv, cv::Mat& target)
+{
+    int hbins = 30, sbins = 32;
+    int channels[] = {0,  1};
+    int histSize[] = {hbins, sbins};
+    float hranges[] = { 0, 180 };
+    float sranges[] = { 0, 255 };
+    const float* ranges[] = { hranges, sranges};
+
+    Mat hist1;
+    calcHist( &ref_hsv, 1, channels,  Mat(),// do not use mask
+     hist1, 2, histSize, ranges,
+     true, // the histogram is uniform
+     false );
+    normalize(hist1, hist1, 0, 1, CV_MINMAX);
+
+    Mat hist2;
+     calcHist( &target, 1, channels,  Mat(),// do not use mask
+      hist2, 2, histSize, ranges,
+      true, // the histogram is uniform
+      false );
+     normalize(hist2, hist2, 0, 1, CV_MINMAX);
+
+     //compare histogram
+     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     int numrows = hbins * sbins;
+
+     //make signature
+     Mat sig1(numrows, 3, CV_32FC1);
+     Mat sig2(numrows, 3, CV_32FC1);
+
+     //fill value into signature
+     for(int h=0; h< hbins; h++)
+     {
+      for(int s=0; s< sbins; ++s)
+      {
+       float binval = hist1.at< float>(h,s);
+       sig1.at< float>( h*sbins + s, 0) = binval;
+       sig1.at< float>( h*sbins + s, 1) = h;
+       sig1.at< float>( h*sbins + s, 2) = s;
+
+       binval = hist2.at< float>(h,s);
+       sig2.at< float>( h*sbins + s, 0) = binval;
+       sig2.at< float>( h*sbins + s, 1) = h;
+       sig2.at< float>( h*sbins + s, 2) = s;
+      }
+     }
+
+     //compare similarity of 2images using emd.
+     float emd = cv::EMD(sig1, sig2, CV_DIST_L2); //emd 0 is best matching.
+     qDebug() << "similarity " << (1-emd)*100 << "%%";
+     return emd;
+
+}
 
 
 int CImgProcEngine::OneLineMeasurement(cv::Mat& mat, vector<Point>& cone, RoiObject *pData, vector<ElemLineIt> &vecLineIt)
