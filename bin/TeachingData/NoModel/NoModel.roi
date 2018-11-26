@@ -4,7 +4,7 @@
   <object id="1" name="noname1124230653" x="3.6236" y="2.96629" width="553.376" height="256.09">
    <pattern child="2"/>
    <param InspectType="16">
-    <param00 steptype="1" name="Method" valuetype="4" value="0" detail="HueOnly,Hue+Saturation"/>
+    <param00 steptype="1" name="Method" valuetype="4" value="1" detail="HueOnly,Hue+Saturation"/>
     <param01 steptype="1" name="hbins" valuetype="1" value="30" detail=""/>
     <param02 steptype="1" name="sbins" valuetype="1" value="32" detail=""/>
     <param03 steptype="2" name="Low Threshold" valuetype="1" value="35" detail=""/>
@@ -12,6 +12,7 @@
     <param05 steptype="3" name="Noise out 1" valuetype="1" value="1" detail=""/>
     <param06 steptype="3" name="Noise out 2" valuetype="1" value="-1" detail=""/>
     <param07 steptype="3" name="Area" valuetype="1" value="1000" detail=""/>
+    <param08 steptype="3" name="Matching Result" valuetype="4" value="1" detail="TopOne,All"/>
    </param>
   </object>
   <object id="2" x="180.101" y="115.283" width="36.518" height="38.364">

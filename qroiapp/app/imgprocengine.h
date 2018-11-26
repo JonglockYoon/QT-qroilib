@@ -111,7 +111,7 @@ public:
     int SingleROILineMeasurement(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
     int SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect);
 
-    double HistEMD(cv::Mat& hist, cv::Mat& target);
+    double HistEMD(cv::Mat& hist, cv::Mat& target, int dims);
 
     cv::Mat drawGoodMatches(
         const cv::Mat& img1,

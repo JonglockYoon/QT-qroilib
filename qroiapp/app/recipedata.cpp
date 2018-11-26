@@ -58,6 +58,7 @@ Qroilib::ParamTable paramTable[] = {
     _Inspect_Color_Matching,  CParam(_ProcessValue3, ("Noise out 1"), _IntValue, ("1")),	// -1 : Open - 작은 White blob 들을 없앤다
     _Inspect_Color_Matching,  CParam(_ProcessValue3, ("Noise out 2"), _IntValue, ("-1")),	// 1 : Close - White blob 들을 묶는다.
     _Inspect_Color_Matching,  CParam(_ProcessValue3, ("Area"), _IntValue, ("0")),
+    _Inspect_Color_Matching,  CParam(_ProcessValue3, ("Matching Result"), _ComboValue, ("0"), ("TopOne,All")),
 
     _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("Method"), _ComboValue, ("2"), ("SURF,SIFT,ORB")),
     _Inspect_Patt_FeatureMatch, CParam(_ProcessValue1, ("Param1"), _IntValue, ("2000")),

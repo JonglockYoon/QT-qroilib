@@ -4246,6 +4246,7 @@ int CImgProcEngine::SingleROILineMeasurement(IplImage* croppedImage, Qroilib::Ro
 
 int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiObject *pData, QRectF rect)
 {
+    QString str;
     if (pData == nullptr || pData->iplTemplate == nullptr)
         return -1;
 
@@ -4360,7 +4361,6 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
     }
     if (m_bSaveEngineImg)
     {
-        QString str;
         str.sprintf(("130_hist.jpg"));
         SaveOutImage(histImage, pData, str);
     }
@@ -4382,7 +4382,6 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
     );
     if (m_bSaveEngineImg)
     {
-        QString str;
         str.sprintf(("131_bp.jpg"));
         SaveOutImage(result, pData, str);
     }
@@ -4418,7 +4417,6 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
 
     if (m_bSaveEngineImg)
     {
-        QString str;
         str.sprintf(("134_Area.jpg"));
         SaveOutImage(result, pData, str);
     }
@@ -4439,16 +4437,40 @@ int CImgProcEngine::SingleROIColorMatching(IplImage* croppedImage, Qroilib::RoiO
 
         cv:Rect rect = r1;
         Mat tar = tar_hsv(rect);
-        double per = HistEMD(ref_hsv, tar);
+        double per = HistEMD(ref_hsv, tar, dims);
         m_DetectResult.dMatchRate = per;
         pData->m_vecDetectResult.push_back(m_DetectResult);
+    }
+
+    int iMatchingResult = 0;
+    pParam = pData->getParam(("Matching Result"));
+    if (pParam)
+       iMatchingResult = (int)pParam->Value.toDouble();
+    if (iMatchingResult == 0) { // TopOne
+        std::stable_sort(pData->m_vecDetectResult.begin(), pData->m_vecDetectResult.end(), [](const DetectResult lhs, const DetectResult rhs)->bool {
+            if (lhs.dMatchRate > rhs.dMatchRate) // descending
+                return true;
+            return false;
+        });
+        int size = pData->m_vecDetectResult.size();
+        for (int i=size-1; i>0; i--) {
+            pData->m_vecDetectResult.erase(pData->m_vecDetectResult.begin()+i);
+        }
+    }
+    int size = pData->m_vecDetectResult.size();
+    for (int i=0; i<size; i++) {
+        DetectResult *pRst = &pData->m_vecDetectResult[i];
+
+        str.sprintf(("ColorMatching(%d) Rate=%.1f"), i, pRst->dMatchRate);
+        qDebug() << str;
+        theMainWindow->DevLogSave(str.toLatin1().data());
     }
 
     return 0;
 }
 
 //Ref : http://study.marearts.com/2014/11/opencv-emdearth-mover-distance-example.html
-double CImgProcEngine::HistEMD(cv::Mat& ref_hsv, cv::Mat& target)
+double CImgProcEngine::HistEMD(cv::Mat& ref_hsv, cv::Mat& target, int dims)
 {
     int hbins = 30, sbins = 32;
     int channels[] = {0,  1};
@@ -4459,14 +4481,14 @@ double CImgProcEngine::HistEMD(cv::Mat& ref_hsv, cv::Mat& target)
 
     Mat hist1;
     calcHist( &ref_hsv, 1, channels,  Mat(),// do not use mask
-     hist1, 2, histSize, ranges,
+     hist1, dims, histSize, ranges,
      true, // the histogram is uniform
      false );
     normalize(hist1, hist1, 0, 1, CV_MINMAX);
 
     Mat hist2;
      calcHist( &target, 1, channels,  Mat(),// do not use mask
-      hist2, 2, histSize, ranges,
+      hist2, dims, histSize, ranges,
       true, // the histogram is uniform
       false );
      normalize(hist2, hist2, 0, 1, CV_MINMAX);
@@ -4484,12 +4506,19 @@ double CImgProcEngine::HistEMD(cv::Mat& ref_hsv, cv::Mat& target)
      {
       for(int s=0; s< sbins; ++s)
       {
-       float binval = hist1.at< float>(h,s);
+       float binval = 0;
+       if (dims == 2)
+            binval = hist1.at< float>(h,s);
+       else
+            binval = hist1.at< float>(h);
        sig1.at< float>( h*sbins + s, 0) = binval;
        sig1.at< float>( h*sbins + s, 1) = h;
        sig1.at< float>( h*sbins + s, 2) = s;
 
-       binval = hist2.at< float>(h,s);
+       if (dims == 2)
+            binval = hist2.at< float>(h,s);
+       else
+            binval = hist2.at< float>(h);
        sig2.at< float>( h*sbins + s, 0) = binval;
        sig2.at< float>( h*sbins + s, 1) = h;
        sig2.at< float>( h*sbins + s, 2) = s;
@@ -4498,7 +4527,10 @@ double CImgProcEngine::HistEMD(cv::Mat& ref_hsv, cv::Mat& target)
 
      //compare similarity of 2images using emd.
      float emd = cv::EMD(sig1, sig2, CV_DIST_L2); //emd 0 is best matching.
-     qDebug() << "similarity " << (1-emd)*100 << "%%";
+     if (emd >= 1)
+         emd = 0.95;
+     else emd = (1-emd)*100;
+     //qDebug() << "similarity " << perc<< "%%";
      return emd;
 
 }
