@@ -36,6 +36,11 @@ Tiled의 Object drawing 기능을 가져와서 camera의 이미지를 실시간 
 
 다음 블로그에 각 Program의 설명들이 있습니다.
 </pre>
+https://blog.naver.com/jerry1455/221405996453 - qroiapp Color Matching Rate(OpenCV 칼라매칭율)
+https://blog.naver.com/jerry1455/221405305176 - qroiapp Color Matching(OpenCV 칼라매칭)
+https://blog.naver.com/jerry1455/221404801140 - qroilib Simulator calcBackProject(OpenCV 히스토그램 역투영)
+https://blog.naver.com/jerry1455/221401937306 - qroilib Simulator 히스토그램평활화(CLAHE)
+https://blog.naver.com/jerry1455/221400989043 - qroilibapp Line Measurement with OpenCV(거리측정)
 https://blog.naver.com/jerry1455/221396435441 - qroilibapp 패턴매칭 과 피처매칭 속도비교 with OpenCV
 https://blog.naver.com/jerry1455/221389173153 - qroilibapp 피처매칭(feature matching) with OpenCV
 https://blog.naver.com/jerry1455/221388359589 - qroilibapp 템플릿매칭(패턴매칭) with OpenCV
