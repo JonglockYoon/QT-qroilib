@@ -72,21 +72,55 @@ https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Lib
 
 -----
 
-https://blog.naver.com/jerry1455/221407563931 - OpenCV-4.0.0 compile.
-https://blog.naver.com/jerry1455/221404800504 - OpenCV #13 copyMakeBorder.
-https://blog.naver.com/jerry1455/221404202816 - OpenCV #12 WebCam AutoExposure.
-https://blog.naver.com/jerry1455/221403428262 - OpenCV #11 자동 초점 기능(Auto Focus)
-https://blog.naver.com/jerry1455/221402622851 - OpenCV #10 파노라마 Stitching (Stitcher)
-https://blog.naver.com/jerry1455/221400549618 - OpenCV #9 blob feature (2)
-https://blog.naver.com/jerry1455/221400510903 - OpenCV #8 Contours 응용(2)
-https://blog.naver.com/jerry1455/221397184991 - OpenCV #7 Contours 응용.
-https://blog.naver.com/jerry1455/221389104013 - OpenCV #6 패턴 및 피처 매칭(Pattern & Feature Matching)
-https://blog.naver.com/jerry1455/221368080208 - OpenCV #5 OpenCV Blob APIs.
-https://blog.naver.com/jerry1455/221365405520 - OpenCV #4 blob feature.
-https://blog.naver.com/jerry1455/221359367760 - OpenCV #3 LineFit ,EdgeCorner,FindShape,CenterOfBlob.
-https://blog.naver.com/jerry1455/221354695256 - OpenCV #2 Canny,Sobel,Laplacian.
-https://blog.naver.com/jerry1455/221341480823 - OpenCV #1 Binarization,Morphology,Arithmetic.
 
+<table>
+<tbody>
+
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221407563931" rel="nofollow">OpenCV-4.0.0 compile.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221404800504" rel="nofollow">OpenCV #13 copyMakeBorder.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221404202816" rel="nofollow">OpenCV #12 WebCam AutoExposure.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221403428262" rel="nofollow">OpenCV #11 자동 초점 기능(Auto Focus)</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221402622851" rel="nofollow">OpenCV #10 파노라마 Stitching (Stitcher)</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221400549618" rel="nofollow">OpenCV #9 blob feature (2)</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221400510903" rel="nofollow">OpenCV #8 Contours 응용(2)</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221397184991" rel="nofollow">OpenCV #7 Contours 응용.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221389104013" rel="nofollow">OpenCV #6 패턴 및 피처 매칭(Pattern & Feature Matching)</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221368080208" rel="nofollow">OpenCV #5 OpenCV Blob APIs.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221365405520" rel="nofollow">OpenCV #4 blob feature.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221359367760" rel="nofollow">OpenCV #3 LineFit ,EdgeCorner,FindShape,CenterOfBlob.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221354695256" rel="nofollow">OpenCV #2 Canny,Sobel,Laplacian.</a></td>
+</tr>
+<tr>
+<td><a href="https://blog.naver.com/jerry1455/221341480823" rel="nofollow">OpenCV #1 Binarization,Morphology,Arithmetic.</a></td>
+</tr>
+
+</tbody>
+</table>
 -----
 
 -----
