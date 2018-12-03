@@ -72,9 +72,9 @@ https://blog.naver.com/jerry1455/221331480081 - qroilib란(OpenCV ROI Editor Lib
 
 -----
 
-https://blog.naver.com/jerry1455/221407563931 - OpenCV-4.0.0 compile
-https://blog.naver.com/jerry1455/221404800504 - OpenCV #13 copyMakeBorder
-https://blog.naver.com/jerry1455/221404202816 - OpenCV #12 WebCam AutoExposure
+https://blog.naver.com/jerry1455/221407563931 - OpenCV-4.0.0 compile.
+https://blog.naver.com/jerry1455/221404800504 - OpenCV #13 copyMakeBorder.
+https://blog.naver.com/jerry1455/221404202816 - OpenCV #12 WebCam AutoExposure.
 https://blog.naver.com/jerry1455/221403428262 - OpenCV #11 자동 초점 기능(Auto Focus)
 https://blog.naver.com/jerry1455/221402622851 - OpenCV #10 파노라마 Stitching (Stitcher)
 https://blog.naver.com/jerry1455/221400549618 - OpenCV #9 blob feature (2)
